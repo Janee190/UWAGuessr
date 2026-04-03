@@ -1,0 +1,52 @@
+@import url('https://fonts.googleapis.com/css2?family=Bitcount+Grid+Double&display=swap');
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    color: #ffffff;
+    background-color: #ffffff;
+}
+
+.signup-card h2 {
+    font-family: 'Bitcount Grid Double', Arial, sans-serif;
+}
+
+.custom-navbar {
+    background-color: rgba(10, 16, 40, 0.95);
+}
+
+.hero-section {
+    min-height: 100vh;
+    background-image: linear-gradient(rgba(8, 12, 30, 0.55), rgba(8, 12, 30, 0.75)),
+                      url("../images/uwaimage.jpg");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.hero-title {
+    text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.45);
+}
+
+.hero-text {
+    max-width: 650px;
+    font-size: 1.2rem;
+}
+
+.signup-card {
+    background-color: rgba(22, 18, 70, 0.92);
+    border: 2px solid #5b5bff;
+    border-radius: 18px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+}
+
+.info-section {
+    color: #212529;
+    background-color: #ffffff;
+}
+
+.feature-box {
+    background-color: #f1f3f5;
+    border-radius: 14px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
