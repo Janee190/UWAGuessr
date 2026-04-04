@@ -1,164 +1,102 @@
-<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>UWAGuessr</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UWAGuessr</title>
 
-<!-- Bootstrap -->
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
-<!-- Custom CSS -->
-<style>
-/* Navbar styling */
-.custom-navbar {
-    background-color: #1a1a1a;
-    padding: 12px 0;
-    z-index: 1000;
-}
-
-/* Prevent content hiding behind fixed navbar */
-body {
-    padding-top: 80px;
-}
-
-/* Hero section styling */
-.hero-section {
-    height: 90vh;
-    background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)),
-                url('images/uwa-campus.jpg') center/cover no-repeat;
-    color: white;
-}
-
-/* Card hover effect */
-.feature-card:hover {
-    transform: translateY(-5px);
-    transition: 0.3s;
-}
-
-/* Navbar hover */
-.nav-link:hover {
-    color: #ffc107 !important;
-}
-</style>
-
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
-<!-- NAVBAR -->
-<nav class="navbar navbar-expand-lg navbar-dark custom-navbar fixed-top">
-  <div class="container">
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-dark custom-navbar">
+            <div class="container">
+                <a class="navbar-brand d-flex align-items-center" href="index.html">
+                <img src="C:\Users\mathe\uwa geoguessr project\UWAGuessr\images\UWAGuessr logo.png" alt="UWAGuessr Logo" height="40" class="me-2">
+                </a>
 
-    <!-- Logo / Brand -->
-    <a class="navbar-brand fw-bold d-flex align-items-center" href="index.html">
-      <img src="images/logo.png" alt="Logo" width="40" class="me-2">
-      UWAGuessr
-    </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
 
-    <!-- Mobile toggle -->
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-      <span class="navbar-toggler-icon"></span>
-    </button>
+                <div class="collapse navbar-collapse" id="mainNav">
+                    <ul class="navbar-nav ms-auto align-items-lg-center">
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">How to Play</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="leaderboard.html">Leaderboard</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="btn btn-outline-light ms-lg-3 me-lg-2 mt-2 mt-lg-0" href="login.html">Log In</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="btn btn-success mt-2 mt-lg-0" href="game.html">Play Now</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
 
-    <!-- Menu -->
-    <div class="collapse navbar-collapse" id="navbarNav">
+    <main>
+        <section class="hero-section d-flex align-items-center">
+            <div class="container">
+                <div class="row align-items-center gy-4">
+                    
+                    <div class="col-lg-7 text-center text-lg-start">
+                        <h1 class="display-3 fw-bold hero-title">EXPLORE UWA</h1>
+                        <p class="lead hero-text">
+                            Guess where each photo around the UWA campus was taken.
+                            Test your campus knowledge, challenge your friends, and climb the leaderboard.
+                        </p>
+                    </div>
 
-      <!-- Left links -->
-      <ul class="navbar-nav me-auto">
-        <li class="nav-item">
-          <a class="nav-link" href="profile.html">My Profile</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="leaderboard.html">Leaderboard</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="howtoplay.html">How to Play</a>
-        </li>
-      </ul>
+                    <div class="col-lg-5">
+                        <section class="signup-card p-4">
+                            <h2 class="h3 text-center mb-4">Start your challenge</h2>
 
-      <!-- Right buttons -->
-      <div class="d-flex">
-        <a class="btn btn-outline-light me-2" href="login.html">Login</a>
-        <a class="btn btn-warning fw-semibold" href="game.html">Play Now</a>
-      </div>
+                            <div class="d-grid gap-3">
+                                <a href="game.html" class="btn btn-warning btn-lg fw-semibold">Play Now</a>
+                                <a href="login.html" class="btn btn-light btn-lg">Log In</a>
+                                <a href="leaderboard.html" class="btn btn-outline-light btn-lg">View Leaderboard</a>
+                            </div>
+                        </section>
+                    </div>
 
-    </div>
-  </div>
-</nav>
+                </div>
+            </div>
+        </section>
 
-<!-- HERO -->
-<section class="hero-section text-center d-flex align-items-center">
-  <div class="container">
-    <h1 class="display-4 fw-bold mb-3">Guess UWA. Challenge Your Friends.</h1>
-    <p class="lead mb-4">
-      UWAGuessr is a GeoGuessr-inspired game where players guess the location of photos taken around the UWA campus.
-    </p>
-    <a href="game.html" class="btn btn-warning btn-lg me-2">Start Playing</a>
-    <a href="leaderboard.html" class="btn btn-outline-light btn-lg">View Leaderboard</a>
-  </div>
-</section>
+        <section class="info-section py-5">
+            <div class="container">
+                <div class="row text-center g-4">
+                    <div class="col-md-4">
+                        <article class="feature-box p-4 h-100">
+                            <h3 class="h4">View a Photo</h3>
+                            <p>Each round shows a photo taken somewhere around the UWA campus.</p>
+                        </article>
+                    </div>
+                    <div class="col-md-4">
+                        <article class="feature-box p-4 h-100">
+                            <h3 class="h4">Make a Guess</h3>
+                            <p>Choose the location on a map and submit your guess.</p>
+                        </article>
+                    </div>
+                    <div class="col-md-4">
+                        <article class="feature-box p-4 h-100">
+                            <h3 class="h4">Score Points</h3>
+                            <p>Earn points based on how close your guess is to the real location.</p>
+                        </article>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
 
-<!-- FEATURES -->
-<section class="container py-5">
-  <div class="row g-4">
-    
-    <div class="col-md-4">
-      <div class="card feature-card h-100 shadow-sm">
-        <div class="card-body text-center">
-          <h3 class="h5">Play Rounds</h3>
-          <p>Guess where each UWA campus photo was taken using the map.</p>
-        </div>
-      </div>
-    </div>
-
-    <div class="col-md-4">
-      <div class="card feature-card h-100 shadow-sm">
-        <div class="card-body text-center">
-          <h3 class="h5">Track Scores</h3>
-          <p>See how close your guesses are and improve over time.</p>
-        </div>
-      </div>
-    </div>
-
-    <div class="col-md-4">
-      <div class="card feature-card h-100 shadow-sm">
-        <div class="card-body text-center">
-          <h3 class="h5">Compete</h3>
-          <p>Compare your results with other players on the leaderboard.</p>
-        </div>
-      </div>
-    </div>
-
-  </div>
-</section>
-
-<!-- HOW IT WORKS -->
-<section class="how-it-works py-5">
-  <div class="container text-center">
-    <h2 class="mb-4">How It Works</h2>
-    <div class="row g-4">
-
-      <div class="col-md-4">
-        <h4>1. View a Photo</h4>
-        <p>You’ll be shown a photo taken somewhere around UWA.</p>
-      </div>
-
-      <div class="col-md-4">
-        <h4>2. Make a Guess</h4>
-        <p>Drop your marker on the map where you think the location is.</p>
-      </div>
-
-      <div class="col-md-4">
-        <h4>3. Get Your Score</h4>
-        <p>See the real location, your distance away, and the points you earned.</p>
-      </div>
-
-    </div>
-  </div>
-</section>
-
-<!-- Bootstrap JS (IMPORTANT for menu toggle) -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
+    <!-- Bootstrap JS bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
