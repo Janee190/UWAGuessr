@@ -1,0 +1,90 @@
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    color: #ffffff;
+    background-color: #ffffff;
+}
+
+.custom-navbar {
+    background-color: rgba(10, 16, 40, 0.95);
+}
+
+.hero-section {
+    min-height: 100vh;
+    background-image: linear-gradient(rgba(8, 12, 30, 0.55), rgba(8, 12, 30, 0.75)),
+                      url("../images/uwaimage.jpg");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.hero-title {
+    text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.45);
+    font-family: 'Bitcount Single', monospace;
+}
+
+.hero-text {
+    max-width: 650px;
+    font-size: 1.2rem;
+    font-family: 'Russo One', sans-serif;
+}
+
+.signup-card {
+    background-color: rgba(22, 18, 70, 0.92);
+    border: 2px solid #5b5bff;
+    border-radius: 18px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+}
+
+.signup-card h2 {
+    font-family: 'Orbitron', sans-serif;
+}
+
+.signup-card .btn {
+    font-family: 'Press Start 2P', sans-serif;
+    font-size: 0.9rem;
+    padding: 0.75rem 1rem;
+}
+
+.info-section {
+    color: #212529;
+    background-color: #ffffff;
+}
+
+.feature-box {
+    background-color: #f1f3f5;
+    border-radius: 14px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.bangers-font {
+    font-family: 'Bangers', cursive;
+    font-size: 1.1em;
+    letter-spacing: 0.5px;
+}
+
+/* This ensures images stay inside their columns */
+.feature-box img {
+    max-width: 100%;    /* Never wider than the column */
+    height: auto;        /* Keep proportions perfect */
+    display: block;      /* Helps with alignment */
+    margin: 0 auto 20px; /* Centers the image and adds space below */
+    max-height: 180px;   /* Limits the height so they don't get huge */
+}
+
+/* Optional: Add this to make the boxes align nicely even if text lengths differ */
+.feature-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.feature-box {
+    background-color: #1a1a2e; /* A dark navy to match the UWA sky */
+    color: white;              /* Make the text white so it's readable */
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
