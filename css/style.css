@@ -62,3 +62,21 @@ body {
     font-size: 1.1em;
     letter-spacing: 0.5px;
 }
+
+/* This ensures images stay inside their columns */
+.feature-box img {
+    max-width: 100%;    /* Never wider than the column */
+    height: auto;        /* Keep proportions perfect */
+    display: block;      /* Helps with alignment */
+    margin: 0 auto 20px; /* Centers the image and adds space below */
+    max-height: 180px;   /* Limits the height so they don't get huge */
+}
+
+/* Optional: Add this to make the boxes align nicely even if text lengths differ */
+.feature-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
