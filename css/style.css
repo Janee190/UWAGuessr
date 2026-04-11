@@ -1,14 +1,8 @@
-@import url('https://fonts.googleapis.com/css2?family=Bitcount+Grid+Double&display=swap');
-
 body {
     margin: 0;
     font-family: Arial, sans-serif;
     color: #ffffff;
     background-color: #ffffff;
-}
-
-.signup-card h2 {
-    font-family: 'Bitcount Grid Double', Arial, sans-serif;
 }
 
 .custom-navbar {
@@ -26,11 +20,13 @@ body {
 
 .hero-title {
     text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.45);
+    font-family: 'Bitcount Single', monospace;
 }
 
 .hero-text {
     max-width: 650px;
     font-size: 1.2rem;
+    font-family: 'Russo One', sans-serif;
 }
 
 .signup-card {
@@ -38,6 +34,16 @@ body {
     border: 2px solid #5b5bff;
     border-radius: 18px;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+}
+
+.signup-card h2 {
+    font-family: 'Orbitron', sans-serif;
+}
+
+.signup-card .btn {
+    font-family: 'Press Start 2P', sans-serif;
+    font-size: 0.9rem;
+    padding: 0.75rem 1rem;
 }
 
 .info-section {
@@ -49,4 +55,10 @@ body {
     background-color: #f1f3f5;
     border-radius: 14px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.bangers-font {
+    font-family: 'Bangers', cursive;
+    font-size: 1.1em;
+    letter-spacing: 0.5px;
 }
