@@ -15,7 +15,7 @@ let panStartOffsetY = 0;
 let activePhotoPointerId = null;
 let photoViewerInitialized = false;
 
-// Starts the game loop
+// Resets game state and starts the first round.
 function startGame() {
     currentRoundIndex = 0;
     totalScore = 0;
@@ -27,7 +27,7 @@ function startGame() {
     loadNextRound();
 }
 
-// Loads UI for the next round
+// Loads the next round photo and resets round-specific UI.
 function loadNextRound() {
     currentRoundData = getRoundData(currentRoundIndex);
     
@@ -47,7 +47,7 @@ function loadNextRound() {
     clearMapForNextRound();
 }
 
-// Triggers when the user clicks the 'Submit Guess' button in HTML
+// Submits the current map guess, scores it, and unlocks the next round button.
 function submitGuess() {
     if (!guessMarker) return;
 
@@ -74,7 +74,7 @@ function submitGuess() {
     currentRoundIndex++;
 }
 
-// The Math: Haversine distance in meters
+// Computes spherical distance between two lat/lng points in meters.
 function calculateHaversine(lat1, lon1, lat2, lon2) {
     const R = 6371e3; // Earth radius in meters
     const φ1 = lat1 * Math.PI/180;
@@ -90,7 +90,7 @@ function calculateHaversine(lat1, lon1, lat2, lon2) {
     return R * c; 
 }
 
-// The Curve: Convert meters to points (Max 5000)
+// Converts distance error into a round score using exponential decay.
 function calculateScore(distanceMeters) {
     const maxScore = 5000;
     const dropoffRate = 0.005; // Adjust this to make it harder or easier
@@ -102,12 +102,14 @@ function calculateScore(distanceMeters) {
     return Math.max(0, Math.round(score));
 }
 
+// Displays the game-over overlay with the final score.
 function showGameOver() {
     document.getElementById('game-board').style.display = 'none';
     document.getElementById('game-over').style.display = 'block';
     document.getElementById('final-score').innerText = `Final Score: ${totalScore}`;
 }
 
+// Wires up photo interactions (wheel zoom and pointer-based panning).
 function setupPhotoViewer() {
     if (photoViewerInitialized) return;
 
@@ -130,14 +132,16 @@ function setupPhotoViewer() {
     photoViewerInitialized = true;
 }
 
+// Zooms in/out around the pointer position when the mouse wheel is used.
 function onPhotoWheel(event) {
     event.preventDefault();
     const factor = event.deltaY < 0 ? 1.12 : (1 / 1.12);
     zoomPhoto(factor, event.clientX, event.clientY);
 }
 
+// Starts dragging when the image currently has overflow available to pan.
 function onPhotoPointerDown(event) {
-    if (event.button !== 0 || photoScale <= 1) return;
+    if (event.button !== 0 || !canPanPhoto()) return;
 
     const locationImage = document.getElementById('location-image');
     if (!locationImage) return;
@@ -153,6 +157,7 @@ function onPhotoPointerDown(event) {
     event.preventDefault();
 }
 
+// Updates photo translation while the active pointer is dragging.
 function onPhotoPointerMove(event) {
     if (!isPhotoPanning || activePhotoPointerId !== event.pointerId) return;
 
@@ -163,6 +168,7 @@ function onPhotoPointerMove(event) {
     applyPhotoTransform();
 }
 
+// Ends dragging and restores non-drag cursor state.
 function onPhotoPointerUp(event) {
     if (!isPhotoPanning || activePhotoPointerId !== event.pointerId) return;
 
@@ -175,38 +181,48 @@ function onPhotoPointerUp(event) {
     activePhotoPointerId = null;
 }
 
+// Applies the current translate/scale transform and cursor state to the photo.
 function applyPhotoTransform() {
     const locationImage = document.getElementById('location-image');
     if (!locationImage) return;
 
-    if (photoScale <= 1) {
-        locationImage.style.cursor = 'zoom-in';
-    } else {
-        locationImage.style.cursor = isPhotoPanning ? 'grabbing' : 'grab';
-    }
+    locationImage.style.cursor = isPhotoPanning ? 'grabbing' : (canPanPhoto() ? 'grab' : 'zoom-in');
 
     locationImage.style.transform = `translate3d(${photoOffsetX}px, ${photoOffsetY}px, 0) scale(${photoScale})`;
 }
 
-function clampPhotoOffsets() {
+// Calculates how far the image can move in each axis based on current scale.
+function getPhotoPanBounds() {
     const photoViewer = document.getElementById('photo-viewer');
     const locationImage = document.getElementById('location-image');
 
-    if (!photoViewer || !locationImage) return;
-
-    if (photoScale <= 1) {
-        photoOffsetX = 0;
-        photoOffsetY = 0;
-        return;
+    if (!photoViewer || !locationImage) {
+        return { maxX: 0, maxY: 0 };
     }
 
     const maxX = Math.max(0, ((locationImage.clientWidth * photoScale) - photoViewer.clientWidth) / 2);
     const maxY = Math.max(0, ((locationImage.clientHeight * photoScale) - photoViewer.clientHeight) / 2);
 
-    photoOffsetX = Math.max(-maxX, Math.min(maxX, photoOffsetX));
-    photoOffsetY = Math.max(-maxY, Math.min(maxY, photoOffsetY));
+    return { maxX, maxY };
 }
 
+// Returns true when the current image dimensions exceed the viewer in any axis.
+function canPanPhoto() {
+    const bounds = getPhotoPanBounds();
+    return bounds.maxX > 0 || bounds.maxY > 0;
+}
+
+// Clamps translation so the image never pans beyond its visible bounds.
+function clampPhotoOffsets() {
+    const bounds = getPhotoPanBounds();
+    const maxX = bounds.maxX;
+    const maxY = bounds.maxY;
+
+    photoOffsetX = maxX === 0 ? 0 : Math.max(-maxX, Math.min(maxX, photoOffsetX));
+    photoOffsetY = maxY === 0 ? 0 : Math.max(-maxY, Math.min(maxY, photoOffsetY));
+}
+
+// Changes zoom level while preserving a chosen anchor point under the cursor.
 function zoomPhoto(factor, anchorClientX, anchorClientY) {
     const photoViewer = document.getElementById('photo-viewer');
     const locationImage = document.getElementById('location-image');
@@ -235,6 +251,7 @@ function zoomPhoto(factor, anchorClientX, anchorClientY) {
     applyPhotoTransform();
 }
 
+// Restores default zoom/pan state for a newly loaded image.
 function resetPhotoTransform() {
     photoScale = 1;
     photoOffsetX = 0;
