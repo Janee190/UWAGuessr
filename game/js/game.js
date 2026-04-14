@@ -3,22 +3,22 @@
 let currentRoundIndex = 0;
 let totalScore = 0;
 let currentRoundData = null;
+let activeRounds = [];
 
-let photoScale = 1;
-let photoOffsetX = 0;
-let photoOffsetY = 0;
-let isPhotoPanning = false;
-let panStartClientX = 0;
-let panStartClientY = 0;
-let panStartOffsetX = 0;
-let panStartOffsetY = 0;
-let activePhotoPointerId = null;
 let photoViewerInitialized = false;
+let panoViewer = null;
+const ROUNDS_PER_GAME = 5;
+const DEFAULT_HFOV = 100;
+const MIN_HFOV = 40;
+const MAX_HFOV = 120;
+const MIN_PITCH = -15;
+const MAX_PITCH = 15;
 
 // Resets game state and starts the first round.
 function startGame() {
     currentRoundIndex = 0;
     totalScore = 0;
+    activeRounds = buildRandomRounds();
     localStorage.setItem('uwa_totalScore', totalScore); // Reset local storage
     document.getElementById('game-board').style.display = 'block';
     document.getElementById('game-over').style.display = 'none';
@@ -27,9 +27,26 @@ function startGame() {
     loadNextRound();
 }
 
+// Chooses a unique random subset of rounds for one game session.
+function buildRandomRounds() {
+    const totalRounds = getTotalRounds();
+    const roundsToPlay = Math.min(ROUNDS_PER_GAME, totalRounds);
+    const indices = Array.from({ length: totalRounds }, (_, index) => index);
+
+    for (let i = indices.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [indices[i], indices[j]] = [indices[j], indices[i]];
+    }
+
+    return indices
+        .slice(0, roundsToPlay)
+        .map((index) => getRoundData(index))
+        .filter(Boolean);
+}
+
 // Loads the next round photo and resets round-specific UI.
 function loadNextRound() {
-    currentRoundData = getRoundData(currentRoundIndex);
+    currentRoundData = activeRounds[currentRoundIndex];
     
     if (!currentRoundData) {
         showGameOver();
@@ -37,12 +54,11 @@ function loadNextRound() {
     }
 
     // Update UI
-    document.getElementById('location-image').src = currentRoundData.imagePath;
-    document.getElementById('round-counter').innerText = `Round ${currentRoundIndex + 1} / ${getTotalRounds()}`;
+    loadPanorama(currentRoundData.imagePath);
+    document.getElementById('round-counter').innerText = `Round ${currentRoundIndex + 1} / ${activeRounds.length}`;
     document.getElementById('submit-btn').disabled = true; // Wait for guess
     document.getElementById('next-btn').disabled = true;
     document.getElementById('feedback-text').innerText = '';
-    resetPhotoTransform();
     
     clearMapForNextRound();
 }
@@ -109,162 +125,80 @@ function showGameOver() {
     document.getElementById('final-score').innerText = `Final Score: ${totalScore}`;
 }
 
-// Wires up photo interactions (wheel zoom and pointer-based panning).
+// Ensures the panorama container exists before rounds begin.
 function setupPhotoViewer() {
     if (photoViewerInitialized) return;
 
     const photoViewer = document.getElementById('photo-viewer');
-    const locationImage = document.getElementById('location-image');
-
-    if (!photoViewer || !locationImage) return;
-
-    photoViewer.addEventListener('wheel', onPhotoWheel, { passive: false });
-    photoViewer.addEventListener('pointerdown', onPhotoPointerDown);
-    window.addEventListener('pointermove', onPhotoPointerMove);
-    window.addEventListener('pointerup', onPhotoPointerUp);
-    window.addEventListener('pointercancel', onPhotoPointerUp);
-
-    locationImage.addEventListener('dragstart', function (event) {
-        event.preventDefault();
-    });
-    locationImage.addEventListener('load', resetPhotoTransform);
+    if (!photoViewer) return;
 
     photoViewerInitialized = true;
 }
 
-// Zooms in/out around the pointer position when the mouse wheel is used.
-function onPhotoWheel(event) {
-    event.preventDefault();
-    const factor = event.deltaY < 0 ? 1.12 : (1 / 1.12);
-    zoomPhoto(factor, event.clientX, event.clientY);
-}
-
-// Starts dragging when the image currently has overflow available to pan.
-function onPhotoPointerDown(event) {
-    if (event.button !== 0 || !canPanPhoto()) return;
-
-    const locationImage = document.getElementById('location-image');
-    if (!locationImage) return;
-
-    isPhotoPanning = true;
-    activePhotoPointerId = event.pointerId;
-    panStartClientX = event.clientX;
-    panStartClientY = event.clientY;
-    panStartOffsetX = photoOffsetX;
-    panStartOffsetY = photoOffsetY;
-    locationImage.classList.add('panning');
-
-    event.preventDefault();
-}
-
-// Updates photo translation while the active pointer is dragging.
-function onPhotoPointerMove(event) {
-    if (!isPhotoPanning || activePhotoPointerId !== event.pointerId) return;
-
-    photoOffsetX = panStartOffsetX + (event.clientX - panStartClientX);
-    photoOffsetY = panStartOffsetY + (event.clientY - panStartClientY);
-
-    clampPhotoOffsets();
-    applyPhotoTransform();
-}
-
-// Ends dragging and restores non-drag cursor state.
-function onPhotoPointerUp(event) {
-    if (!isPhotoPanning || activePhotoPointerId !== event.pointerId) return;
-
-    const locationImage = document.getElementById('location-image');
-    if (locationImage) {
-        locationImage.classList.remove('panning');
+function loadPanorama(imageUrl) {
+    // If a viewer already exists, destroy it first
+    if (panoViewer !== null) {
+        panoViewer.destroy();
     }
 
-    isPhotoPanning = false;
-    activePhotoPointerId = null;
+    // Create a temporary hidden image to read the true dimensions
+    const tempImg = new Image();
+    
+    // Wait for the image to load in the background so we get accurate dimensions
+    tempImg.onload = function() {
+        
+        // Calculate the correct vertical angle of view (vaov) based on aspect ratio
+        // We assume your panoramas are a full 360 degrees horizontally
+        const haov = 360; 
+        const vaov = haov * (tempImg.naturalHeight / tempImg.naturalWidth);
+
+        // Now initialize Pannellum using the exact geometry of the image
+        panoViewer = pannellum.viewer('photo-viewer', {
+            "type": "equirectangular",
+            "panorama": imageUrl, 
+            
+            // The Magic Fix: Explicitly tell Pannellum the image dimensions
+            "haov": haov,
+            "vaov": vaov,  
+            "vOffset": 0, // Keeps it perfectly centered horizontally
+            
+            "autoLoad": true,
+            "showControls": false,
+            
+            // Lock the vertical pitch so they can't look into the black void
+            "minPitch": -(vaov / 2) + 10, // Dynamically set based on the image height
+            "maxPitch": (vaov / 2) - 10,  
+            "pitch": 0,      
+            
+            "hfov": 100,     
+            "minHfov": 40,   
+            "maxHfov": 120,  
+            
+            "compass": false,
+            "mouseZoom": true 
+        });
+    };
+
+    // Trigger the load
+    tempImg.src = imageUrl;
 }
 
-// Applies the current translate/scale transform and cursor state to the photo.
-function applyPhotoTransform() {
-    const locationImage = document.getElementById('location-image');
-    if (!locationImage) return;
+// Handles +/- zoom controls by converting scale into Pannellum field-of-view.
+function zoomPhoto(scaleFactor) {
+    if (!panoViewer) return;
 
-    locationImage.style.cursor = isPhotoPanning ? 'grabbing' : (canPanPhoto() ? 'grab' : 'zoom-in');
-
-    locationImage.style.transform = `translate3d(${photoOffsetX}px, ${photoOffsetY}px, 0) scale(${photoScale})`;
+    const currentFov = panoViewer.getHfov();
+    const nextFov = Math.max(MIN_HFOV, Math.min(MAX_HFOV, currentFov / scaleFactor));
+    panoViewer.setHfov(nextFov);
 }
 
-// Calculates how far the image can move in each axis based on current scale.
-function getPhotoPanBounds() {
-    const photoViewer = document.getElementById('photo-viewer');
-    const locationImage = document.getElementById('location-image');
-
-    if (!photoViewer || !locationImage) {
-        return { maxX: 0, maxY: 0 };
-    }
-
-    const maxX = Math.max(0, ((locationImage.clientWidth * photoScale) - photoViewer.clientWidth) / 2);
-    const maxY = Math.max(0, ((locationImage.clientHeight * photoScale) - photoViewer.clientHeight) / 2);
-
-    return { maxX, maxY };
-}
-
-// Returns true when the current image dimensions exceed the viewer in any axis.
-function canPanPhoto() {
-    const bounds = getPhotoPanBounds();
-    return bounds.maxX > 0 || bounds.maxY > 0;
-}
-
-// Clamps translation so the image never pans beyond its visible bounds.
-function clampPhotoOffsets() {
-    const bounds = getPhotoPanBounds();
-    const maxX = bounds.maxX;
-    const maxY = bounds.maxY;
-
-    photoOffsetX = maxX === 0 ? 0 : Math.max(-maxX, Math.min(maxX, photoOffsetX));
-    photoOffsetY = maxY === 0 ? 0 : Math.max(-maxY, Math.min(maxY, photoOffsetY));
-}
-
-// Changes zoom level while preserving a chosen anchor point under the cursor.
-function zoomPhoto(factor, anchorClientX, anchorClientY) {
-    const photoViewer = document.getElementById('photo-viewer');
-    const locationImage = document.getElementById('location-image');
-
-    if (!photoViewer || !locationImage || !locationImage.complete) return;
-
-    const previousScale = photoScale;
-    const nextScale = Math.max(1, Math.min(5, Number((photoScale * factor).toFixed(3))));
-
-    if (nextScale === previousScale) return;
-
-    const viewerRect = photoViewer.getBoundingClientRect();
-    const anchorX = (anchorClientX !== undefined)
-        ? (anchorClientX - viewerRect.left - (viewerRect.width / 2))
-        : 0;
-    const anchorY = (anchorClientY !== undefined)
-        ? (anchorClientY - viewerRect.top - (viewerRect.height / 2))
-        : 0;
-
-    const scaleRatio = nextScale / previousScale;
-    photoOffsetX = (photoOffsetX * scaleRatio) + (anchorX * (1 - scaleRatio));
-    photoOffsetY = (photoOffsetY * scaleRatio) + (anchorY * (1 - scaleRatio));
-    photoScale = nextScale;
-
-    clampPhotoOffsets();
-    applyPhotoTransform();
-}
-
-// Restores default zoom/pan state for a newly loaded image.
+// Resets pitch, yaw, and zoom to the default view.
 function resetPhotoTransform() {
-    photoScale = 1;
-    photoOffsetX = 0;
-    photoOffsetY = 0;
-    isPhotoPanning = false;
-    activePhotoPointerId = null;
+    if (!panoViewer) return;
 
-    const locationImage = document.getElementById('location-image');
-    if (locationImage) {
-        locationImage.classList.remove('panning');
-    }
-
-    applyPhotoTransform();
+    panoViewer.setPitch(0);
+    panoViewer.setYaw(0);
+    panoViewer.setHfov(DEFAULT_HFOV);
 }
 
 // Initialize on page load

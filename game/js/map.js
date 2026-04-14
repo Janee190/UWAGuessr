@@ -4,6 +4,23 @@ let map;
 let guessMarker = null;
 let actualMarker = null;
 let resultLine = null;
+const greenIcon = L.icon({
+    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
+    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowSize: [41, 41]
+});
+
+const redIcon = L.icon({
+    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowSize: [41, 41]
+});
 
 // Initialize the map centered on UWA
 function initMap() {
@@ -38,7 +55,7 @@ function placeGuessMarker(lat, lng) {
     if (guessMarker) {
         map.removeLayer(guessMarker);
     }
-    guessMarker = L.marker([lat, lng]).addTo(map);
+    guessMarker = L.marker([lat, lng], {icon: redIcon}).addTo(map);
     
     // Enable the submit button in your HTML once a marker is placed
     document.getElementById('submit-btn').disabled = false;
@@ -46,8 +63,8 @@ function placeGuessMarker(lat, lng) {
 
 // Show the actual location and draw a line after guessing
 function showResultOnMap(guessLat, guessLng, actualLat, actualLng) {
-    // Drop actual marker
-    actualMarker = L.marker([actualLat, actualLng]).addTo(map);
+    // Drop actual marker with green color
+    actualMarker = L.marker([actualLat, actualLng], {icon: greenIcon}).addTo(map);
     
     // Draw connecting line
     resultLine = L.polyline([
