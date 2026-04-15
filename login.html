@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>UWAGuessr — Sign In</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet"/>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+
+    :root {
+      --uwa-green:      #1D9E75;
+      --uwa-green-dark: #0F6E56;
+      --uwa-green-pale: #e1f5ee;
+      --map-bg:         #b8d9c2;
+    }
+
+    html, body {
+      height: 100%;
+      margin: 0;
+      font-family: 'DM Sans', sans-serif;
+      background: #f4f6f3;
+    }
+
+    /* ── Layout ── */
+    .page-wrap {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1rem;
+    }
+
+    .card-shell {
+      display: flex;
+      width: 100%;
+      max-width: 860px;
+      min-height: 520px;
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.13);
+    }
+
+    /* ── Map panel ── */
+    .map-panel {
+      flex: 1.1;
+      background: var(--map-bg);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .map-panel svg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    .map-badge {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      background: rgba(255,255,255,0.9);
+      border-radius: 8px;
+      padding: 8px 14px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--uwa-green-dark);
+      backdrop-filter: blur(4px);
+      z-index: 2;
+    }
+
+    .map-badge small { display: block; font-size: 11px; color: #5F5E5A; font-weight: 400; }
+
+    .pin {
+      animation: bob 2.4s ease-in-out infinite;
+    }
+    .pin-2 { animation-delay: 0.7s; }
+    .pin-3 { animation-delay: 1.4s; }
+
+    @keyframes bob {
+      0%, 100% { transform: translateY(0); }
+      50%       { transform: translateY(-7px); }
+    }
+
+    /* ── Form panel ── */
+    .form-panel {
+      flex: 1;
+      background: #fff;
+      padding: 52px 44px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .brand-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 28px;
+      font-weight: 700;
+      color: #1a1a1a;
+      letter-spacing: -0.5px;
+      margin-bottom: 2px;
+    }
+
+    .brand-name span { color: var(--uwa-green); }
+
+    .brand-sub {
+      font-size: 13.5px;
+      color: #888;
+      margin-bottom: 36px;
+    }
+
+    .form-label {
+      font-size: 11.5px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #777;
+      margin-bottom: 5px;
+    }
+
+    .form-control {
+      border: 1px solid #dde2db;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 14.5px;
+      font-family: 'DM Sans', sans-serif;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    .form-control:focus {
+      border-color: var(--uwa-green);
+      box-shadow: 0 0 0 3px rgba(29,158,117,0.15);
+      outline: none;
+    }
+
+    .btn-signin {
+      width: 100%;
+      padding: 11px;
+      background: var(--uwa-green);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      margin-top: 6px;
+      transition: background 0.15s, transform 0.1s;
+      position: relative;
+    }
+
+    .btn-signin:hover  { background: var(--uwa-green-dark); }
+    .btn-signin:active { transform: scale(0.98); }
+
+    .btn-signin .spinner-border {
+      width: 1rem;
+      height: 1rem;
+      border-width: 2px;
+      display: none;
+      margin-right: 6px;
+    }
+
+    .btn-signin.loading .spinner-border { display: inline-block; }
+    .btn-signin.loading .btn-label     { opacity: 0.7; }
+
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 20px 0;
+      color: #bbb;
+      font-size: 12px;
+    }
+
+    .divider::before,
+    .divider::after {
+      content: '';
+      flex: 1;
+      border-top: 1px solid #e8e8e8;
+    }
+
+    .btn-guest {
+      width: 100%;
+      padding: 10px;
+      background: transparent;
+      border: 1px solid #d4d9d2;
+      border-radius: 8px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      color: #555;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .btn-guest:hover { background: #f6f8f5; }
+
+    .form-footer {
+      font-size: 12.5px;
+      color: #aaa;
+      margin-top: 22px;
+      text-align: center;
+    }
+
+    .form-footer a {
+      color: var(--uwa-green);
+      text-decoration: none;
+    }
+
+    .form-footer a:hover { text-decoration: underline; }
+
+    /* Alert */
+    .alert-area { min-height: 36px; margin-bottom: 8px; }
+
+    /* Responsive: stack on small screens */
+    @media (max-width: 640px) {
+      .card-shell  { flex-direction: column; max-width: 420px; }
+      .map-panel   { height: 180px; flex: none; }
+      .form-panel  { padding: 36px 28px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="page-wrap">
+  <div class="card-shell">
+
+    <!-- ── Map panel ── -->
+    <div class="map-panel">
+      <div class="map-badge">
+        UWA Campus <small>Perth, WA</small>
+      </div>
+
+      <svg viewBox="0 0 340 520" xmlns="http://www.w3.org/2000/svg">
+        <!-- Ground -->
+        <rect width="340" height="520" fill="#b2d9b8"/>
+        <polygon points="30,70 310,55 325,210 295,390 70,430 20,275" fill="#9dcca4" opacity="0.55"/>
+
+        <!-- Buildings -->
+        <rect x="55"  y="130" width="72" height="48" rx="4" fill="#e4f0e0" stroke="#7ab86a" stroke-width="1"/>
+        <rect x="155" y="112" width="58" height="40" rx="4" fill="#e4f0e0" stroke="#7ab86a" stroke-width="1"/>
+        <rect x="75"  y="235" width="92" height="52" rx="4" fill="#e4f0e0" stroke="#7ab86a" stroke-width="1"/>
+        <rect x="185" y="215" width="68" height="44" rx="4" fill="#e4f0e0" stroke="#7ab86a" stroke-width="1"/>
+        <rect x="95"  y="325" width="54" height="36" rx="4" fill="#e4f0e0" stroke="#7ab86a" stroke-width="1"/>
+        <rect x="168" y="308" width="82" height="42" rx="4" fill="#e4f0e0" stroke="#7ab86a" stroke-width="1"/>
+        <rect x="60"  y="400" width="44" height="30" rx="4" fill="#e4f0e0" stroke="#7ab86a" stroke-width="1"/>
+        <rect x="215" y="385" width="58" height="34" rx="4" fill="#e4f0e0" stroke="#7ab86a" stroke-width="1"/>
+
+        <!-- Paths -->
+        <line x1="127" y1="154" x2="155" y2="132" stroke="#9bba8e" stroke-width="2.5"/>
+        <line x1="91"  y1="178" x2="91"  y2="235" stroke="#9bba8e" stroke-width="2.5"/>
+        <line x1="184" y1="152" x2="215" y2="215" stroke="#9bba8e" stroke-width="2.5"/>
+        <line x1="122" y1="287" x2="122" y2="325" stroke="#9bba8e" stroke-width="2.5"/>
+        <line x1="210" y1="259" x2="210" y2="308" stroke="#9bba8e" stroke-width="2.5"/>
+        <line x1="82"  y1="361" x2="82"  y2="400" stroke="#9bba8e" stroke-width="2.5"/>
+        <line x1="240" y1="350" x2="240" y2="385" stroke="#9bba8e" stroke-width="2.5"/>
+        <line x1="149" y1="343" x2="168" y2="329" stroke="#9bba8e" stroke-width="2.5"/>
+
+        <!-- Pin 1 — red -->
+        <g class="pin">
+          <circle cx="91"  cy="144" r="11" fill="#E24B4A"/>
+          <polygon points="91,162 84,152 98,152" fill="#E24B4A"/>
+          <circle cx="91"  cy="144" r="4.5" fill="white"/>
+        </g>
+
+        <!-- Pin 2 — blue -->
+        <g class="pin pin-2">
+          <circle cx="219" cy="232" r="11" fill="#185FA5"/>
+          <polygon points="219,250 212,240 226,240" fill="#185FA5"/>
+          <circle cx="219" cy="232" r="4.5" fill="white"/>
+        </g>
+
+        <!-- Pin 3 — amber -->
+        <g class="pin pin-3">
+          <circle cx="152" cy="320" r="11" fill="#BA7517"/>
+          <polygon points="152,338 145,328 159,328" fill="#BA7517"/>
+          <circle cx="152" cy="320" r="4.5" fill="white"/>
+        </g>
+      </svg>
+    </div>
+
+    <!-- ── Form panel ── -->
+    <div class="form-panel">
+      <div class="brand-name">UWA<span>Guessr</span></div>
+      <div class="brand-sub">How well do you know your campus?</div>
+
+      <!-- Alert area -->
+      <div class="alert-area" id="alertArea"></div>
+
+      <form id="loginForm" novalidate>
+        <div class="mb-3">
+          <label class="form-label" for="email">Email</label>
+          <input
+            type="email"
+            class="form-control"
+            id="email"
+            name="email"
+            placeholder="student@uwa.edu.au"
+            autocomplete="email"
+            required
+          />
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label" for="password">Password</label>
+          <input
+            type="password"
+            class="form-control"
+            id="password"
+            name="password"
+            placeholder="••••••••"
+            autocomplete="current-password"
+            required
+          />
+        </div>
+
+        <button type="submit" class="btn-signin" id="signinBtn">
+          <span class="spinner-border" role="status" aria-hidden="true"></span>
+          <span class="btn-label">Sign in</span>
+        </button>
+      </form>
+
+      <div class="divider">or</div>
+
+      <button class="btn-guest" id="guestBtn">Continue as guest</button>
+
+      <div class="form-footer">
+        No account? <a href="signup.html">Sign up free</a>
+        &nbsp;·&nbsp;
+        <a href="forgot.html">Forgot password?</a>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+<script>
+$(function () {
+
+  // ── Helper: show an alert in the alert area ──────────────────────────────
+  function showAlert(message, type) {
+    // type: 'danger' | 'success' | 'warning'
+    var html =
+      '<div class="alert alert-' + type + ' alert-dismissible fade show py-2 px-3 mb-0" role="alert" style="font-size:13.5px;">' +
+        message +
+        '<button type="button" class="btn-close btn-sm" data-bs-dismiss="alert" aria-label="Close"></button>' +
+      '</div>';
+    $('#alertArea').html(html);
+  }
+
+  // ── Helper: basic email format check ────────────────────────────────────
+  function isValidEmail(email) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  }
+
+  // ── Login form submit ────────────────────────────────────────────────────
+  $('#loginForm').on('submit', function (e) {
+    e.preventDefault();
+
+    var email    = $('#email').val().trim();
+    var password = $('#password').val();
+
+    // Client-side validation
+    if (!email || !isValidEmail(email)) {
+      showAlert('Please enter a valid email address.', 'danger');
+      $('#email').trigger('focus');
+      return;
+    }
+    if (!password) {
+      showAlert('Please enter your password.', 'danger');
+      $('#password').trigger('focus');
+      return;
+    }
+
+    // Loading state
+    var $btn = $('#signinBtn');
+    $btn.addClass('loading').prop('disabled', true);
+    $btn.find('.btn-label').text('Signing in…');
+
+    // AJAX call to your login endpoint
+    // Replace '/api/login' with your actual backend endpoint when ready.
+    $.ajax({
+      url:         '/api/login',
+      method:      'POST',
+      contentType: 'application/json',
+      data:         JSON.stringify({ email: email, password: password }),
+      success: function (response) {
+        showAlert('Welcome back! Redirecting…', 'success');
+        // Redirect to the game after a short delay
+        setTimeout(function () {
+          window.location.href = 'game.html';
+        }, 900);
+      },
+      error: function (xhr) {
+        var msg = 'Something went wrong. Please try again.';
+        if (xhr.status === 401) msg = 'Incorrect email or password.';
+        if (xhr.status === 429) msg = 'Too many attempts. Please wait a moment.';
+        showAlert(msg, 'danger');
+      },
+      complete: function () {
+        $btn.removeClass('loading').prop('disabled', false);
+        $btn.find('.btn-label').text('Sign in');
+      }
+    });
+  });
+
+  // ── Guest button ─────────────────────────────────────────────────────────
+  $('#guestBtn').on('click', function () {
+    // You can set a guest flag in sessionStorage and redirect to the game.
+    sessionStorage.setItem('guest', 'true');
+    window.location.href = 'game.html';
+  });
+
+  // ── Auto-focus email field ───────────────────────────────────────────────
+  $('#email').trigger('focus');
+
+});
+</script>
+
+</body>
+</html>
