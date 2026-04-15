@@ -419,7 +419,7 @@
 
         // ── Helper: show an alert in the alert area ────────────────────────────
         function showAlert(message, type) {
-          var html =
+          const html =
             '<div class="alert alert-' +
             type +
             ' alert-dismissible fade show py-2 px-3 mb-0" role="alert" style="font-size:13.5px;">' +
@@ -438,8 +438,8 @@
         $("#loginForm").on("submit", function (e) {
           e.preventDefault();
 
-          var email = $("#email").val().trim();
-          var password = $("#password").val();
+          const email = $("#email").val().trim();
+          const password = $("#password").val();
 
           if (!email || !isValidEmail(email)) {
             showAlert("Please enter a valid email address.", "danger");
@@ -452,7 +452,7 @@
             return;
           }
 
-          var $btn = $("#signinBtn");
+          const $btn = $("#signinBtn");
           $btn.addClass("loading").prop("disabled", true);
           $btn.find(".btn-label").text("Signing in…");
 
@@ -468,7 +468,7 @@
               }, 900);
             },
             error: function (xhr) {
-              var msg = "Something went wrong. Please try again.";
+              let msg = "Something went wrong. Please try again.";
               if (xhr.status === 401) msg = "Incorrect email or password.";
               if (xhr.status === 429)
                 msg = "Too many attempts. Please wait a moment.";
