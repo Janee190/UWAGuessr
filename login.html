@@ -22,7 +22,7 @@
       }
 
       :root {
-        --uwa-green: #1d9e75;
+        --uwa-green: #ffca2c;
         --uwa-green-dark: #0f6e56;
         --uwa-green-pale: #e1f5ee;
         --map-bg: #b8d9c2;
@@ -118,7 +118,7 @@
       /* ── Form panel ── */
       .form-panel {
         flex: 1;
-        background: #fff;
+        background: rgba(22, 18, 70, 0.92);
         padding: 52px 44px;
         display: flex;
         flex-direction: column;
@@ -140,7 +140,7 @@
 
       .brand-sub {
         font-size: 13.5px;
-        color: #888;
+        color: #fff;
         margin-bottom: 36px;
       }
 
@@ -149,7 +149,7 @@
         font-weight: 500;
         text-transform: uppercase;
         letter-spacing: 0.06em;
-        color: #777;
+        color: #fff;
         margin-bottom: 5px;
       }
 
@@ -162,19 +162,27 @@
         transition:
           border-color 0.15s,
           box-shadow 0.15s;
+        background: rgba(255, 255, 255, 0.12);
+        color: #fff;
+      }
+
+      .form-control::placeholder {
+        color: rgba(255, 255, 255, 0.6);
       }
 
       .form-control:focus {
         border-color: var(--uwa-green);
         box-shadow: 0 0 0 3px rgba(29, 158, 117, 0.15);
         outline: none;
+        background: rgba(255, 255, 255, 0.12);
+        color: #fff;
       }
 
       .btn-signin {
         width: 100%;
         padding: 11px;
         background: var(--uwa-green);
-        color: #fff;
+        color: #000;
         border: none;
         border-radius: 8px;
         font-family: "DM Sans", sans-serif;
@@ -234,7 +242,7 @@
         border-radius: 8px;
         font-family: "DM Sans", sans-serif;
         font-size: 14px;
-        color: #555;
+        color: #fff;
         cursor: pointer;
         transition: background 0.15s;
       }
@@ -245,7 +253,7 @@
 
       .form-footer {
         font-size: 12.5px;
-        color: #aaa;
+        color: #fff;
         margin-top: 22px;
         text-align: center;
       }
