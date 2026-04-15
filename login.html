@@ -22,7 +22,7 @@
       }
 
       :root {
-        --uwa-green: #ffca2c;
+        --golden: #ffca2c;
         --uwa-green-dark: #0f6e56;
         --uwa-green-pale: #e1f5ee;
         --map-bg: #b8d9c2;
@@ -117,11 +117,14 @@
       }
 
       .brand-name span {
-        color: var(--uwa-green);
+        color: var(--golden);
       }
 
       .brand-sub {
         font-size: 13.5px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
         color: #fff;
         margin-bottom: 36px;
       }
@@ -153,7 +156,7 @@
       }
 
       .form-control:focus {
-        border-color: var(--uwa-green);
+        border-color: var(--golden);
         box-shadow: 0 0 0 3px rgba(29, 158, 117, 0.15);
         outline: none;
         background: rgba(255, 255, 255, 0.12);
@@ -163,7 +166,7 @@
       .btn-signin {
         width: 100%;
         padding: 11px;
-        background: var(--uwa-green);
+        background: var(--golden);
         color: #000;
         border: none;
         border-radius: 8px;
@@ -241,7 +244,7 @@
       }
 
       .form-footer a {
-        color: var(--uwa-green);
+        color: var(--golden);
         text-decoration: none;
       }
 
@@ -286,7 +289,7 @@
             alt="UWAGuessr Logo"
             class="brand-logo"
           />
-          <div class="brand-sub">How well do you know your campus?</div>
+          <div class="brand-sub">Explore UWA</div>
 
           <!-- Alert area -->
           <div class="alert-area" id="alertArea"></div>
