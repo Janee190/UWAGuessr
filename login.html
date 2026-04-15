@@ -288,28 +288,7 @@
         <div class="map-panel">
           <div class="map-badge">UWA Campus <small>Perth, WA</small></div>
 
-          <svg viewBox="0 0 340 520" xmlns="http://www.w3.org/2000/svg">
-            <!-- Pin 1 — red -->
-            <g class="pin">
-              <circle cx="91" cy="144" r="11" fill="#E24B4A" />
-              <polygon points="91,162 84,152 98,152" fill="#E24B4A" />
-              <circle cx="91" cy="144" r="4.5" fill="white" />
-            </g>
-
-            <!-- Pin 2 — blue -->
-            <g class="pin pin-2">
-              <circle cx="219" cy="232" r="11" fill="#185FA5" />
-              <polygon points="219,250 212,240 226,240" fill="#185FA5" />
-              <circle cx="219" cy="232" r="4.5" fill="white" />
-            </g>
-
-            <!-- Pin 3 — amber -->
-            <g class="pin pin-3">
-              <circle cx="152" cy="320" r="11" fill="#BA7517" />
-              <polygon points="152,338 145,328 159,328" fill="#BA7517" />
-              <circle cx="152" cy="320" r="4.5" fill="white" />
-            </g>
-          </svg>
+          <svg viewBox="0 0 340 520" xmlns="http://www.w3.org/2000/svg"></svg>
         </div>
 
         <!-- ── Form panel ── -->
@@ -376,9 +355,70 @@
 
     <script>
       $(function () {
-        // ── Helper: show an alert in the alert area ──────────────────────────────
+        // Random pins
+        const NUM_PINS = 5;
+        const MARGIN = 20,
+          W = 340,
+          H = 520;
+        const SVG_NS = "http://www.w3.org/2000/svg";
+        const PIN_COLOURS = [
+          "#E24B4A",
+          "#185FA5",
+          "#BA7517",
+          "#1D9E75",
+          "#8B3FBF",
+          "#E07B2A",
+        ];
+
+        function makeSVGEl(tag, attrs) {
+          const el = document.createElementNS(SVG_NS, tag);
+          $.each(attrs, function (k, v) {
+            el.setAttribute(k, v);
+          });
+          return el;
+        }
+
+        const svg = $("svg")[0];
+
+        for (let i = 0; i < NUM_PINS; i++) {
+          const cx = MARGIN + Math.random() * (W - MARGIN * 2);
+          const cy = MARGIN + 18 + Math.random() * (H - MARGIN * 2 - 18);
+          const colour =
+            PIN_COLOURS[Math.floor(Math.random() * PIN_COLOURS.length)];
+
+          const g = document.createElementNS(SVG_NS, "g");
+          g.setAttribute("class", "pin");
+          g.style.animationDelay = i * 0.3 + "s";
+
+          g.appendChild(
+            makeSVGEl("circle", { cx: cx, cy: cy, r: 11, fill: colour }),
+          );
+          g.appendChild(
+            makeSVGEl("polygon", {
+              points:
+                cx +
+                "," +
+                (cy + 18) +
+                " " +
+                (cx - 7) +
+                "," +
+                (cy + 8) +
+                " " +
+                (cx + 7) +
+                "," +
+                (cy + 8),
+              fill: colour,
+            }),
+          );
+          g.appendChild(
+            makeSVGEl("circle", { cx: cx, cy: cy, r: 4.5, fill: "white" }),
+          );
+
+          svg.appendChild(g);
+        }
+
+        // ── Helper: show an alert in the alert area ────────────────────────────
         function showAlert(message, type) {
-          // type: 'danger' | 'success' | 'warning'
           var html =
             '<div class="alert alert-' +
             type +
@@ -389,19 +429,18 @@
           $("#alertArea").html(html);
         }
 
-        // ── Helper: basic email format check ────────────────────────────────────
+        // ── Helper: basic email format check ──────────────────────────────────
         function isValidEmail(email) {
           return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
         }
 
-        // ── Login form submit ────────────────────────────────────────────────────
+        // ── Login form submit ──────────────────────────────────────────────────
         $("#loginForm").on("submit", function (e) {
           e.preventDefault();
 
           var email = $("#email").val().trim();
           var password = $("#password").val();
 
-          // Client-side validation
           if (!email || !isValidEmail(email)) {
             showAlert("Please enter a valid email address.", "danger");
             $("#email").trigger("focus");
@@ -413,13 +452,10 @@
             return;
           }
 
-          // Loading state
           var $btn = $("#signinBtn");
           $btn.addClass("loading").prop("disabled", true);
           $btn.find(".btn-label").text("Signing in…");
 
-          // AJAX call to your login endpoint
-          // Replace '/api/login' with your actual backend endpoint when ready.
           $.ajax({
             url: "/api/login",
             method: "POST",
@@ -427,7 +463,6 @@
             data: JSON.stringify({ email: email, password: password }),
             success: function (response) {
               showAlert("Welcome back! Redirecting…", "success");
-              // Redirect to the game after a short delay
               setTimeout(function () {
                 window.location.href = "game.html";
               }, 900);
@@ -446,14 +481,13 @@
           });
         });
 
-        // ── Guest button ─────────────────────────────────────────────────────────
+        // ── Guest button ───────────────────────────────────────────────────────
         $("#guestBtn").on("click", function () {
-          // You can set a guest flag in sessionStorage and redirect to the game.
           sessionStorage.setItem("guest", "true");
           window.location.href = "game.html";
         });
 
-        // ── Auto-focus email field ───────────────────────────────────────────────
+        // ── Auto-focus email field ─────────────────────────────────────────────
         $("#email").trigger("focus");
       });
     </script>
