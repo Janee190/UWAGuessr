@@ -8,11 +8,12 @@ let activeRounds = [];
 let photoViewerInitialized = false;
 let panoViewer = null;
 const ROUNDS_PER_GAME = 5;
-const DEFAULT_HFOV = 100;
+const DEFAULT_HFOV = 85;
 const MIN_HFOV = 40;
-const MAX_HFOV = 120;
+const MAX_HFOV = 90;
 const MIN_PITCH = -15;
 const MAX_PITCH = 15;
+const PITCH_EDGE_BUFFER = 4;
 
 // Resets game state and starts the first round.
 function startGame() {
@@ -67,8 +68,9 @@ function loadNextRound() {
 function submitGuess() {
     if (!guessMarker) return;
 
-    const guessLat = guessMarker.getLatLng().lat;
-    const guessLng = guessMarker.getLatLng().lng;
+    const markerPosition = guessMarker.getLngLat ? guessMarker.getLngLat() : guessMarker.getLatLng();
+    const guessLat = markerPosition.lat;
+    const guessLng = markerPosition.lng;
 
     // Calculate Math
     const distanceMeters = calculateHaversine(guessLat, guessLng, currentRoundData.lat, currentRoundData.lng);
@@ -151,6 +153,8 @@ function loadPanorama(imageUrl) {
         // We assume your panoramas are a full 360 degrees horizontally
         const haov = 360; 
         const vaov = haov * (tempImg.naturalHeight / tempImg.naturalWidth);
+        const minPitchLimit = -(vaov / 2) + PITCH_EDGE_BUFFER;
+        const maxPitchLimit = (vaov / 2) - PITCH_EDGE_BUFFER;
 
         // Now initialize Pannellum using the exact geometry of the image
         panoViewer = pannellum.viewer('photo-viewer', {
@@ -166,13 +170,13 @@ function loadPanorama(imageUrl) {
             "showControls": false,
             
             // Lock the vertical pitch so they can't look into the black void
-            "minPitch": -(vaov / 2) + 10, // Dynamically set based on the image height
-            "maxPitch": (vaov / 2) - 10,  
+            "minPitch": minPitchLimit,
+            "maxPitch": maxPitchLimit,
             "pitch": 0,      
             
-            "hfov": 100,     
-            "minHfov": 40,   
-            "maxHfov": 120,  
+            "hfov": DEFAULT_HFOV,
+            "minHfov": MIN_HFOV,
+            "maxHfov": MAX_HFOV,
             
             "compass": false,
             "mouseZoom": true 

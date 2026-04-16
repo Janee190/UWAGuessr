@@ -1,93 +1,241 @@
-// map.js - Leaflet Map Integration
+// map.js - MazeMap Integration
 
 let map;
 let guessMarker = null;
 let actualMarker = null;
 let resultLine = null;
-const greenIcon = L.icon({
-    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
-    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
-    popupAnchor: [1, -34],
-    shadowSize: [41, 41]
-});
+let resizeListenersAttached = false;
 
-const redIcon = L.icon({
-    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
-    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
-    popupAnchor: [1, -34],
-    shadowSize: [41, 41]
-});
+const UWA_CAMPUS_ID = 119;
+const UWA_CENTER = [115.818, -31.98]; // [lng, lat]
+const UWA_DEFAULT_ZOOM = 15;
+const UWA_DEFAULT_ZLEVEL = 1;
+const RESULT_LINE_SOURCE_ID = 'guess-result-line-source';
+const RESULT_LINE_LAYER_ID = 'guess-result-line-layer';
 
-// Initialize the map centered on UWA
-function initMap() {
-    // UWA roughly centered at -31.980, 115.818
-    map = L.map('map').setView([-31.980, 115.818], 16);
+function isMapReady() {
+    return !!map;
+}
 
-/*     // OpenStreetMap tiles (Free, no API key needed for MVP)
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19,
-        attribution: '© OpenStreetMap'
-    }).addTo(map); */
+function hideMapLabelsAndIcons() {
+    if (!map || typeof map.getStyle !== 'function') return;
 
-// CARTO Voyager (Colorful but clean, no API key)
-/*     L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-        subdomains: 'abcd',
-        maxZoom: 20,
-        minZoom: 14,
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
-    }).addTo(map); */
+    const style = map.getStyle();
+    if (!style || !Array.isArray(style.layers)) return;
 
-    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-	attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
-    }).addTo(map);
+    style.layers.forEach(function(layer) {
+        if (layer.type !== 'symbol') return;
+        if (!map.getLayer(layer.id)) return;
 
-    // Listen for clicks to place a guess
-    map.on('click', function(e) {
-        placeGuessMarker(e.latlng.lat, e.latlng.lng);
+        // Symbol layers carry both POI icons and text labels in Mapbox/MazeMap styles.
+        try {
+            map.setLayoutProperty(layer.id, 'visibility', 'none');
+        } catch (_err) {
+            // Ignore transient style update races and continue hiding remaining layers.
+        }
     });
 }
 
+function recenterMapView() {
+    if (!map) return;
+
+    if (typeof map.stop === 'function') {
+        map.stop();
+    }
+
+    if (typeof map.jumpTo === 'function') {
+        map.jumpTo({
+            center: UWA_CENTER,
+            zoom: UWA_DEFAULT_ZOOM,
+            bearing: 0,
+            pitch: 0
+        });
+    } else {
+        if (typeof map.setCenter === 'function') {
+            map.setCenter(UWA_CENTER);
+        }
+        if (typeof map.setZoom === 'function') {
+            map.setZoom(UWA_DEFAULT_ZOOM);
+        }
+        if (typeof map.setBearing === 'function') {
+            map.setBearing(0);
+        }
+        if (typeof map.setPitch === 'function') {
+            map.setPitch(0);
+        }
+    }
+
+    if (typeof map.setZLevel === 'function') {
+        map.setZLevel(UWA_DEFAULT_ZLEVEL);
+    }
+
+    if (typeof map.resize === 'function') {
+        map.resize();
+    }
+}
+
+function attachResizeHandlers() {
+    if (resizeListenersAttached) return;
+
+    const floatingMapContainer = document.querySelector('.floating-map-container');
+    if (floatingMapContainer) {
+        floatingMapContainer.addEventListener('transitionend', function() {
+            if (map) {
+                map.resize();
+            }
+        });
+    }
+
+    window.addEventListener('resize', function() {
+        if (map) {
+            map.resize();
+        }
+    });
+
+    resizeListenersAttached = true;
+}
+
+// Initialize the map centered on UWA
+function initMap() {
+    if (map) {
+        map.remove();
+    }
+
+    guessMarker = null;
+    actualMarker = null;
+    resultLine = null;
+
+    map = new Mazemap.Map({
+        container: 'map',
+        campuses: UWA_CAMPUS_ID,
+        center: UWA_CENTER,
+        zoom: UWA_DEFAULT_ZOOM,
+        zLevel: UWA_DEFAULT_ZLEVEL,
+        scrollZoom: true
+    });
+
+    map.on('load', function() {
+        recenterMapView();
+        hideMapLabelsAndIcons();
+
+        // Keep labels/icons hidden if MazeMap refreshes style data.
+        map.on('styledata', hideMapLabelsAndIcons);
+
+        map.on('click', function(e) {
+            placeGuessMarker(e.lngLat.lat, e.lngLat.lng);
+        });
+    });
+
+    attachResizeHandlers();
+    
+}
+
+
 function placeGuessMarker(lat, lng) {
-    if (actualMarker) {
+    if (!isMapReady() || actualMarker) {
         // If the actual marker is already shown, ignore new guesses until next round
         return;
     }
+
     if (guessMarker) {
-        map.removeLayer(guessMarker);
+        guessMarker.remove();
     }
-    guessMarker = L.marker([lat, lng], {icon: redIcon}).addTo(map);
-    
-    // Enable the submit button in your HTML once a marker is placed
+
+    guessMarker = new Mazemap.MazeMarker({
+        color: '#ffc107',
+        size: 34
+    })
+        .setLngLat([lng, lat])
+        .addTo(map);
+
     document.getElementById('submit-btn').disabled = false;
+}
+
+function clearResultLine() {
+    if (!map || !resultLine) return;
+
+    if (map.getLayer(RESULT_LINE_LAYER_ID)) {
+        map.removeLayer(RESULT_LINE_LAYER_ID);
+    }
+
+    if (map.getSource(RESULT_LINE_SOURCE_ID)) {
+        map.removeSource(RESULT_LINE_SOURCE_ID);
+    }
+
+    resultLine = null;
 }
 
 // Show the actual location and draw a line after guessing
 function showResultOnMap(guessLat, guessLng, actualLat, actualLng) {
-    // Drop actual marker with green color
-    actualMarker = L.marker([actualLat, actualLng], {icon: greenIcon}).addTo(map);
-    
-    // Draw connecting line
-    resultLine = L.polyline([
-        [guessLat, guessLng],
-        [actualLat, actualLng]
-    ], {color: 'red', weight: 3}).addTo(map);
+    if (!isMapReady()) return;
 
-    // Zoom map to fit both markers
-    map.fitBounds(resultLine.getBounds(), { padding: [50, 50] });
+    if (actualMarker) {
+        actualMarker.remove();
+    }
+
+    actualMarker = new Mazemap.MazeMarker({
+        color: '#22c55e',
+        size: 34
+    })
+        .setLngLat([actualLng, actualLat])
+        .addTo(map);
+
+    clearResultLine();
+
+    const resultLineGeoJson = {
+        type: 'Feature',
+        geometry: {
+            type: 'LineString',
+            coordinates: [
+                [guessLng, guessLat],
+                [actualLng, actualLat]
+            ]
+        }
+    };
+
+    map.addSource(RESULT_LINE_SOURCE_ID, {
+        type: 'geojson',
+        data: resultLineGeoJson
+    });
+
+    map.addLayer({
+        id: RESULT_LINE_LAYER_ID,
+        type: 'line',
+        source: RESULT_LINE_SOURCE_ID,
+        layout: {
+            'line-cap': 'round',
+            'line-join': 'round'
+        },
+        paint: {
+            'line-color': '#ff3b30',
+            'line-width': 3
+        }
+    });
+
+    resultLine = true;
+
+    const minLng = Math.min(guessLng, actualLng);
+    const maxLng = Math.max(guessLng, actualLng);
+    const minLat = Math.min(guessLat, actualLat);
+    const maxLat = Math.max(guessLat, actualLat);
+
+    map.fitBounds([[minLng, minLat], [maxLng, maxLat]], { padding: 50, duration: 700 });
 }
 
 // Reset map for the next round
 function clearMapForNextRound() {
-    if (guessMarker) map.removeLayer(guessMarker);
+    if (guessMarker) {
+        guessMarker.remove();
+        guessMarker = null;
+    }
+
     if (actualMarker) {
-        map.removeLayer(actualMarker);
-        actualMarker = null;}
-    if (resultLine) map.removeLayer(resultLine);
-    
-    guessMarker = null;
-    map.setView([-31.980, 115.818], 16); // Reset view back to UWA campus
+        actualMarker.remove();
+        actualMarker = null;
+    }
+
+    clearResultLine();
+
+    recenterMapView();
+    hideMapLabelsAndIcons();
 }

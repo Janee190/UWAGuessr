@@ -28,4 +28,4 @@ UWAGuessr is a web-based discovery game inspired by GeoGuessr, focussed specific
 ## Tech Stack
 * **Frontend:** Bootstrap (HTML/CSS)
 * **Backend:** [To be determined]
-* **Map API:** [To be determined, e.g., Google Maps or Leaflet]
+* **Map API:** MazeMap (Mapbox GL-based)
