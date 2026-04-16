@@ -13,6 +13,15 @@
       href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@400;500&display=swap"
       rel="stylesheet"
     />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bangers&display=swap"
+      rel="stylesheet"
+    />
 
     <style>
       *,
@@ -32,7 +41,7 @@
       body {
         height: 100%;
         margin: 0;
-        font-family: "DM Sans", sans-serif;
+        font-family: "Orbitron", sans-serif;
         background-image:
           linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
           url("images/uwa-aerial.webp");
@@ -132,6 +141,7 @@
       .form-label {
         font-size: 11.5px;
         font-weight: 500;
+        font-family: "Orbitron", sans-serif;
         text-transform: uppercase;
         letter-spacing: 0.06em;
         color: #fff;
@@ -142,8 +152,10 @@
         border: 1px solid #dde2db;
         border-radius: 8px;
         padding: 10px 14px;
-        font-size: 14.5px;
-        font-family: "DM Sans", sans-serif;
+        height: 42px;
+
+        font-size: 12px;
+        font-family: "Orbitron", sans-serif;
         transition:
           border-color 0.15s,
           box-shadow 0.15s;
@@ -152,7 +164,13 @@
       }
 
       .form-control::placeholder {
+        font-size: 12px;
         color: rgba(255, 255, 255, 0.6);
+      }
+
+      #password {
+        font-size: 14px;
+        font-family: "DM Sans", sans-serif;
       }
 
       .form-control:focus {
@@ -165,14 +183,21 @@
 
       .btn-signin {
         width: 100%;
-        padding: 11px;
+        height: 44px;
+        line-height: 44px;
+        padding: 0;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
         background: var(--golden);
         color: #000;
         border: none;
         border-radius: 8px;
-        font-family: "DM Sans", sans-serif;
-        font-size: 15px;
-        font-weight: 500;
+        font-family: "Bangers", sans-serif;
+        font-size: 25px;
+        font-weight: 200;
         cursor: pointer;
         margin-top: 6px;
         transition:
@@ -182,7 +207,7 @@
       }
 
       .btn-signin:hover {
-        background: var(--uwa-green-dark);
+        background: #d9aa1f;
       }
       .btn-signin:active {
         transform: scale(0.98);
@@ -221,19 +246,26 @@
 
       .btn-guest {
         width: 100%;
-        padding: 10px;
+        height: 44px;
+        line-height: 44px;
+        padding: 0;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
         background: transparent;
         border: 1px solid #d4d9d2;
         border-radius: 8px;
-        font-family: "DM Sans", sans-serif;
-        font-size: 14px;
+        font-family: "Bangers", sans-serif;
+        font-size: 25px;
         color: #fff;
         cursor: pointer;
         transition: background 0.15s;
       }
 
       .btn-guest:hover {
-        background: #f6f8f5;
+        background: rgba(32, 26, 95, 0.92);
       }
 
       .form-footer {
