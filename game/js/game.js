@@ -111,10 +111,10 @@ function calculateScore(distanceMeters) {
     const maxScore = 5000;
     const dropoffRate = 0.005; // Adjust this to make it harder or easier
     
-    if (distanceMeters < 15) return maxScore; // Perfect score buffer
+    if (distanceMeters < 20) return maxScore; // Perfect score buffer
     
     // Exponential decay curve
-    const score = maxScore * Math.exp(-dropoffRate * (distanceMeters - 15));
+    const score = maxScore * Math.exp(-dropoffRate * (distanceMeters - 20));
     return Math.max(0, Math.round(score));
 }
 
