@@ -6,7 +6,8 @@ body {
 }
 
 .custom-navbar {
-    background-color: rgba(10, 16, 40, 0.95);
+    background-color: rgba(22, 18, 70, 0.95); 
+    border-bottom: 1px solid #5b5bff;
 }
 
 .hero-section {
@@ -16,6 +17,7 @@ body {
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
+    background-attachment: fixed;
 }
 
 .hero-title {
@@ -63,16 +65,16 @@ body {
     letter-spacing: 0.5px;
 }
 
-/* This ensures images stay inside their columns */
+
 .feature-box img {
-    max-width: 100%;    /* Never wider than the column */
-    height: auto;        /* Keep proportions perfect */
-    display: block;      /* Helps with alignment */
-    margin: 0 auto 20px; /* Centers the image and adds space below */
-    max-height: 180px;   /* Limits the height so they don't get huge */
+    max-width: 100%;    
+    height: auto;        
+    display: block;      
+    margin: 0 auto 20px; 
+    max-height: 180px;   
 }
 
-/* Optional: Add this to make the boxes align nicely even if text lengths differ */
+
 .feature-box {
     display: flex;
     flex-direction: column;
@@ -82,9 +84,21 @@ body {
 }
 
 .feature-box {
-    background-color: #1a1a2e; /* A dark navy to match the UWA sky */
-    color: white;              /* Make the text white so it's readable */
+    background-color: #2c2966; /* Your deep purple from image 2 */
+    color: #ffffff;
     border-radius: 20px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 30px;
+    height: 100%;
+    transition: transform 0.3s ease;
+}
+
+.feature-box:hover {
+    transform: translateY(-10px); 
+}
+
+.how-to-container {
+    background: linear-gradient(135deg, #161246 0%, #0a0a28 100%);
+    min-height: 100vh;
+    padding-top: 50px;
+    padding-bottom: 50px;
 }
