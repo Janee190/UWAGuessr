@@ -1,0 +1,526 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>UWAGuessr — Sign In</title>
+
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bangers&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+
+      :root {
+        --golden: #ffca2c;
+        --uwa-green-dark: #0f6e56;
+        --uwa-green-pale: #e1f5ee;
+        --map-bg: #b8d9c2;
+      }
+
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+        font-family: "Orbitron", sans-serif;
+        background-image:
+          linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+          url("images/uwa-aerial.webp");
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+      }
+
+      /* ── Layout ── */
+      .page-wrap {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem 1rem;
+      }
+
+      .card-shell {
+        display: flex;
+        width: 100%;
+        max-width: 860px;
+        min-height: 520px;
+        border-radius: 18px;
+        overflow: hidden;
+        box-shadow: 0 8px 40px rgba(0, 0, 0, 0.13);
+      }
+
+      /* ── Map panel ── */
+      .map-panel {
+        flex: 1.1;
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        background: url("images/uwamap.png") center/cover no-repeat;
+      }
+
+      .map-panel svg {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+      }
+
+      .pin {
+        animation: bob 2.4s ease-in-out infinite;
+      }
+      .pin-2 {
+        animation-delay: 0.7s;
+      }
+      .pin-3 {
+        animation-delay: 1.4s;
+      }
+
+      @keyframes bob {
+        0%,
+        100% {
+          transform: translateY(0);
+        }
+        50% {
+          transform: translateY(-7px);
+        }
+      }
+
+      /* ── Form panel ── */
+      .form-panel {
+        flex: 1;
+        background: rgba(22, 18, 70, 0.92);
+        padding: 52px 44px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+
+      .brand-logo {
+        height: 50px;
+        width: auto;
+        display: block;
+        margin: 0 auto 10px auto;
+      }
+
+      .brand-name span {
+        color: var(--golden);
+      }
+
+      .brand-sub {
+        font-size: 13.5px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: #fff;
+        margin-bottom: 36px;
+      }
+
+      .form-label {
+        font-size: 11.5px;
+        font-weight: 500;
+        font-family: "Orbitron", sans-serif;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: #fff;
+        margin-bottom: 5px;
+      }
+
+      .form-control {
+        border: 1px solid #dde2db;
+        border-radius: 8px;
+        padding: 10px 14px;
+        height: 42px;
+
+        font-size: 12px;
+        font-family: "Orbitron", sans-serif;
+        transition:
+          border-color 0.15s,
+          box-shadow 0.15s;
+        background: rgba(255, 255, 255, 0.12);
+        color: #fff;
+      }
+
+      .form-control::placeholder {
+        font-size: 12px;
+        color: rgba(255, 255, 255, 0.6);
+      }
+
+      #password {
+        font-size: 14px;
+        font-family: "DM Sans", sans-serif;
+      }
+
+      .form-control:focus {
+        border-color: var(--golden);
+        box-shadow: 0 0 0 3px rgba(29, 158, 117, 0.15);
+        outline: none;
+        background: rgba(255, 255, 255, 0.12);
+        color: #fff;
+      }
+
+      .btn-signin {
+        width: 100%;
+        height: 44px;
+        line-height: 44px;
+        padding: 0;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        background: var(--golden);
+        color: #000;
+        border: none;
+        border-radius: 8px;
+        font-family: "Bangers", sans-serif;
+        font-size: 25px;
+        font-weight: 200;
+        cursor: pointer;
+        margin-top: 6px;
+        transition:
+          background 0.15s,
+          transform 0.1s;
+        position: relative;
+      }
+
+      .btn-signin:hover {
+        background: #d9aa1f;
+      }
+      .btn-signin:active {
+        transform: scale(0.98);
+      }
+
+      .btn-signin .spinner-border {
+        width: 1rem;
+        height: 1rem;
+        border-width: 2px;
+        display: none;
+        margin-right: 6px;
+      }
+
+      .btn-signin.loading .spinner-border {
+        display: inline-block;
+      }
+      .btn-signin.loading .btn-label {
+        opacity: 0.7;
+      }
+
+      .divider {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin: 20px 0;
+        color: #bbb;
+        font-size: 12px;
+      }
+
+      .divider::before,
+      .divider::after {
+        content: "";
+        flex: 1;
+        border-top: 1px solid #e8e8e8;
+      }
+
+      .btn-guest {
+        width: 100%;
+        height: 44px;
+        line-height: 44px;
+        padding: 0;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        background: transparent;
+        border: 1px solid #d4d9d2;
+        border-radius: 8px;
+        font-family: "Bangers", sans-serif;
+        font-size: 25px;
+        color: #fff;
+        cursor: pointer;
+        transition: background 0.15s;
+      }
+
+      .btn-guest:hover {
+        background: rgba(32, 26, 95, 0.92);
+      }
+
+      .form-footer {
+        font-size: 12.5px;
+        color: #fff;
+        margin-top: 22px;
+        text-align: center;
+      }
+
+      .form-footer a {
+        color: var(--golden);
+        text-decoration: none;
+      }
+
+      .form-footer a:hover {
+        text-decoration: underline;
+      }
+
+      /* Alert */
+      .alert-area {
+        min-height: 36px;
+        margin-bottom: 8px;
+      }
+
+      /* Responsive: stack on small screens */
+      @media (max-width: 640px) {
+        .card-shell {
+          flex-direction: column;
+          max-width: 420px;
+        }
+        .map-panel {
+          height: 180px;
+          flex: none;
+        }
+        .form-panel {
+          padding: 36px 28px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page-wrap">
+      <div class="card-shell">
+        <!-- ── Map panel ── -->
+        <div class="map-panel">
+          <svg viewBox="0 0 340 520" xmlns="http://www.w3.org/2000/svg"></svg>
+        </div>
+
+        <!-- ── Form panel ── -->
+        <div class="form-panel">
+          <img
+            src="images/UWAGuessr-logo.png"
+            alt="UWAGuessr Logo"
+            class="brand-logo"
+          />
+          <div class="brand-sub">Explore UWA</div>
+
+          <!-- Alert area -->
+          <div class="alert-area" id="alertArea"></div>
+
+          <form id="loginForm" novalidate>
+            <div class="mb-3">
+              <label class="form-label" for="email">Email</label>
+              <input
+                type="email"
+                class="form-control"
+                id="email"
+                name="email"
+                placeholder="email@example.com"
+                autocomplete="email"
+                required
+              />
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label" for="password">Password</label>
+              <input
+                type="password"
+                class="form-control"
+                id="password"
+                name="password"
+                placeholder="•••••••••••"
+                autocomplete="current-password"
+                required
+              />
+            </div>
+
+            <button type="submit" class="btn-signin" id="signinBtn">
+              <span
+                class="spinner-border"
+                role="status"
+                aria-hidden="true"
+              ></span>
+              <span class="btn-label">Sign in</span>
+            </button>
+          </form>
+
+          <div class="divider">or</div>
+
+          <button class="btn-guest" id="guestBtn">Continue as guest</button>
+
+          <div class="form-footer">
+            No account? <a href="signup.html">Sign up free</a>
+            &nbsp;·&nbsp;
+            <a href="forgot.html">Forgot password?</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+    <script>
+      $(function () {
+        // Random pins
+        const NUM_PINS = 5;
+        const MARGIN = 20,
+          W = 340,
+          H = 520;
+        const SVG_NS = "http://www.w3.org/2000/svg";
+        const PIN_COLOURS = [
+          "#E24B4A",
+          "#185FA5",
+          "#8B3FBF",
+          "#F2C94C",
+          "#000000",
+          "#FF2D55",
+          "#00C7FF",
+          "#FF8C00",
+          "#FFD700",
+          "#FF1493",
+        ];
+
+        function makeSVGEl(tag, attrs) {
+          const el = document.createElementNS(SVG_NS, tag);
+          $.each(attrs, function (k, v) {
+            el.setAttribute(k, v);
+          });
+          return el;
+        }
+
+        const svg = $("svg")[0];
+
+        for (let i = 0; i < NUM_PINS; i++) {
+          const cx = MARGIN + Math.random() * (W - MARGIN * 2);
+          const cy = MARGIN + 18 + Math.random() * (H - MARGIN * 2 - 18);
+          const colour =
+            PIN_COLOURS[Math.floor(Math.random() * PIN_COLOURS.length)];
+
+          const g = document.createElementNS(SVG_NS, "g");
+          g.setAttribute("class", "pin");
+          g.style.animationDelay = i * 0.3 + "s";
+
+          g.appendChild(
+            makeSVGEl("circle", { cx: cx, cy: cy, r: 11, fill: colour }),
+          );
+          g.appendChild(
+            makeSVGEl("polygon", {
+              points:
+                cx +
+                "," +
+                (cy + 18) +
+                " " +
+                (cx - 7) +
+                "," +
+                (cy + 8) +
+                " " +
+                (cx + 7) +
+                "," +
+                (cy + 8),
+              fill: colour,
+            }),
+          );
+          g.appendChild(
+            makeSVGEl("circle", { cx: cx, cy: cy, r: 4.5, fill: "white" }),
+          );
+
+          svg.appendChild(g);
+        }
+
+        // ── Helper: show an alert in the alert area ────────────────────────────
+        function showAlert(message, type) {
+          const html =
+            '<div class="alert alert-' +
+            type +
+            ' alert-dismissible fade show py-2 px-3 mb-0" role="alert" style="font-size:13.5px;">' +
+            message +
+            '<button type="button" class="btn-close btn-sm" data-bs-dismiss="alert" aria-label="Close"></button>' +
+            "</div>";
+          $("#alertArea").html(html);
+        }
+
+        // ── Helper: basic email format check ──────────────────────────────────
+        function isValidEmail(email) {
+          return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+        }
+
+        // ── Login form submit ──────────────────────────────────────────────────
+        $("#loginForm").on("submit", function (e) {
+          e.preventDefault();
+
+          const email = $("#email").val().trim();
+          const password = $("#password").val();
+
+          if (!email || !isValidEmail(email)) {
+            showAlert("Please enter a valid email address.", "danger");
+            $("#email").trigger("focus");
+            return;
+          }
+          if (!password) {
+            showAlert("Please enter your password.", "danger");
+            $("#password").trigger("focus");
+            return;
+          }
+
+          const $btn = $("#signinBtn");
+          $btn.addClass("loading").prop("disabled", true);
+          $btn.find(".btn-label").text("Signing in…");
+
+          $.ajax({
+            url: "/api/login",
+            method: "POST",
+            contentType: "application/json",
+            data: JSON.stringify({ email: email, password: password }),
+            success: function (response) {
+              showAlert("Welcome back! Redirecting…", "success");
+              setTimeout(function () {
+                window.location.href = "game.html";
+              }, 900);
+            },
+            error: function (xhr) {
+              let msg = "Something went wrong. Please try again.";
+              if (xhr.status === 401) msg = "Incorrect email or password.";
+              if (xhr.status === 429)
+                msg = "Too many attempts. Please wait a moment.";
+              showAlert(msg, "danger");
+            },
+            complete: function () {
+              $btn.removeClass("loading").prop("disabled", false);
+              $btn.find(".btn-label").text("Sign in");
+            },
+          });
+        });
+
+        // ── Guest button ───────────────────────────────────────────────────────
+        $("#guestBtn").on("click", function () {
+          sessionStorage.setItem("guest", "true");
+          window.location.href = "game.html";
+        });
+
+        // ── Auto-focus email field ─────────────────────────────────────────────
+        $("#email").trigger("focus");
+      });
+    </script>
+  </body>
+</html>
