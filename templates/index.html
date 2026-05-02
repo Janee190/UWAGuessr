@@ -3,6 +3,15 @@
 {% block title %}UWAGuessr{% endblock %}
 {% block body_class %}page-home{% endblock %}
 
+{% block extra_head %}
+<!-- Load Mazemap CSS directly so we can initialize a hidden map -->
+<link rel="stylesheet" href="https://api.mazemap.com/js/v2.2.6/mazemap.min.css">
+
+<!-- Preload Pannellum since we don't need to execute it here -->
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.css" as="style">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js" as="script">
+{% endblock %}
+
 {% block content %}
 <section class="hero-section d-flex align-items-center">
     <div class="container">
@@ -61,4 +70,27 @@
         </div>
     </div>
 </section>
+{% endblock %}
+
+{% block scripts %}
+<div id="hidden-preload-map"
+    style="position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; overflow: hidden; z-index: -1;">
+</div>
+<script src="https://api.mazemap.com/js/v2.2.6/mazemap.min.js"></script>
+<script>
+    // After the home page is fully loaded, silently load the UWA map tiles into the browser cache
+    window.addEventListener('load', function () {
+        setTimeout(function () {
+            if (typeof Mazemap !== 'undefined') {
+                new Mazemap.Map({
+                    container: 'hidden-preload-map',
+                    campuses: 119,
+                    center: [115.818, -31.98],
+                    zoom: 15,
+                    zLevel: 1
+                });
+            }
+        }, 800); // Wait 800ms to ensure it doesn't interrupt any home page animations
+    });
+</script>
 {% endblock %}
