@@ -1,3 +1,5 @@
+# No longer used, to be replaced with admin tools on the website
+
 import os
 import re
 import sys
@@ -75,14 +77,16 @@ def update_datafile(datafile_path, images):
         content = f.read()
 
     location_entries = []
-    valid_images = [(name, coords) for name, coords in sorted(images.items()) if coords is not None]
+    valid_images = [
+        (name, coords) for name, coords in sorted(images.items()) if coords is not None
+    ]
 
     for idx, (filename, coords) in enumerate(valid_images, start=1):
         lat, lng = coords
         location_entries.append(
             "    {\n"
             f"        id: {idx},\n"
-            f"        imagePath: \"game/photos/{filename}\",\n"
+            f'        imagePath: "game/photos/{filename}",\n'
             f"        lat: {lat:.6f},\n"
             f"        lng: {lng:.6f}\n"
             "    }"
@@ -90,9 +94,7 @@ def update_datafile(datafile_path, images):
 
     locations_block = (
         "// Hardcoded locations \n"
-        "const uwaLocations = [\n"
-        + ",\n".join(location_entries)
-        + "\n];"
+        "const uwaLocations = [\n" + ",\n".join(location_entries) + "\n];"
     )
 
     pattern = r"// Hardcoded locations\s*const uwaLocations\s*=\s*\[[\s\S]*?\];"
@@ -113,7 +115,6 @@ def main():
     photos_dir = sys.argv[1] if len(sys.argv) > 1 else default_photos_dir
     data_file = sys.argv[2] if len(sys.argv) > 2 else default_data_file
 
-
     if not os.path.isdir(photos_dir):
         print(f"Photos folder not found: {photos_dir}")
         return 1
@@ -131,4 +132,3 @@ def main():
 
 if __name__ == "__main__":
     raise SystemExit(main())
-        
