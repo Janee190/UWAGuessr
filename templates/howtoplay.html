@@ -1,84 +1,47 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>How to Play - UWAGuessr</title>
+{% extends "base.html" %}
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Russo+One&family=Orbitron&display=swap" rel="stylesheet">
+{% block title %}How to Play{% endblock %}
+
+{% block body_class %}bg-dark text-white{% endblock %}
+
+{% block content %}
+<main class="how-to-container">
+    <div class="container py-5">
+        <section class="text-center mb-5">
+            <h1 class="display-4 fw-bold bangers-font hero-title" style="color: #ffc107; font-size: 64px;">How to Play</h1>
+            <p class="lead hero-text mx-auto">Master the art of UWA navigation in 3 easy steps.</p>
+        </section>
+
+        <div class="row gy-5 align-items-center">
     
-    <link rel="stylesheet" href="css/style.css">
-    <header>
-    <nav class="navbar navbar-expand-lg navbar-dark custom-navbar">
-        <div class="container">
-            <a class="navbar-brand" href="index.html">
-                <img src="images/UWAGuessr logo.png" alt="UWAGuessr Logo" height="40">
-            </a>
-
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-
-            <div class="collapse navbar-collapse" id="mainNav">
-                <ul class="navbar-nav ms-auto align-items-lg-center">
-                    <li class="nav-item">
-                        <a class="nav-link bangers-font" href="how-to-play.html">How to Play</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link bangers-font" href="leaderboard.html">Leaderboard</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="btn btn-outline-light ms-lg-3 me-lg-2 mt-2 mt-lg-0 bangers-font" href="login.html">Log In</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="btn btn-success mt-2 mt-lg-0 bangers-font" href="game.html">Play Now</a>
-                    </li>
-                </ul>
+            <div class="col-lg-6">
+                <h2 class="h3 bangers-font" style="color: #ffc107;">1. Study the Image</h2>
+                <p class="hero-text">You'll be shown a high-resolution photo of a location somewhere on the UWA campus. Look for clues like building architecture, specific trees, or recognizable statues.</p>
             </div>
-        </div>
-    </nav>
-</header>
-</head>
-<body class="bg-dark text-white"> 
 
-    <main class="how-to-container">
-        <div class="container py-5">
-            <section class="text-center mb-5">
-                <h1 class="display-4 fw-bold bangers-font hero-title" style="color: #ffc107; font-size: 64px;">How to Play</h1>
-                <p class="lead hero-text mx-auto">Master the art of UWA navigation in 3 easy steps.</p>
-            </section>
 
-            <div class="row gy-5 align-items-center">
-    
-                <div class="col-lg-6">
-                    <h2 class="h3 bangers-font" style="color: #ffc107;">1. Study the Image</h2>
-                    <p class="hero-text">You'll be shown a high-resolution photo of a location somewhere on the UWA campus. Look for clues like building architecture, specific trees, or recognizable statues.</p>
-                </div>
-                <div class="col-lg-6 text-center">
-                    <img src="images\man looking through a magnifying glass.png" alt="Globe Icon" class="img-fluid" style="max-height: 250px;">
-                </div>
+            <div class="col-lg-6 text-center">
+                <img src="images\man looking through a magnifying glass.png" alt="Globe Icon" class="img-fluid" style="max-height: 250px;">
+            </div>
 
-                <div class="col-lg-6 text-center">
-                    <img src="images\Map with destination marked by pushpin.png" alt="Map Pin Icon" class="img-fluid" style="max-height: 250px;">
-                </div>
-                <div class="col-lg-6">
-                    <h2 class="h3 bangers-font" style="color: #ffc107;">2. Pin the Map</h2>
-                    <p class="hero-text">
-                        Once you think you know where the photo was taken, click on the interactive campus map.
-                        You can zoom in to find specific wings or garden paths.
-                    </p>
-                </div>
+            <div class="col-lg-6 text-center">
+                <img src="images\Map with destination marked by pushpin.png" alt="Map Pin Icon" class="img-fluid" style="max-height: 250px;">
+            </div>
+            <div class="col-lg-6">
+                <h2 class="h3 bangers-font" style="color: #ffc107;">2. Pin the Map</h2>
+                <p class="hero-text">
+                    Once you think you know where the photo was taken, click on the interactive campus map.
+                    You can zoom in to find specific wings or garden paths.
+                </p>
+            </div>
 
-                <div class="col-lg-6">
-                    <h2 class="h3 bangers-font" style="color: #ffc107;">3. Check Your Accuracy</h2>
-                    <p class="hero-text">The closer your pin is to the actual location, the more points you earn! You'll see the exact distance between your guess and the true spot.</p>
-                </div>
-                <div class="col-lg-6 text-center">
-                    <img src="images\trophy.png" alt="Trophy Icon" class="img-fluid" style="max-height: 250px;">
-                </div>
+            <div class="col-lg-6">
+                <h2 class="h3 bangers-font" style="color: #ffc107;">3. Check Your Accuracy</h2>
+                <p class="hero-text">The closer your pin is to the actual location, the more points you earn! You'll see the exact distance between your guess and the true spot.</p>
+            </div>
+            <div class="col-lg-6 text-center">
+                <img src="images\trophy.png" alt="Trophy Icon" class="img-fluid" style="max-height: 250px;">
+            </div>
 
             </div>
 
@@ -87,8 +50,7 @@
                 <a href="game.html" class="btn btn-warning btn-lg bangers-font px-5">Start Playing!</a>
             </div>
         </div>
-    </main>
+    </div>
+</main>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+{% endblock %}
