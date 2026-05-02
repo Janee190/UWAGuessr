@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, jsonify, request
 
 app = Flask(__name__)
 
@@ -11,6 +11,36 @@ def index():
 @app.route("/login")
 def login():
     return render_template("login.html")
+@app.route("/game")
+def game():
+    return render_template("game.html")
+
+@app.route("/api/rounds")
+def api_rounds():
+    from game.game_logic import get_game_data
+    return jsonify(get_game_data())
+
+@app.route("/api/guess", methods=["POST"])
+def api_guess():
+    from game.game_logic import calculate_score
+    data = request.json
+    guess_lat = data.get('lat')
+    guess_lng = data.get('lng')
+    img_id = data.get('id')
+    
+    if guess_lat is None or guess_lng is None or img_id is None:
+        return jsonify({'error': 'Missing required fields'}), 400
+        
+    score, distance, actual_lat, actual_lng = calculate_score(guess_lat, guess_lng, img_id)
+    if score is None:
+        return jsonify({'error': 'Invalid image ID'}), 404
+        
+    return jsonify({
+        'score': score,
+        'distance': distance,
+        'actual_lat': actual_lat,
+        'actual_lng': actual_lng
+    })
 
 
 if __name__ == "__main__":
