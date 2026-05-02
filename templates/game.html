@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block title %}UWAGuessr | Play{% endblock %}
+
+{% block body_class %}page-game{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/game-styles.css') }}">
+<link rel="stylesheet" href="https://api.mazemap.com/js/v2.2.6/mazemap.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.css">
+<link href="https://fonts.googleapis.com/css2?family=Bitcount+Single&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Russo+One&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+{% endblock %}
+
+{% block navbar %}{% endblock %}
+
+{% block content %}
+<div class="game-wrapper">
+
+	<div id="game-board" style="width: 100%; height: 100%;">
+
+		<div id="photo-viewer" class="photo-viewer"></div>
+
+		<div class="photo-controls">
+			<button class="btn btn-dark btn-game" type="button" onclick="zoomPhoto(1.2)">+</button>
+			<button class="btn btn-dark btn-game" type="button" onclick="zoomPhoto(1 / 1.2)">-</button>
+			<button class="btn btn-outline-light btn-game" type="button" onclick="resetPhotoTransform()">Reset</button>
+		</div>
+
+		<div class="exit-btn">
+			<a class="btn btn-dark btn-game" href="{{ url_for('index') }}">Exit</a>
+		</div>
+
+		<article class="game-ui-panel">
+			<div class="d-flex justify-content-between align-items-center mb-3">
+				<h1 class="h3 mb-0 text-uppercase">Campus Guess</h1>
+			</div>
+			<div class="mb-3">
+				<span id="round-counter">Round 1 / 5</span>
+			</div>
+
+			<p class="small text-light mb-2 opacity-75">Pan & zoom the photo, then place your marker on the map.</p>
+
+			<p id="feedback-text" aria-live="polite"></p>
+
+			<div class="d-flex flex-column gap-2 mt-3">
+				<button id="submit-btn" class="btn btn-warning btn-game w-100" type="button"
+					onclick="submitGuess()">Submit Guess</button>
+
+				<button id="next-btn" class="btn btn-outline-light btn-game w-100" type="button" disabled
+					onclick="loadNextRound()">Next Round</button>
+			</div>
+		</article>
+
+		<aside class="floating-map-container">
+			<div id="map" aria-label="Interactive UWA campus map"></div>
+		</aside>
+
+	</div>
+
+	<section id="game-over">
+		<h2 class="display-6 mb-3 text-uppercase">Game Over</h2>
+		<p id="final-score">Final Score: 0</p>
+		<div class="d-flex justify-content-center gap-3 mt-4">
+			<a class="btn btn-warning btn-game" href="{{ url_for('game') }}">Play Again</a>
+			<a class="btn btn-outline-light btn-game" href="{{ url_for('index') }}">Back to Home</a>
+		</div>
+	</section>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://api.mazemap.com/js/v2.2.6/mazemap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js"></script>
+<script src="{{ url_for('static', filename='game/js/map.js') }}"></script>
+<script src="{{ url_for('static', filename='game/js/game.js') }}"></script>
+{% endblock %}

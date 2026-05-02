@@ -4,6 +4,7 @@ let currentRoundIndex = 0;
 let totalScore = 0;
 let currentRoundData = null;
 let activeRounds = [];
+let allRoundsData = [];
 
 let photoViewerInitialized = false;
 let panoViewer = null;
@@ -16,7 +17,15 @@ const MAX_PITCH = 15;
 const PITCH_EDGE_BUFFER = 4;
 
 // Resets game state and starts the first round.
-function startGame() {
+async function startGame() {
+    try {
+        const response = await fetch('/api/rounds');
+        allRoundsData = await response.json();
+    } catch (e) {
+        console.error("Failed to load rounds:", e);
+        return;
+    }
+
     currentRoundIndex = 0;
     totalScore = 0;
     activeRounds = buildRandomRounds();
@@ -30,7 +39,7 @@ function startGame() {
 
 // Chooses a unique random subset of rounds for one game session.
 function buildRandomRounds() {
-    const totalRounds = getTotalRounds();
+    const totalRounds = allRoundsData.length;
     const roundsToPlay = Math.min(ROUNDS_PER_GAME, totalRounds);
     const indices = Array.from({ length: totalRounds }, (_, index) => index);
 
@@ -41,7 +50,7 @@ function buildRandomRounds() {
 
     return indices
         .slice(0, roundsToPlay)
-        .map((index) => getRoundData(index))
+        .map((index) => allRoundsData[index])
         .filter(Boolean);
 }
 
@@ -65,59 +74,55 @@ function loadNextRound() {
 }
 
 // Submits the current map guess, scores it, and unlocks the next round button.
-function submitGuess() {
+async function submitGuess() {
     if (!guessMarker) return;
 
     const markerPosition = guessMarker.getLngLat ? guessMarker.getLngLat() : guessMarker.getLatLng();
     const guessLat = markerPosition.lat;
     const guessLng = markerPosition.lng;
 
-    // Calculate Math
-    const distanceMeters = calculateHaversine(guessLat, guessLng, currentRoundData.lat, currentRoundData.lng);
-    const roundScore = calculateScore(distanceMeters);
+    // Send guess to backend
+    try {
+        const response = await fetch('/api/guess', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                lat: guessLat,
+                lng: guessLng,
+                id: currentRoundData.id
+            })
+        });
+        
+        const result = await response.json();
+        if (result.error) {
+            console.error(result.error);
+            return;
+        }
 
-    // Update State
-    totalScore += roundScore;
-    localStorage.setItem('uwa_totalScore', totalScore);
+        const distanceMeters = result.distance;
+        const roundScore = result.score;
+        const actualLat = result.actual_lat;
+        const actualLng = result.actual_lng;
 
-    // Show Map Results
-    showResultOnMap(guessLat, guessLng, currentRoundData.lat, currentRoundData.lng);
+        // Update State
+        totalScore += roundScore;
+        localStorage.setItem('uwa_totalScore', totalScore);
 
-    // Show UI Feedback (You will need HTML elements for these)
-    document.getElementById('feedback-text').innerText = `You were ${Math.round(distanceMeters)}m away! You scored ${roundScore} points.`;
-    document.getElementById('submit-btn').disabled = true;
-    document.getElementById('next-btn').disabled = false;
-    
-    // Prepare for next round
-    currentRoundIndex++;
-}
+        // Show Map Results
+        showResultOnMap(guessLat, guessLng, actualLat, actualLng);
 
-// Computes spherical distance between two lat/lng points in meters.
-function calculateHaversine(lat1, lon1, lat2, lon2) {
-    const R = 6371e3; // Earth radius in meters
-    const φ1 = lat1 * Math.PI/180;
-    const φ2 = lat2 * Math.PI/180;
-    const Δφ = (lat2-lat1) * Math.PI/180;
-    const Δλ = (lon2-lon1) * Math.PI/180;
-
-    const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
-              Math.cos(φ1) * Math.cos(φ2) *
-              Math.sin(Δλ/2) * Math.sin(Δλ/2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-
-    return R * c; 
-}
-
-// Converts distance error into a round score using exponential decay.
-function calculateScore(distanceMeters) {
-    const maxScore = 5000;
-    const dropoffRate = 0.005; // Adjust this to make it harder or easier
-    
-    if (distanceMeters < 20) return maxScore; // Perfect score buffer
-    
-    // Exponential decay curve
-    const score = maxScore * Math.exp(-dropoffRate * (distanceMeters - 20));
-    return Math.max(0, Math.round(score));
+        // Show UI Feedback (You will need HTML elements for these)
+        document.getElementById('feedback-text').innerText = `You were ${Math.round(distanceMeters)}m away! You scored ${roundScore} points.`;
+        document.getElementById('submit-btn').disabled = true;
+        document.getElementById('next-btn').disabled = false;
+        
+        // Prepare for next round
+        currentRoundIndex++;
+    } catch (e) {
+        console.error("Failed to submit guess:", e);
+    }
 }
 
 // Displays the game-over overlay with the final score.
