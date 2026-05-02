@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>UWAGuessr | Play</title>
+
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+	<link rel="stylesheet" href="https://api.mazemap.com/js/v2.2.6/mazemap.min.css">
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.css">
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Bangers&display=swap" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css2?family=Bitcount+Single&display=swap" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css2?family=Russo+One&display=swap" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css2?family=Orbitron&display=swap" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+
+	<link rel="stylesheet" href="css/style.css">
+
+	<style>
+		body {
+			margin: 0;
+			overflow: hidden; /* Prevent scrolling for a true full-screen game feel */
+			background-color: #212529;
+			font-family: 'Russo One', sans-serif;
+			color: #ffffff;
+		}
+
+		/* Game Layout */
+		.game-wrapper {
+			position: relative;
+			width: 100vw;
+			height: calc(100vh - 66px); /* Adjust based on navbar height */
+			overflow: hidden;
+			background-color: #0f1d33;
+		}
+
+		/* Full Screen Photo Viewer */
+		.photo-viewer {
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			overflow: hidden;
+			touch-action: none;
+		}
+
+		#location-image {
+			min-width: 100%;
+			min-height: 100%;
+			object-fit: cover;
+			user-select: none;
+			-webkit-user-drag: none;
+			cursor: grab;
+			transform-origin: center center;
+			transition: transform 120ms ease-out;
+		}
+
+		#location-image.panning {
+			cursor: grabbing;
+			transition: none;
+		}
+
+		/* Top Right Controls */
+		.photo-controls {
+			position: absolute;
+			top: 20px;
+			right: 20px;
+			z-index: 1000;
+			display: flex;
+			gap: 10px;
+		}
+
+		.photo-controls .btn {
+			font-family: 'Bangers', cursive;
+			font-size: 1.1rem;
+			letter-spacing: 1px;
+			box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+		}
+
+		/* Bottom Left Game UI Panel (styled like signup-card) */
+		.game-ui-panel {
+			position: absolute;
+			bottom: 20px;
+			left: 20px;
+			z-index: 1000;
+			width: 350px;
+			background-color: rgba(22, 18, 70, 0.92);
+			border: 2px solid #5b5bff;
+			border-radius: 18px;
+			box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+			padding: 20px;
+		}
+
+		.game-ui-panel h1 {
+			font-family: 'Orbitron', sans-serif;
+			font-size: 1.5rem;
+			margin-bottom: 0;
+		}
+
+		#round-counter {
+			font-family: 'Press Start 2P', sans-serif;
+			font-size: 0.6rem;
+			color: #ffc107;
+		}
+
+		#feedback-text {
+			font-family: 'Russo One', sans-serif;
+			font-size: 1rem;
+			min-height: 2.5rem;
+			color: #ffffff;
+		}
+
+		.btn-game {
+			font-family: 'Bangers', cursive;
+			font-size: 1.2rem;
+			letter-spacing: 1px;
+		}
+
+		/* Bottom Right Floating Map */
+		.floating-map-container {
+			position: absolute;
+			bottom: 20px;
+			right: 20px;
+			z-index: 1000;
+			width: 320px;
+			height: 240px;
+			background-color: rgba(22, 18, 70, 0.92);
+			border: 2px solid #5b5bff;
+			border-radius: 18px;
+			box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+			overflow: hidden;
+			transition: all 0.3s ease-in-out;
+		}
+
+		/* Expand map slightly on hover for easier clicking */
+		.floating-map-container:hover {
+			width: 450px;
+			height: 350px;
+		}
+
+		#map {
+			width: 100%;
+			height: 100%;
+			background-color: #e4edf6;
+		}
+
+		/* Game Over Overlay */
+		#game-over {
+			display: none;
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+			z-index: 2000;
+			background-color: rgba(22, 18, 70, 0.95);
+			border: 2px solid #5b5bff;
+			border-radius: 18px;
+			box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+			padding: 40px;
+			text-align: center;
+			min-width: 400px;
+		}
+
+		#game-over h2 {
+			font-family: 'Orbitron', sans-serif;
+		}
+
+		#final-score {
+			font-family: 'Press Start 2P', sans-serif;
+			font-size: 1.2rem;
+			color: #ffc107;
+			margin: 20px 0;
+		}
+
+		#map canvas {
+			outline: none;
+		}
+		
+		@media (max-width: 768px) {
+			.floating-map-container {
+				width: 200px;
+				height: 150px;
+				bottom: auto;
+				top: 80px;
+			}
+			.floating-map-container:hover {
+				width: 300px;
+				height: 250px;
+			}
+			.game-ui-panel {
+				width: calc(100% - 40px);
+			}
+		}
+	</style>
+</head>
+<body>
+	<header>
+		<nav class="navbar navbar-expand-lg navbar-dark custom-navbar">
+			<div class="container">
+				<a class="navbar-brand" href="index.html">
+					<img src="images/UWAGuessr-logo.png" alt="UWAGuessr Logo" height="40">
+				</a>
+
+				<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
+					<span class="navbar-toggler-icon"></span>
+				</button>
+
+				<div class="collapse navbar-collapse" id="mainNav">
+					<ul class="navbar-nav ms-auto align-items-lg-center">
+						<li class="nav-item">
+							<a class="nav-link bangers-font" href="index.html">Home</a>
+						</li>
+						<li class="nav-item">
+							<a class="btn btn-outline-light ms-lg-3 mt-2 mt-lg-0 bangers-font" href="index.html">Exit Game</a>
+						</li>
+					</ul>
+				</div>
+			</div>
+		</nav>
+	</header>
+
+	<main class="game-wrapper">
+		
+		<div id="game-board" style="width: 100%; height: 100%;">
+			
+			<div id="photo-viewer" class="photo-viewer"></div>
+
+			<div class="photo-controls">
+				<button class="btn btn-dark btn-game" type="button" onclick="zoomPhoto(1.2)">+</button>
+				<button class="btn btn-dark btn-game" type="button" onclick="zoomPhoto(1 / 1.2)">-</button>
+				<button class="btn btn-outline-light btn-game" type="button" onclick="resetPhotoTransform()">Reset</button>
+			</div>
+
+			<article class="game-ui-panel">
+				<div class="d-flex justify-content-between align-items-center mb-3">
+					<h1 class="h3 mb-0 text-uppercase">Campus Guess</h1>
+				</div>
+				<div class="mb-3">
+					<span id="round-counter">Round 1 / 5</span>
+				</div>
+				
+				<p class="small text-light mb-2 opacity-75">Pan & zoom the photo, then place your marker on the map.</p>
+				
+				<p id="feedback-text" aria-live="polite"></p>
+
+                <div class="d-flex flex-column gap-2 mt-3">
+                    <button id="submit-btn" class="btn btn-warning btn-game w-100" type="button" onclick="submitGuess()">Submit Guess</button>
+                    
+                    <button id="next-btn" class="btn btn-outline-light btn-game w-100" type="button" disabled onclick="loadNextRound()">Next Round</button>
+                </div>
+			</article>
+
+			<aside class="floating-map-container">
+				<div id="map" aria-label="Interactive UWA campus map"></div>
+			</aside>
+			
+		</div>
+
+		<section id="game-over">
+			<h2 class="display-6 mb-3 text-uppercase">Game Over</h2>
+			<p id="final-score">Final Score: 0</p>
+			<div class="d-flex justify-content-center gap-3 mt-4">
+				<a class="btn btn-warning btn-game" href="game.html">Play Again</a>
+				<a class="btn btn-outline-light btn-game" href="index.html">Back to Home</a>
+			</div>
+		</section>
+
+	</main>
+
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+	<script src="https://api.mazemap.com/js/v2.2.6/mazemap.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js"></script>
+	<script src="game/js/data.js"></script>
+	<script src="game/js/map.js"></script>
+	<script src="game/js/game.js"></script>
+</body>
+</html>
