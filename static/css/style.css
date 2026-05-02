@@ -437,3 +437,52 @@ img {
 .hero-title {
     text-shadow: 0 0 20px rgba(255, 193, 7, 0.5);
 }
+
+.how-to-container {
+    
+    background: linear-gradient(rgba(15, 12, 41, 0.8), rgba(15, 12, 41, 0.9)),
+                url("../images/uwaimage.jpg"); 
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed; 
+    min-height: 100vh;
+    padding: 60px 0;
+} 
+
+/* --- MAIN PAGE PARALLAX --- */
+.hero-section {
+    min-height: 100vh;
+    /* Using your previous gradient and image combo */
+    background-image: linear-gradient(rgba(8, 12, 30, 0.55), rgba(8, 12, 30, 0.75)),
+                      url("../images/uwaimage.jpg");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed; /* This creates the scrolling effect */
+    display: flex;
+    align-items: center;
+}
+
+/* --- ICON POP-UP EFFECT --- */
+.feature-box {
+    background-color: rgba(44, 41, 102, 0.9); /* Slightly translucent */
+    color: #ffffff;
+    border-radius: 20px;
+    padding: 30px;
+    height: 100%;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Bouncy pop effect */
+    border: 1px solid rgba(91, 91, 255, 0.3);
+}
+
+.feature-box:hover {
+    transform: translateY(-15px) scale(1.05); /* Lifts and grows */
+    background-color: rgba(60, 56, 140, 1);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+    border-color: #ffc107; /* Highlight border on hover */
+}
+
+/* Optional: Make the image inside the box pop even more */
+.feature-box:hover img {
+    transform: scale(1.1);
+    transition: transform 0.3s ease;
+}
