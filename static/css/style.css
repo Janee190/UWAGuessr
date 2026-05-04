@@ -532,3 +532,27 @@ img {
     color: var(--golden);
     font-family: var(--font-accent);
 }
+
+.rank-card .text-muted {
+    color: rgba(255, 255, 255, 0.8) !important; /* Increase opacity */
+    font-family: var(--font-main);
+    letter-spacing: 1px;
+    font-weight: 500;
+}
+
+.leaderboard-table {
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(22, 18, 70, 0.6) !important; /* Match your navy theme */
+    backdrop-filter: blur(15px); /* Stronger glass effect */
+}
+
+.leaderboard-table tr:hover {
+    background-color: rgba(91, 91, 255, 0.15) !important;
+    cursor: default;
+}
+
+/* Add a gold highlight for the user's name if they are in the list */
+.leaderboard-table td {
+    padding: 15px 0;
+    font-size: 1.1rem;
+}
