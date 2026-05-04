@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block content % }
+
+<main class="leaderboard-container">
+    <div class="container">
+        <h1 class ="text-centre bangers-font mb-5" style="color: var(--golden); font-size: 60px;">CAMPUS LEGENDS</h1>
+
+        <div class="Top-three"> 
+            <div class="rank-card rank-2">
+                <div class="h3 bangers-font">#2</div>
+                <div class="fw-bold">Stefan_C</div>
+                <div class="text-muted small">12,450 pts</div>
+            </div>
+            <div class="rank-card rank-1">
+                <div class="h2 bangers-font" style="color: #ffd700;">#1</div>
+                <div class="fw-bold">Mathew_N</div>
+                <div class="text-muted small">15,200 pts</div>
+            </div>
+            <div class="rank-card rank-3">
+                <div class="h3 bangers-font">#3</div>
+                <div class="fw-bold">Jeremy_P</div>
+                <div class="text-muted small">11,800 pts</div>
+            </div>
+        </div>
+
+        <div class="leaderboard-table">
+            <table class="table table-hover table-dark mb-0">
+                <thead>
+                    <tr>
+                        <th class="ps-4">RANK</th>
+                        <th>PLAYER</th>
+                        <th class="text-end pe-4">SCORE</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="ps-4">4</td>
+                        <td>Samuel_O</td>
+                        <td class="text-end pe-4">10,100</td>
+                    </tr>
+                    <!-- More rows here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+
+{% endblock %}
