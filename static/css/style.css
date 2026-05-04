@@ -487,13 +487,9 @@ img {
     transition: transform 0.3s ease;
 }
 
-/* Leaderboard Specifics */
+/* --- Leaderboard Consolidated --- */
 .leaderboard-container {
-    background: linear-gradient(rgba(10, 16, 40, 0.85), rgba(10, 16, 40, 0.95)),
-                url("../images/uwaimage.jpg");
-    background-size: cover;
-    background-position: center;
-    background-attachment: fixed;
+    background: linear-gradient(rgba(10, 16, 40, 0.85), rgba(10, 16, 40, 0.95)), url("../images/uwaimage.jpg") center/cover fixed;
     min-height: 100vh;
     padding: 80px 0;
 }
@@ -519,12 +515,13 @@ img {
 .rank-2 { border-color: #c0c0c0; }
 .rank-3 { border-color: #cd7f32; }
 
+/* Combined and cleaned up table styles */
 .leaderboard-table {
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(10px);
+    background: rgba(22, 18, 70, 0.6) !important;
+    backdrop-filter: blur(15px);
     border-radius: var(--radius-lg);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     overflow: hidden;
-    border: 1px solid var(--border-light);
 }
 
 .leaderboard-table thead {
@@ -533,26 +530,17 @@ img {
     font-family: var(--font-accent);
 }
 
-.rank-card .text-muted {
-    color: rgba(255, 255, 255, 0.8) !important; /* Increase opacity */
-    font-family: var(--font-main);
-    letter-spacing: 1px;
-    font-weight: 500;
-}
-
-.leaderboard-table {
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    background: rgba(22, 18, 70, 0.6) !important; /* Match your navy theme */
-    backdrop-filter: blur(15px); /* Stronger glass effect */
+.leaderboard-table td {
+    padding: 15px 0;
+    font-size: 1.1rem;
 }
 
 .leaderboard-table tr:hover {
     background-color: rgba(91, 91, 255, 0.15) !important;
-    cursor: default;
 }
 
-/* Add a gold highlight for the user's name if they are in the list */
-.leaderboard-table td {
-    padding: 15px 0;
-    font-size: 1.1rem;
+.rank-card .text-muted {
+    color: rgba(255, 255, 255, 0.8) !important;
+    font: 500 1rem/1 var(--font-main);
+    letter-spacing: 1px;
 }
