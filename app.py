@@ -12,6 +12,14 @@ def index():
 def login():
     return render_template("login.html")
 
+@app.route("/how-to-play")
+def how_to_play():
+    return render_template("howtoplay.html")
+
+@app.route('/leaderboard')
+def leaderboard():
+    return render_template('leaderboard.html')
+
 
 if __name__ == "__main__":
     app.run(debug=True)
