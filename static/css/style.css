@@ -517,11 +517,25 @@ img {
 
 /* Combined and cleaned up table styles */
 .leaderboard-table {
-    background: rgba(22, 18, 70, 0.6) !important;
-    backdrop-filter: blur(15px);
+    background: rgba(22, 28, 60, 0.6) !important; /* Dark navy with transparency */
+    backdrop-filter: blur(15px); 
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
     border-radius: var(--radius-lg);
-    border: 1px solid rgba(255, 255, 255, 0.1);
     overflow: hidden;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+}
+
+.leaderboard-table .table {
+    background-color: transparent !important;
+    margin-bottom: 0;
+}
+
+.leaderboard-table .table > :not(caption) > * > * {
+    background-color: transparent !important;
+    border-bottom-color: rgba(255, 255, 255, 0.05);
+    color: #f8f9fa;
+    padding: 18px 15px; /* Added some breathing room */
 }
 
 .leaderboard-table thead {
@@ -530,13 +544,18 @@ img {
     font-family: var(--font-accent);
 }
 
-.leaderboard-table td {
-    padding: 15px 0;
-    font-size: 1.1rem;
+.leaderboard-table tr {
+    transition: background 0.2s ease;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .leaderboard-table tr:hover {
-    background-color: rgba(91, 91, 255, 0.15) !important;
+    background-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+.leaderboard-table td {
+    color: #f8f9fa;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
 }
 
 .rank-card .text-muted {
