@@ -15,9 +15,8 @@ __pycache__/
 *.pyo
 *.pyd
 
-# Flask / Migrations
+# Flask
 instance/
-migrations/
 
 # Distribution / packaging
 dist/
