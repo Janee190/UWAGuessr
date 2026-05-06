@@ -1,14 +1,14 @@
 from flask import Flask, render_template, jsonify, request
 
-app = Flask(__name__)
+application = Flask(__name__)
 
 
-@app.route("/")
+@application.route("/")
 def index():
     return render_template("index.html")
 
 
-@app.route("/login")
+@application.route("/login")
 def login():
     return render_template("login.html")
 @app.route("/game")
@@ -43,5 +43,15 @@ def api_guess():
     })
 
 
+@application.route("/how-to-play")
+def how_to_play():
+    return render_template("howtoplay.html")
+
+
+@application.route("/leaderboard")
+def leaderboard():
+    return render_template("leaderboard.html")
+
+
 if __name__ == "__main__":
-    app.run(debug=True)
+    application.run(debug=True)
