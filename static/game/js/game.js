@@ -19,16 +19,16 @@ const PITCH_EDGE_BUFFER = 4;
 // Resets game state and starts the first round.
 async function startGame() {
     try {
-        const response = await fetch('/api/rounds');
-        allRoundsData = await response.json();
+        const response = await fetch('/api/game-images');
+        images = await response.json();
     } catch (e) {
-        console.error("Failed to load rounds:", e);
+        console.error("Failed to load images:", e);
         return;
     }
 
     currentRoundIndex = 0;
     totalScore = 0;
-    activeRounds = buildRandomRounds();
+    activeRounds = images;
     localStorage.setItem('uwa_totalScore', totalScore); // Reset local storage
     document.getElementById('game-board').style.display = 'block';
     document.getElementById('game-over').style.display = 'none';
