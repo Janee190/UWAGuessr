@@ -1,5 +1,8 @@
 import csv
 import math
+import os
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 def calculate_haversine(lat1, lon1, lat2, lon2):
     R = 6371e3 # Earth radius in meters
@@ -15,7 +18,7 @@ def calculate_haversine(lat1, lon1, lat2, lon2):
 
 def calculate_score(guess_lat, guess_lng, img_id):
     actual_lat, actual_lng = None, None
-    with open('game/locations.csv', 'r') as f:
+    with open(os.path.join(BASE_DIR, 'locations.csv'), 'r') as f:
         reader = csv.DictReader(f)
         for row in reader:
             if int(row['id']) == img_id:
@@ -39,7 +42,7 @@ def calculate_score(guess_lat, guess_lng, img_id):
 
 def get_game_data():
     data = []
-    with open('game/locations.csv', 'r') as f:
+    with open(os.path.join(BASE_DIR, 'locations.csv'), 'r') as f:
         reader = csv.DictReader(f)
         for row in reader:
             data.append({
