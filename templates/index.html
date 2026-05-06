@@ -3,72 +3,100 @@
 {% block title %}UWAGuessr{% endblock %}
 {% block body_class %}page-home{% endblock %}
 
+{% block extra_head %}
+<!-- Load Mazemap CSS directly so we can initialize a hidden map -->
+<link rel="stylesheet" href="https://api.mazemap.com/js/v2.2.6/mazemap.min.css">
+
+<!-- Preload Pannellum since we don't need to execute it here -->
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.css" as="style">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js" as="script">
+{% endblock %}
+
 {% block content %}
-    <section class="hero-section d-flex align-items-center">
-        <div class="container">
-            <div class="row align-items-center gy-4">
-                <div class="col-lg-7 text-center text-lg-start">
-                    <h1 class="display-3 fw-bold hero-title">EXPLORE UWA</h1>
-                    <p class="lead hero-text">
-                        Guess where each photo around the UWA campus was taken. Test your campus knowledge,
-                        challenge your friends, and climb the leaderboard.
-                    </p>
-                </div>
+<section class="hero-section d-flex align-items-center">
+    <div class="container">
+        <div class="row align-items-center gy-4">
+            <div class="col-lg-7 text-center text-lg-start">
+                <h1 class="display-3 fw-bold hero-title">EXPLORE UWA</h1>
+                <p class="lead hero-text">
+                    Guess where each photo around the UWA campus was taken. Test your campus knowledge,
+                    challenge your friends, and climb the leaderboard.
+                </p>
+            </div>
 
-                <div class="col-lg-5">
-                    <section class="signup-card p-4">
-                        <h2 class="h3 text-center mb-4">Start your challenge!</h2>
+            <div class="col-lg-5">
+                <section class="signup-card p-4">
+                    <h2 class="h3 text-center mb-4">Start your challenge!</h2>
 
-                        <div class="d-grid gap-3">
-                            <a href="game.html" class="btn btn-warning btn-lg fw-semibold">Play Now</a>
-                            <a href="{{ url_for('login') }}" class="btn btn-light btn-lg">Log In</a>
-                            <a href="leaderboard.html" class="btn btn-outline-light btn-lg">
-                                View Leaderboard
-                            </a>
-                        </div>
-                    </section>
-                </div>
+                    <div class="d-grid gap-3">
+                        <a href="{{ url_for('game') }}" class="btn btn-warning btn-lg fw-semibold">Play Now</a>
+                        <a href="{{ url_for('login') }}" class="btn btn-light btn-lg">Log In</a>
+                        <a href="leaderboard.html" class="btn btn-outline-light btn-lg">
+                            View Leaderboard
+                        </a>
+                    </div>
+                </section>
             </div>
         </div>
-    </section>
+    </div>
+</section>
 
-    <section class="info-section py-5">
-        <div class="container">
-            <div class="row text-center g-4">
-                <div class="col-md-4">
-                    <article class="feature-box p-4 h-100">
-                        <img
-                            src="{{ url_for('static', filename='images/taking-photo.png') }}"
-                            alt="Globe"
-                            class="feature-img"
-                        />
-                        <h3 class="h4">View a Photo</h3>
-                        <p>Each round shows a photo taken somewhere around the UWA campus.</p>
-                    </article>
-                </div>
-                <div class="col-md-4">
-                    <article class="feature-box p-4 h-100">
-                        <img
-                            src="{{ url_for('static', filename='images/making-a-guess.png') }}"
-                            alt="Camera"
-                            class="feature-img"
-                        />
-                        <h3 class="h4">Make a Guess</h3>
-                        <p>Choose the location on a map and submit your guess.</p>
-                    </article>
-                </div>
-                <div class="col-md-4">
-                    <article class="feature-box p-4 h-100">
-                        <img
-                            src="{{ url_for('static', filename='images/target.png') }}"
-                            alt="Trophy"
-                            class="feature-img"
-                        />
-                        <h3 class="h4">Score Points</h3>
-                        <p>Earn points based on how close your guess is to the real location.</p>
-                    </article>
-                </div>
+<section class="info-section py-5">
+    <div class="container">
+        <div class="row text-center g-4">
+            <div class="col-md-4">
+                <article class="feature-box p-4 h-100">
+                    <img src="{{ url_for('static', filename='images/taking-photo.png') }}" alt="Globe"
+                        class="feature-img" />
+                    <h3 class="h4">View a Photo</h3>
+                    <p>Each round shows a photo taken somewhere around the UWA campus.</p>
+                </article>
+            </div>
+            <div class="col-md-4">
+                <article class="feature-box p-4 h-100">
+                    <img src="{{ url_for('static', filename='images/making-a-guess.png') }}" alt="Camera"
+                        class="feature-img" />
+                    <h3 class="h4">Make a Guess</h3>
+                    <p>Choose the location on a map and submit your guess.</p>
+                </article>
+            </div>
+            <div class="col-md-4">
+                <article class="feature-box p-4 h-100">
+                    <img src="{{ url_for('static', filename='images/target.png') }}" alt="Trophy" class="feature-img" />
+                    <h3 class="h4">Score Points</h3>
+                    <p>Earn points based on how close your guess is to the real location.</p>
+                </article>
             </div>
         </div>
-    </section>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<div id="hidden-preload-map"
+    style="position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; overflow: hidden; z-index: -1;">
+</div>
+<script src="https://api.mazemap.com/js/v2.2.6/mazemap.min.js"></script>
+<script>
+    // After the home page is fully loaded, silently load the UWA map tiles into the browser cache
+    window.addEventListener('load', function () {
+        setTimeout(function () {
+            if (typeof Mazemap !== 'undefined') {
+                const preloadMap = new Mazemap.Map({
+                    container: 'hidden-preload-map',
+                    campuses: 119,
+                    center: [115.818, -31.98],
+                    zoom: 15,
+                    zLevel: 1
+                });
+                
+                // Once the map has downloaded all tiles and finished rendering,
+                // destroy the WebGL context to free memory. The tiles stay in the browser cache.
+                preloadMap.once('idle', function() {
+                    preloadMap.remove();
+                });
+            }
+        }, 800); // Wait 800ms to ensure it doesn't interrupt any home page animations
+    });
+</script>
 {% endblock %}

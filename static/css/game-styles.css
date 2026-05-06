@@ -1,0 +1,197 @@
+/* 
+This contains specific css used only by the game page, 
+all general purpose css should be in style.css
+*/
+
+/* --- Pages: Game View --- */
+.page-game {
+    overflow: hidden;
+    /* Prevent scrolling for a true full-screen game feel */
+    background-color: #212529;
+    font-family: 'Russo One', sans-serif;
+    color: var(--text-light);
+}
+
+/* Game Layout */
+.page-game .game-wrapper {
+    position: relative;
+    width: 100vw;
+    height: calc(100vh);
+    /* Adjust based on navbar height */
+    overflow: hidden;
+    background-color: #0f1d33;
+}
+
+/* Full Screen Photo Viewer */
+.page-game .photo-viewer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    touch-action: none;
+}
+
+.page-game #location-image {
+    min-width: 100%;
+    min-height: 100%;
+    object-fit: cover;
+    user-select: none;
+    -webkit-user-drag: none;
+    cursor: grab;
+    transform-origin: center center;
+    transition: transform 120ms ease-out;
+}
+
+.page-game #location-image.panning {
+    cursor: grabbing;
+    transition: none;
+}
+
+/* Top Right Controls */
+.page-game .photo-controls {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+    display: flex;
+    gap: 10px;
+}
+
+.page-game .photo-controls .btn {
+    font-family: var(--font-accent);
+    font-size: 1.1rem;
+    letter-spacing: 1px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+}
+
+/* Exit Button */
+.page-game .exit-btn {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    z-index: 1000;
+    display: flex;
+    gap: 10px;
+}
+
+/* Bottom Left Game UI Panel (styled like signup-card) */
+.page-game .game-ui-panel {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    z-index: 1000;
+    width: 350px;
+    background-color: var(--navy-overlay);
+    border: 2px solid #5b5bff;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    padding: 20px;
+}
+
+.page-game .game-ui-panel h1 {
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
+    margin-bottom: 0;
+}
+
+.page-game #round-counter {
+    font-family: 'Press Start 2P', sans-serif;
+    font-size: 0.6rem;
+    color: var(--golden);
+}
+
+.page-game #feedback-text {
+    font-family: 'Russo One', sans-serif;
+    font-size: 1rem;
+    min-height: 2.5rem;
+    color: var(--text-light);
+}
+
+.page-game .btn-game {
+    font-family: var(--font-accent);
+    font-size: 1.2rem;
+    letter-spacing: 1px;
+}
+
+/* Bottom Right Floating Map */
+.page-game .floating-map-container {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+    width: 320px;
+    height: 240px;
+    background-color: var(--navy-overlay);
+    border: 2px solid #5b5bff;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+    transition: all 0.3s ease-in-out;
+}
+
+/* Expand map slightly on hover for easier clicking */
+.page-game .floating-map-container:hover {
+    width: 450px;
+    height: 350px;
+}
+
+.page-game #map {
+    width: 100%;
+    height: 100%;
+    background-color: #e4edf6;
+}
+
+/* Game Over Overlay */
+.page-game #game-over {
+    display: none;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 2000;
+    background-color: var(--navy-nav);
+    border: 2px solid #5b5bff;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    padding: 40px;
+    text-align: center;
+    min-width: 400px;
+}
+
+.page-game #game-over h2 {
+    font-family: var(--font-heading);
+}
+
+.page-game #final-score {
+    font-family: 'Press Start 2P', sans-serif;
+    font-size: 1.2rem;
+    color: var(--golden);
+    margin: 20px 0;
+}
+
+.page-game #map canvas {
+    outline: none;
+}
+
+@media (max-width: 768px) {
+    .page-game .floating-map-container {
+        width: 200px;
+        height: 150px;
+        bottom: auto;
+        top: 80px;
+    }
+
+    .page-game .floating-map-container:hover {
+        width: 300px;
+        height: 250px;
+    }
+
+    .page-game .game-ui-panel {
+        width: calc(100% - 40px);
+    }
+}

@@ -1,91 +1,70 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{% block title %}UWAGuessr{% endblock %}</title>
 
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-    />
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}UWAGuessr{% endblock %}</title>
 
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Bangers&display=swap"
-      rel="stylesheet"
-    />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&display=swap"
-      rel="stylesheet"
-    />
-    <link
-      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap"
-      rel="stylesheet"
-    />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
 
-    <link
-      rel="stylesheet"
-      href="{{ url_for('static', filename='css/style.css') }}"
-    />
-    {% block extra_head %}{% endblock %}
-  </head>
-  <body class="{% block body_class %}{% endblock %}">
-    <header>
-      <nav class="navbar navbar-expand-lg navbar-dark custom-navbar">
-        <div class="container">
-          <a class="navbar-brand" href="{{ url_for('index') }}">
-            <img
-              src="{{ url_for('static', filename='images/UWAGuessr-logo.png') }}"
-              alt="UWAGuessr Logo"
-              height="32"
-            />
-          </a>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bangers&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet" />
 
-          <button
-            class="navbar-toggler"
-            type="button"
-            data-bs-toggle="collapse"
-            data-bs-target="#mainNav"
-          >
-            <span class="navbar-toggler-icon"></span>
-          </button>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+  {% block extra_head %}{% endblock %}
+</head>
 
-          <div class="collapse navbar-collapse" id="mainNav">
-            <ul class="navbar-nav ms-auto align-items-lg-center">
-              <li class="nav-item">
-                <a class="nav-link bangers-font text-nowrap" href="{{ url_for('how_to_play') }}">How to Play</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link bangers-font text-nowrap" href="{{ url_for('leaderboard') }}">
-                  Leaderboard
-                </a>
-              </li>
-              <li class="nav-item">
-                <a
-                  class="btn btn-outline-light ms-lg-3 me-lg-2 mt-2 mt-lg-0 bangers-font text-nowrap"
-                  href="{{ url_for('login') }}"
-                >
-                  Log In
-                </a>
-              </li>
-              <li class="nav-item">
-                <a class="btn btn-warning mt-2 mt-lg-0 bangers-font text-nowrap" href="game.html">
-                  Play Now
-                </a>
-              </li>
-            </ul>
-          </div>
+<body class="{% block body_class %}{% endblock %}">
+  {% block navbar %}
+  <header>
+    <nav class="navbar navbar-expand-lg navbar-dark custom-navbar">
+      <div class="container">
+        <a class="navbar-brand" href="{{ url_for('index') }}">
+          <img src="{{ url_for('static', filename='images/UWAGuessr-logo.png') }}" alt="UWAGuessr Logo" height="32" />
+        </a>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="mainNav">
+          <ul class="navbar-nav ms-auto align-items-lg-center">
+            <li class="nav-item">
+              <a class="nav-link bangers-font text-nowrap" href="{{ url_for('how_to_play') }}">How to Play</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link bangers-font text-nowrap" href="{{ url_for('leaderboard') }}">
+                Leaderboard
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="btn btn-outline-light ms-lg-3 me-lg-2 mt-2 mt-lg-0 bangers-font text-nowrap"
+                href="{{ url_for('login') }}">
+                Log In
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="btn btn-warning mt-2 mt-lg-0 bangers-font text-nowrap" href="{{ url_for('game') }}">
+                Play Now
+              </a>
+            </li>
+          </ul>
         </div>
-      </nav>
-    </header>
+      </div>
+    </nav>
+  </header>
+  {% endblock %}
 
-    <main>
-      {% block content %}{% endblock %}
-    </main>
+  <main>
+    {% block content %}{% endblock %}
+  </main>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    {% block scripts %}{% endblock %}
-  </body>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  {% block scripts %}{% endblock %}
+</body>
+
 </html>
