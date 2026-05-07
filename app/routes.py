@@ -13,10 +13,11 @@ def login():
 def game():
     return render_template("game.html")
 
-@app.route("/api/rounds")
-def api_rounds():
-    from app.game.game_logic import get_game_data
-    return jsonify(get_game_data())
+@app.route("/api/game-images")
+def api_game_images():
+    from app.game.game_logic import get_game_images
+
+    return jsonify(get_game_images())
 
 @app.route("/api/guess", methods=["POST"])
 def api_guess():
