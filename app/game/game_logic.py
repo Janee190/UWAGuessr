@@ -1,5 +1,6 @@
 import csv
 import math
+import random
 import os
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -52,4 +53,5 @@ def get_game_images():
         for row in reader:
             data.append({"id": int(row["id"]), "imagePath": row["imagePath"]})
     images = random.sample(data, 5)  # select 5 random pictures
+
     return images
