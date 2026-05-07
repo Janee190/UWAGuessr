@@ -651,17 +651,4 @@ img {
   padding: 1.5rem 0;
 }
 
-.rank-badge {
-  display: inline-block;
-  width: 1.75rem;
-  height: 1.75rem;
-  line-height: 1.75rem;
-  text-align: center;
-  border-radius: 50%;
-  font-weight: 700;
-  font-size: 0.85rem;
-}
 
-.rank-1 { background: #ffd700; color: #000; }
-.rank-2 { background: #c0c0c0; color: #000; }
-.rank-3 { background: #cd7f32; color: #000; }
