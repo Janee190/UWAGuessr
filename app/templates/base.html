@@ -41,12 +41,28 @@
                   Leaderboard
                 </a>
               </li>
+
+              {% if current_user.is_authenticated %}
+              <li class="nav-item">
+                <a class="btn btn-outline-light ms-lg-3 me-lg-2 mt-2 mt-lg-0 bangers-font text-nowrap"
+                  href="{{ url_for('profile') }}">
+                  {{ current_user.username }}
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="btn btn-warning mt-2 mt-lg-0 bangers-font text-nowrap" href="{{ url_for('logout') }}">
+                  Log Out
+                </a>
+              </li>
+              {% else %}
               <li class="nav-item">
                 <a class="btn btn-outline-light ms-lg-3 me-lg-2 mt-2 mt-lg-0 bangers-font text-nowrap"
                   href="{{ url_for('login') }}">
                   Log In
                 </a>
               </li>
+              {% endif %}
+              
               <li class="nav-item">
                 <a class="btn btn-warning mt-2 mt-lg-0 bangers-font text-nowrap" href="{{ url_for('game') }}">
                   Play Now
