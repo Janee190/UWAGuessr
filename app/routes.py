@@ -1,4 +1,4 @@
-from flask import Flask, render_template, jsonify, request
+from flask import Flask, render_template, jsonify, request,redirect, url_for
 from app import app
 
 @app.route("/")
@@ -96,6 +96,19 @@ def api_login():
 
     login_user(user)
     return jsonify({'message': 'Login successful'}), 200
+
+@app.route("/logout")
+def logout():
+    from flask_login import logout_user
+    logout_user()
+    return redirect(url_for('index'))
+
+from flask_login import login_required
+
+@app.route("/dashboard")
+@login_required
+def dashboard():
+    return render_template("dashboard.html")
 
 if __name__ == "__main__":
     app.run(debug=True)
