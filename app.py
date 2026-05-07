@@ -13,6 +13,10 @@ def login():
     return render_template("login.html")
 
 
+@app.route("/forgot-password")
+def forgot_password():
+    return render_template("forgot_password.html")
+
 @app.route("/game")
 def game():
     return render_template("game.html")
@@ -65,3 +69,7 @@ def leaderboard():
 
 if __name__ == "__main__":
     app.run(debug=True)
+
+
+
+
