@@ -45,7 +45,7 @@
               {% if current_user.is_authenticated %}
               <li class="nav-item">
                 <a class="btn btn-outline-light ms-lg-3 me-lg-2 mt-2 mt-lg-0 bangers-font text-nowrap"
-                  href="{{ url_for('profile') }}">
+                  href="{{ url_for('dashboard') }}">
                   {{ current_user.username }}
                 </a>
               </li>
@@ -62,7 +62,7 @@
                 </a>
               </li>
               {% endif %}
-              
+
               <li class="nav-item">
                 <a class="btn btn-warning mt-2 mt-lg-0 bangers-font text-nowrap" href="{{ url_for('game') }}">
                   Play Now

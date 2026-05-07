@@ -184,7 +184,7 @@
             success: function (response) {
               showAlert("Welcome back! Redirecting…", "success");
               setTimeout(function () {
-                window.location.href = "{{ url_for('game') }}";
+                window.location.href = "{{ url_for('dashboard') }}";
               }, 900);
             },
             error: function (xhr) {
@@ -204,7 +204,7 @@
         // ── Guest button ───────────────────────────────────────────────────────
         $("#guestBtn").on("click", function () {
           sessionStorage.setItem("guest", "true");
-          window.location.href = "{{ url_for('game') }}";
+          window.location.href = "{{ url_for('dashboard') }}";
         });
 
         // ── Auto-focus email field ─────────────────────────────────────────────
