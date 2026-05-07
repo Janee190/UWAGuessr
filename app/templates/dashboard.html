@@ -86,22 +86,30 @@
         <!-- Leaderboard Preview -->
             <div class="col-12">
                 <div class="dashboard-card p-4">
-                    <h2 class="orbitron-font h5 mb-4 card-title-gold">🏆 Leaderboard Preview</h2>
+                <h2 class="orbitron-font h5 mb-4 card-title-gold">🏆 Friends Leaderboard</h2>
                     <div class="table-responsive">
                         <table class="table table-dark table-hover mb-0">
                             <thead>
                                 <tr>
                                     <th class="bangers-font" style="color: var(--golden);">Rank</th>
-                                    <th class="bangers-font" style="color: var(--golden);">Player</th>
+                                    <th class="bangers-font" style="color: var(--golden);">Friend</th>
                                     <th class="bangers-font" style="color: var(--golden);">Score</th>
                                 </tr>
                             </thead>
-                            <tbody id="leaderboardPreview">
+                            <tbody>
                                 <tr>
-                                    <td colspan="3" class="text-center text-muted-light">Loading...</td>
+                                    <td colspan="3" class="text-center text-muted-light py-4">
+                                        Add friends to see how you compare!<br>
+                                        <small style="color: var(--text-muted);">Coming Soon</small>
+                                    </td>
                                 </tr>
                             </tbody>
                         </table>
+                    </div>
+                    <div class="text-end mt-3">
+                        <a href="{{ url_for('leaderboard') }}" class="btn btn-outline-warning btn-sm bangers-font">
+                        View Global Leaderboard
+                        </a>
                     </div>
                 </div>
             </div>
@@ -111,22 +119,5 @@
 
 {% endblock %}
 
-{% block scripts %}
-<script>
-  // Leaderboard preview — placeholder until API is ready
-  const leaderboardData = [
-    { rank: 1, player: "Coming", score: "—" },
-    { rank: 2, player: "Soon", score: "—" },
-    { rank: 3, player: "...", score: "—" },
-  ];
 
-  const tbody = document.getElementById("leaderboardPreview");
-  tbody.innerHTML = leaderboardData.map(row => `
-    <tr>
-      <td><span class="rank-badge rank-${row.rank}">${row.rank}</span></td>
-      <td>${row.player}</td>
-      <td>${row.score}</td>
-    </tr>
-  `).join("");
-</script>
-{% endblock %}
+
