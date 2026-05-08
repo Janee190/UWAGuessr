@@ -70,8 +70,15 @@ def register_user(data):
     if User.query.filter_by(username=data['username']).first():
         return None, {'username': 'Username already taken'}
 
-    user = User(username=data['username'], email=data['email'])
+    user = User(
+    username=data['username'],
+    email=data['email'],
+    security_question=data.get('securityQuestion')
+    )
+    
     user.set_password(data['password'])
+    user.set_security_answer(data.get('securityAnswer', ''))
+
     db.session.add(user)
     db.session.commit()
     return user, None

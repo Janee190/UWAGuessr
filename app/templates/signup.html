@@ -71,6 +71,33 @@ block body_class %}page-login{% endblock %} {% block content %}
           />
         </div>
 
+        <div class="mb-3">
+          <label class="form-label" for="securityQuestion"
+            >Security Question</label
+          >
+          <input
+            type="text"
+            class="form-control"
+            id="securityQuestion"
+            name="securityQuestion"
+            placeholder="What is your mother's maiden name?"
+            autocomplete="off"
+            required
+          />
+        </div>
+        <div class="mb-3">
+          <label class="form-label" for="securityAnswer">Answer</label>
+          <input
+            type="text"
+            class="form-control"
+            id="securityAnswer"
+            name="securityAnswer"
+            placeholder="Your answer"
+            autocomplete="off"
+            required
+          />
+        </div>
+
         <button type="submit" class="btn-signin" id="signupBtn">
           <span class="spinner-border" role="status" aria-hidden="true"></span>
           <span class="btn-label">Create account</span>
@@ -177,6 +204,8 @@ block body_class %}page-login{% endblock %} {% block content %}
       const email = $("#email").val().trim();
       const password = $("#password").val();
       const confirmPassword = $("#confirmPassword").val();
+      const securityQuestion = $("#securityQuestion").val().trim();
+      const securityAnswer = $("#securityAnswer").val().trim();
 
       // Username
       if (!username) {
@@ -257,6 +286,26 @@ block body_class %}page-login{% endblock %} {% block content %}
         return;
       }
 
+      // Security question
+      if (!securityQuestion) {
+        showAlert("Please enter a security question.", "danger");
+        $("#securityQuestion").trigger("focus");
+        return;
+      }
+      if (securityQuestion.length > 256) {
+        showAlert(
+          "Security question must be less than 256 characters.",
+          "danger",
+        );
+        $("#securityQuestion").trigger("focus");
+        return;
+      }
+      if (!securityAnswer) {
+        showAlert("Please enter a security answer.", "danger");
+        $("#securityAnswer").trigger("focus");
+        return;
+      }
+
       const $btn = $("#signupBtn");
       $btn.addClass("loading").prop("disabled", true);
       $btn.find(".btn-label").text("Creating account…");
@@ -269,6 +318,8 @@ block body_class %}page-login{% endblock %} {% block content %}
           username: username,
           email: email,
           password: password,
+          securityQuestion: securityQuestion,
+          securityAnswer: securityAnswer,
         }),
         success: function (response) {
           showAlert("Account created! Redirecting…", "success");
