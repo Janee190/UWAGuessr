@@ -1,19 +1,21 @@
-// image-upload.js — MazeMap + Pannellum integration for the image upload tool
+// image-upload.js — MazeMap + Pannellum integration with multi-file queue
 
 /** @type {Mazemap.Map} */
 let uploadMap = null;
-/** @type {maplibregl.Marker|Mazemap.MazeMarker|null} */
+/** @type {maplibregl.Marker|null} */
 let locationMarker = null;
 /** @type {Pannellum.Viewer|null} */
 let panoViewer = null;
 
-let currentTempPath = null;
-let currentLat = null;
-let currentLng = null;
+// ── Queue state ──────────────────────────────────────────────────────────
+
+let fileQueue = [];
+let currentIdx = -1;    // Index of item currently shown in editor
+let isSaving = false;   // Prevent double-save
 
 const UWA_CAMPUS_ID = 119;
 
-// ── Helper: hide MazeMap labels ─────────────────────────────────────────
+// ── MazeMap helpers ──────────────────────────────────────────────────────
 
 function hideLabels(map) {
     if (!map || typeof map.getStyle !== 'function') return;
@@ -26,8 +28,6 @@ function hideLabels(map) {
         catch (_err) { /* ignore */ }
     });
 }
-
-// ── Initialise MazeMap ───────────────────────────────────────────────────
 
 function initUploadMap(lat, lng) {
     var container = document.getElementById('upload-map');
@@ -61,18 +61,12 @@ function initUploadMap(lat, lng) {
     });
 }
 
-
-// ── Marker management ────────────────────────────────────────────────────
-
 function placeMarker(lat, lng) {
     if (locationMarker) {
-        if (typeof locationMarker.remove === 'function') {
-            locationMarker.remove();
-        }
+        if (typeof locationMarker.remove === 'function') locationMarker.remove();
         locationMarker = null;
     }
 
-    // Try maplibregl.Marker for drag support; fallback to MazeMarker.
     if (typeof maplibregl !== 'undefined' && maplibregl.Marker) {
         var el = document.createElement('div');
         el.className = 'upload-pin';
@@ -91,40 +85,34 @@ function placeMarker(lat, lng) {
 
         locationMarker.on('dragend', function () {
             var pos = locationMarker.getLngLat();
-            currentLat = pos.lat;
-            currentLng = pos.lng;
-            updateCoordDisplay(currentLat, currentLng);
+            var item = fileQueue[currentIdx];
+            if (item) {
+                item.lat = pos.lat;
+                item.lng = pos.lng;
+                updateCoordDisplay(pos.lat, pos.lng);
+            }
         });
     } else {
-        // Fallback: non-draggable MazeMarker (click-to-place still works)
         locationMarker = new Mazemap.MazeMarker({ color: '#ffc107', size: 34 })
             .setLngLat([lng, lat])
             .addTo(uploadMap);
     }
 
-    currentLat = lat;
-    currentLng = lng;
+    // Update coords on the current item
+    var item = fileQueue[currentIdx];
+    if (item) { item.lat = lat; item.lng = lng; }
     updateCoordDisplay(lat, lng);
 }
 
-
-// ── Coordinate display ───────────────────────────────────────────────────
-
 function updateCoordDisplay(lat, lng) {
     var el = document.getElementById('coord-display');
-    if (el) {
-        el.textContent = 'Lat: ' + lat.toFixed(6) + ', Lng: ' + lng.toFixed(6);
-    }
+    if (el) el.textContent = 'Lat: ' + lat.toFixed(6) + ', Lng: ' + lng.toFixed(6);
 }
-
 
 // ── Panorama preview ─────────────────────────────────────────────────────
 
 function showPanoramaPreview(imageUrl) {
-    if (panoViewer) {
-        panoViewer.destroy();
-        panoViewer = null;
-    }
+    if (panoViewer) { panoViewer.destroy(); panoViewer = null; }
 
     var container = document.getElementById('pano-preview');
     if (!container) return;
@@ -157,26 +145,275 @@ function showPanoramaPreview(imageUrl) {
     tempImg.src = imageUrl;
 }
 
+// ── Queue rendering ──────────────────────────────────────────────────────
+
+function renderQueue() {
+    var list = document.getElementById('queue-list');
+    var counter = document.getElementById('queue-counter');
+    if (!list) return;
+
+    if (fileQueue.length === 0) {
+        document.getElementById('queue-panel').style.display = 'none';
+        return;
+    }
+    document.getElementById('queue-panel').style.display = 'block';
+    if (counter) counter.textContent = fileQueue.length + ' image' + (fileQueue.length !== 1 ? 's' : '');
+
+    list.innerHTML = '';
+    fileQueue.forEach(function (item, idx) {
+        var div = document.createElement('div');
+        div.className = 'queue-item';
+        if (idx === currentIdx && item.status !== 'saved') div.classList.add('active');
+        if (item.status === 'saved') div.classList.add('saved');
+        if (item.status === 'error') div.classList.add('error');
+
+        var num = document.createElement('span');
+        num.className = 'queue-item-number';
+        num.textContent = idx + 1;
+        div.appendChild(num);
+
+        var name = document.createElement('span');
+        name.className = 'queue-item-name';
+        name.title = item.originalName;
+        name.textContent = item.originalName;
+        div.appendChild(name);
+
+        var statusEl = document.createElement('span');
+        statusEl.className = 'queue-item-status';
+        var statusMap = {
+            waiting:   '<span class="badge badge-waiting">Waiting</span>',
+            uploading: '<span class="badge badge-uploading"><span class="spinner-border spinner-border-sm" style="width:0.65rem;height:0.65rem;margin-right:2px;"></span> Uploading</span>',
+            ready:     '<span class="badge badge-ready">Ready</span>',
+            saving:    '<span class="badge badge-saving"><span class="spinner-border spinner-border-sm" style="width:0.65rem;height:0.65rem;margin-right:2px;"></span> Saving</span>',
+            saved:     '<span class="badge badge-saved">Saved</span>',
+            error:     '<span class="badge badge-error">Error</span>',
+        };
+        statusEl.innerHTML = statusMap[item.status] || item.status;
+        div.appendChild(statusEl);
+
+        // Action button
+        if (item.status === 'ready' && idx !== currentIdx) {
+            var editBtn = document.createElement('button');
+            editBtn.className = 'queue-item-action-btn';
+            editBtn.textContent = 'Edit';
+            editBtn.addEventListener('click', function () { openInEditor(idx); });
+            div.appendChild(editBtn);
+        } else if (item.status === 'error' || item.status === 'saved') {
+            var rmBtn = document.createElement('button');
+            rmBtn.className = 'queue-item-action-btn remove-btn';
+            rmBtn.textContent = 'Remove';
+            rmBtn.addEventListener('click', function () { removeFromQueue(idx); });
+            div.appendChild(rmBtn);
+        }
+
+        list.appendChild(div);
+    });
+
+    updateEditorBadge();
+    updateRemainingCount();
+}
+
+function updateEditorBadge() {
+    var badge = document.getElementById('editor-queue-badge');
+    if (!badge) return;
+    var done = fileQueue.filter(function (i) { return i.status === 'saved'; }).length;
+    var total = fileQueue.length;
+    badge.textContent = (done + 1) + ' of ' + total;
+}
+
+function updateRemainingCount() {
+    var el = document.getElementById('queue-remaining');
+    if (!el) return;
+    var remaining = fileQueue.filter(function (i) { return i.status !== 'saved' && i.status !== 'error'; }).length;
+    el.textContent = remaining > 0 ? (remaining + ' remaining') : '';
+}
+
+// ── Queue management ─────────────────────────────────────────────────────
+
+function removeFromQueue(idx) {
+    var wasCurrent = idx === currentIdx;
+    fileQueue.splice(idx, 1);
+
+    if (wasCurrent) {
+        destroyEditor();
+        currentIdx = -1;
+        var next = findNextReady(0);
+        if (next !== -1) {
+            openInEditor(next);
+        } else {
+            var anyWaiting = fileQueue.some(function (i) { return i.status === 'waiting' || i.status === 'uploading'; });
+            if (!anyWaiting && fileQueue.length > 0) {
+                document.getElementById('upload-panel').style.display = 'block';
+            }
+        }
+    } else if (idx < currentIdx) {
+        currentIdx--;
+    }
+
+    renderQueue();
+    if (fileQueue.length === 0) {
+        document.getElementById('upload-panel').style.display = 'block';
+        document.getElementById('editor-panel').style.display = 'none';
+    }
+}
+
+function findNextReady(fromIdx) {
+    for (var i = fromIdx; i < fileQueue.length; i++) {
+        if (fileQueue[i].status === 'ready') return i;
+    }
+    return -1;
+}
+
+function destroyEditor() {
+    if (panoViewer) { panoViewer.destroy(); panoViewer = null; }
+    if (uploadMap) { uploadMap.remove(); uploadMap = null; locationMarker = null; }
+    document.getElementById('pano-preview').style.display = 'none';
+    document.getElementById('editor-panel').style.display = 'none';
+}
+
+// ── Open item in editor ──────────────────────────────────────────────────
+
+function openInEditor(idx) {
+    var item = fileQueue[idx];
+    if (!item || (item.status !== 'ready' && item.status !== 'saving')) return;
+
+    currentIdx = idx;
+    document.getElementById('editor-panel').style.display = 'block';
+    document.getElementById('upload-panel').style.display = 'none';
+    document.getElementById('file-name').textContent = item.originalName;
+    updateCoordDisplay(item.lat, item.lng);
+    renderQueue();
+
+    var panoUrl = '/instance/uploads/' + encodeURIComponent(item.tempPath);
+    showPanoramaPreview(panoUrl);
+
+    var saveBtn = document.getElementById('save-btn');
+    saveBtn.disabled = false;
+    saveBtn.textContent = 'Save & Next';
+    saveBtn.classList.remove('btn-success');
+    saveBtn.classList.add('btn-warning');
+
+    setTimeout(function () { initUploadMap(item.lat, item.lng); }, 300);
+    setStatus('Adjust the pin if needed, then click "Save & Next".', false);
+}
 
 // ── Upload flow ──────────────────────────────────────────────────────────
+
+async function startUploading() {
+    var progressContainer = document.getElementById('upload-progress-container');
+    var progressFill = document.getElementById('upload-progress-fill');
+    progressContainer.style.display = 'block';
+
+    var waiting = fileQueue.filter(function (i) { return i.status === 'waiting'; });
+    var total = waiting.length;
+    var completed = 0;
+
+    for (var i = 0; i < waiting.length; i++) {
+        var item = waiting[i];
+        item.status = 'uploading';
+        renderQueue();
+
+        var formData = new FormData();
+        formData.append('image', item.file);
+
+        try {
+            var resp = await fetch('/api/upload-image', { method: 'POST', body: formData });
+            var data = await resp.json();
+
+            if (data.error) {
+                item.status = 'error';
+                item.errorMsg = data.error;
+                renderQueue();
+                completed++;
+                progressFill.style.width = (completed / total * 100) + '%';
+                continue;
+            }
+
+            item.status = 'ready';
+            item.tempPath = data.tempPath;
+            item.lat = data.lat;
+            item.lng = data.lng;
+            renderQueue();
+
+            if (currentIdx === -1) {
+                openInEditor(fileQueue.indexOf(item));
+            }
+        } catch (err) {
+            item.status = 'error';
+            item.errorMsg = err.message;
+            renderQueue();
+        }
+
+        completed++;
+        progressFill.style.width = (completed / total * 100) + '%';
+    }
+
+    setTimeout(function () { progressContainer.style.display = 'none'; }, 500);
+
+    if (currentIdx === -1) {
+        var firstReady = findNextReady(0);
+        if (firstReady !== -1) openInEditor(firstReady);
+    }
+
+    var anyUsable = fileQueue.some(function (i) {
+        return i.status === 'ready' || i.status === 'waiting' || i.status === 'uploading';
+    });
+    if (!anyUsable && currentIdx === -1) {
+        document.getElementById('upload-panel').style.display = 'block';
+    }
+}
+
+// ── Status message ───────────────────────────────────────────────────────
+
+function setStatus(msg, isError) {
+    var el = document.getElementById('status-message');
+    if (!el) return;
+    el.textContent = msg;
+    el.className = 'mt-2' + (isError ? ' text-danger' : ' text-success');
+}
+
+// ── DOMContentLoaded ─────────────────────────────────────────────────────
 
 document.addEventListener('DOMContentLoaded', function () {
     var fileInput = document.getElementById('image-input');
     var uploadZone = document.getElementById('upload-zone');
-    var processingEl = document.getElementById('processing-indicator');
-    var editorPanel = document.getElementById('editor-panel');
     var uploadPanel = document.getElementById('upload-panel');
+    var editorPanel = document.getElementById('editor-panel');
     var saveBtn = document.getElementById('save-btn');
+    var skipBtn = document.getElementById('skip-btn');
     var cancelBtn = document.getElementById('cancel-btn');
-    var statusMsg = document.getElementById('status-message');
 
-    function setStatus(msg, isError) {
-        if (!statusMsg) return;
-        statusMsg.textContent = msg;
-        statusMsg.className = isError ? 'text-danger mt-2' : 'text-success mt-2';
+    // ── File selection ──
+    function addFiles(files) {
+        var validExts = ['jpg', 'jpeg', 'png', 'webp'];
+        var added = 0;
+        for (var i = 0; i < files.length; i++) {
+            var f = files[i];
+            var ext = f.name.split('.').pop().toLowerCase();
+            if (validExts.indexOf(ext) === -1) continue;
+            fileQueue.push({
+                id: Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+                file: f,
+                originalName: f.name,
+                status: 'waiting',
+                tempPath: null,
+                lat: null,
+                lng: null,
+                errorMsg: null,
+            });
+            added++;
+        }
+        if (added === 0) {
+            setStatus('No valid image files found (JPG, PNG, WebP).', true);
+            return;
+        }
+        setStatus('');
+        uploadPanel.style.display = 'none';
+        renderQueue();
+        startUploading();
     }
 
-    // ── Drag-and-drop ──
+    // Drag-and-drop
     if (uploadZone) {
         uploadZone.addEventListener('dragover', function (e) {
             e.preventDefault();
@@ -189,8 +426,7 @@ document.addEventListener('DOMContentLoaded', function () {
             e.preventDefault();
             uploadZone.classList.remove('drag-over');
             if (e.dataTransfer.files && e.dataTransfer.files.length) {
-                fileInput.files = e.dataTransfer.files;
-                handleFile(e.dataTransfer.files[0]);
+                addFiles(e.dataTransfer.files);
             }
         });
         uploadZone.addEventListener('click', function () {
@@ -200,117 +436,109 @@ document.addEventListener('DOMContentLoaded', function () {
 
     fileInput.addEventListener('change', function () {
         if (fileInput.files && fileInput.files.length) {
-            handleFile(fileInput.files[0]);
+            addFiles(fileInput.files);
+            fileInput.value = '';
         }
     });
 
-    // ── Upload handler ──
-    async function handleFile(file) {
-        var ext = file.name.split('.').pop().toLowerCase();
-        if (!['jpg', 'jpeg', 'png', 'webp'].includes(ext)) {
-            setStatus('Please select an image file (JPG, PNG, WebP).', true);
-            return;
-        }
-
-        setStatus('');
-        uploadPanel.style.display = 'none';
-        processingEl.style.display = 'block';
-
-        var formData = new FormData();
-        formData.append('image', file);
-
-        try {
-            var resp = await fetch('/api/upload-image', { method: 'POST', body: formData });
-            var data = await resp.json();
-
-            processingEl.style.display = 'none';
-
-            if (data.error) {
-                setStatus(data.error, true);
-                uploadPanel.style.display = 'block';
-                return;
-            }
-
-            currentTempPath = data.tempPath;
-            currentLat = data.lat;
-            currentLng = data.lng;
-
-            editorPanel.style.display = 'block';
-            document.getElementById('file-name').textContent = data.originalName;
-            updateCoordDisplay(data.lat, data.lng);
-
-            var panoUrl = '/instance/uploads/' + encodeURIComponent(currentTempPath);
-            showPanoramaPreview(panoUrl);
-
-            setTimeout(function () {
-                initUploadMap(data.lat, data.lng);
-            }, 300);
-
-            setStatus('GPS extracted! Drag the pin or click the map to adjust, then click Save.', false);
-        } catch (err) {
-            processingEl.style.display = 'none';
-            uploadPanel.style.display = 'block';
-            setStatus('Upload failed: ' + err.message, true);
-        }
-    }
-
-    // ── Save ──
+    // ── Save & Next ──
     saveBtn.addEventListener('click', async function () {
+        if (isSaving) return;
+        var item = fileQueue[currentIdx];
+        if (!item || item.status !== 'ready') return;
+
+        isSaving = true;
+        item.status = 'saving';
         saveBtn.disabled = true;
         saveBtn.textContent = 'Saving\u2026';
+        renderQueue();
         setStatus('');
+
+        // Read coords from draggable marker
+        if (locationMarker && typeof locationMarker.getLngLat === 'function') {
+            var pos = locationMarker.getLngLat();
+            item.lat = pos.lat;
+            item.lng = pos.lng;
+        }
 
         try {
             var resp = await fetch('/api/confirm-image', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    tempPath: currentTempPath,
-                    lat: currentLat,
-                    lng: currentLng,
+                    tempPath: item.tempPath,
+                    lat: item.lat,
+                    lng: item.lng,
                 }),
             });
             var data = await resp.json();
 
             if (data.error) {
                 setStatus(data.error, true);
+                item.status = 'ready';
+                isSaving = false;
                 saveBtn.disabled = false;
-                saveBtn.textContent = 'Save Location';
+                saveBtn.textContent = 'Save & Next';
+                renderQueue();
                 return;
             }
 
-            setStatus('Image saved! Added as location #' + data.id + '.', false);
-            saveBtn.textContent = 'Saved \u2713';
-            saveBtn.classList.remove('btn-warning');
-            saveBtn.classList.add('btn-success');
-            document.getElementById('upload-another-btn').style.display = 'inline-block';
+            item.status = 'saved';
+            renderQueue();
+
+            destroyEditor();
+            setStatus('Saved as location #' + data.id + '!', false);
+
+            // Find next ready item
+            var next = findNextReady(currentIdx + 1);
+            if (next === -1) next = findNextReady(0);
+            if (next !== -1 && next !== currentIdx) {
+                openInEditor(next);
+            } else {
+                // Show upload zone if all done
+                document.getElementById('upload-panel').style.display = 'block';
+                currentIdx = -1;
+                renderQueue();
+                if (fileQueue.every(function (i) { return i.status === 'saved'; })) {
+                    setStatus('All images saved! You can upload more or go play the game.', false);
+                }
+            }
         } catch (err) {
             setStatus('Save failed: ' + err.message, true);
-            saveBtn.disabled = false;
-            saveBtn.textContent = 'Save Location';
+            item.status = 'ready';
+            renderQueue();
         }
+
+        isSaving = false;
+        saveBtn.disabled = false;
+        saveBtn.textContent = 'Save & Next';
     });
 
-    // ── Cancel / Upload Another ──
-    cancelBtn.addEventListener('click', resetAll);
-    document.getElementById('upload-another-btn').addEventListener('click', resetAll);
+    // ── Skip ──
+    skipBtn.addEventListener('click', function () {
+        var item = fileQueue[currentIdx];
+        if (!item) return;
+        destroyEditor();
 
-    function resetAll() {
-        if (panoViewer) { panoViewer.destroy(); panoViewer = null; }
-        if (uploadMap) { uploadMap.remove(); uploadMap = null; locationMarker = null; }
-        editorPanel.style.display = 'none';
-        uploadPanel.style.display = 'block';
-        var preview = document.getElementById('pano-preview');
-        if (preview) preview.style.display = 'none';
-        document.getElementById('upload-another-btn').style.display = 'none';
-        fileInput.value = '';
-        currentTempPath = null;
-        currentLat = null;
-        currentLng = null;
+        var next = findNextReady(currentIdx + 1);
+        if (next === -1) next = findNextReady(0);
+        if (next !== -1 && next !== currentIdx) {
+            openInEditor(next);
+        } else {
+            currentIdx = -1;
+            document.getElementById('upload-panel').style.display = 'block';
+            renderQueue();
+        }
+        renderQueue();
+    });
+
+    // ── Cancel All ──
+    cancelBtn.addEventListener('click', function () {
+        destroyEditor();
+        document.getElementById('upload-panel').style.display = 'block';
+        fileQueue = [];
+        currentIdx = -1;
+        renderQueue();
         setStatus('');
-        saveBtn.disabled = false;
-        saveBtn.textContent = 'Save Location';
-        saveBtn.classList.remove('btn-success');
-        saveBtn.classList.add('btn-warning');
-    }
+    });
 });

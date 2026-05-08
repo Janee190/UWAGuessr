@@ -114,6 +114,58 @@ def api_upload_image():
     })
 
 
+def _process_single_upload(file_obj):
+    """Upload a single file to temp directory and extract GPS.
+    Returns (result_dict, error_str).
+    """
+    ext = os.path.splitext(file_obj.filename)[1].lower()
+    if ext not in ALLOWED_EXTENSIONS:
+        return None, f'Unsupported file type: {ext}'
+
+    temp_name = f"{uuid.uuid4().hex}{ext}"
+    temp_path = os.path.join(UPLOAD_TEMP_DIR, temp_name)
+    file_obj.save(temp_path)
+
+    coords = extract_gps(temp_path)
+    if coords is None:
+        os.remove(temp_path)
+        return None, 'No GPS location data found in the image.'
+
+    lat, lng = coords
+    return {
+        'tempPath': temp_name,
+        'lat': lat,
+        'lng': lng,
+        'originalName': file_obj.filename,
+    }, None
+
+
+@app.route("/api/upload-images", methods=["POST"])
+def api_upload_images():
+    """Upload multiple panoramas at once, extract GPS for each.
+    Accepts multiple files under the 'images[]' field.
+    Returns an array of results, each with tempPath/lat/lng/originalName or an error.
+    """
+    files = request.files.getlist('images[]')
+    if not files:
+        return jsonify({'error': 'No image files provided'}), 400
+
+    results = []
+    for f in files:
+        if not f.filename:
+            continue
+        result, error = _process_single_upload(f)
+        if result:
+            results.append(result)
+        else:
+            results.append({
+                'originalName': f.filename,
+                'error': error,
+            })
+
+    return jsonify({'images': results})
+
+
 @app.route("/api/confirm-image", methods=["POST"])
 def api_confirm_image():
     """Confirm final location, convert to WebP, and save to CSV."""

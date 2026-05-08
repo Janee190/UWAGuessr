@@ -24,33 +24,43 @@
         <a href="{{ url_for('game') }}" class="btn btn-warning btn-game">Play Game</a>
       </div>
 
-      <!-- ===== STATUS MESSAGE (shared) ===== -->
+      <!-- ===== STATUS MESSAGE ===== -->
       <div id="status-message" class="mt-2"></div>
 
-      <!-- ===== UPLOAD PANEL ===== -->
+      <!-- ===== UPLOAD ZONE ===== -->
       <div id="upload-panel">
         <div id="upload-zone" class="upload-zone">
           <div class="upload-icon">📷</div>
-          <p class="fw-semibold">Drop a 360° panorama here, or click to browse</p>
-          <p class="small">Supports JPG, PNG, WebP &mdash; images must contain GPS EXIF data</p>
-          <input type="file" id="image-input" accept=".jpg,.jpeg,.png,.webp" style="display:none">
+          <p class="fw-semibold">Drop 360° panoramas here, or click to browse</p>
+          <p class="small">Supports JPG, PNG, WebP &mdash; multiple files supported &mdash; images must contain GPS EXIF data</p>
+          <input type="file" id="image-input" accept=".jpg,.jpeg,.png,.webp" multiple style="display:none">
+        </div>
+        <!-- Upload progress bar -->
+        <div id="upload-progress-container" class="upload-progress-bar" style="display:none;">
+          <div class="fill" id="upload-progress-fill"></div>
         </div>
       </div>
 
-      <!-- ===== PROCESSING INDICATOR ===== -->
-      <div id="processing-indicator" class="processing-indicator" style="display:none;">
-        <div class="spinner-border text-warning" role="status">
-          <span class="visually-hidden">Processing…</span>
+      <!-- ===== QUEUE PANEL ===== -->
+      <div id="queue-panel" class="queue-panel">
+        <div class="queue-header">
+          <h3 class="orbitron-font">Upload Queue</h3>
+          <span class="queue-counter" id="queue-counter">0 images</span>
         </div>
-        <p class="mt-2">Reading GPS data from image…</p>
+        <div class="queue-list" id="queue-list"></div>
       </div>
 
       <!-- ===== EDITOR PANEL ===== -->
       <div id="editor-panel" class="editor-panel">
 
-        <!-- File info & coordinates -->
-        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+        <!-- Queue position + filename -->
+        <div class="d-flex align-items-center gap-2 mb-2">
+          <span class="badge bg-warning text-dark" id="editor-queue-badge">1 of 1</span>
           <span class="file-info" id="file-name"></span>
+        </div>
+
+        <!-- Coordinates -->
+        <div class="mb-3">
           <span class="coord-display" id="coord-display">—</span>
         </div>
 
@@ -72,10 +82,11 @@
         </div>
 
         <!-- Action buttons -->
-        <div class="d-flex flex-wrap gap-2">
-          <button id="save-btn" class="btn btn-warning btn-game px-4">Save Location</button>
-          <button id="cancel-btn" class="btn btn-outline-light btn-game">Cancel</button>
-          <button id="upload-another-btn" class="btn btn-outline-success btn-game" style="display:none;">Upload Another</button>
+        <div class="d-flex flex-wrap gap-2 align-items-center">
+          <button id="save-btn" class="btn btn-warning btn-game px-4">Save &amp; Next</button>
+          <button id="skip-btn" class="btn btn-outline-light btn-game">Skip</button>
+          <button id="cancel-btn" class="btn btn-outline-light btn-game">Cancel All</button>
+          <span id="queue-remaining" class="text-muted small ms-2"></span>
         </div>
 
       </div>
