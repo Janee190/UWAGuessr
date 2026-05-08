@@ -36,6 +36,10 @@ def api_login():
 def game():
     return render_template("game.html")
 
+@app.route("/forgot-password")
+def forgot_password():
+    return render_template("forgot_password.html")
+
 @app.route("/api/game-images")
 def api_game_images():
     from app.game.game_logic import get_game_images
