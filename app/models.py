@@ -7,8 +7,8 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(64), unique=True, nullable=False)
     email = db.Column(db.String(128), unique=True, nullable=False)
     password_hash = db.Column(db.String(256), nullable=False)
-    security_question = db.Column(db.String(256), nullable=False)
-    security_answer_hash = db.Column(db.String(256), nullable=False)
+    security_question = db.Column(db.String(256), nullable=True)
+    security_answer_hash = db.Column(db.String(256), nullable=True)
 
     def get_id(self):
         return str(self.uid)
