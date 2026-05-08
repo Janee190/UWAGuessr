@@ -5,13 +5,17 @@ from app import app
 def index():
     return render_template("index.html")
 
-
 @app.route("/login")
 def login():
     return render_template("login.html")
+
 @app.route("/game")
 def game():
     return render_template("game.html")
+
+@app.route("/forgot-password")
+def forgot_password():
+    return render_template("forgot_password.html")
 
 @app.route("/api/game-images")
 def api_game_images():
