@@ -1,5 +1,5 @@
 from app import db
-from models import User
+from app.models import User
 import re
 
 def validate_username(username):

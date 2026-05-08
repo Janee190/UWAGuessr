@@ -1,5 +1,7 @@
-from flask import Flask, render_template, jsonify, request
+from flask import Flask, render_template, jsonify, request, url_for
 from app import app
+from app.controllers import login_user_service, register_user
+from flask_login import login_user
 
 @app.route("/")
 def index():
@@ -9,6 +11,14 @@ def index():
 @app.route("/login")
 def login():
     return render_template("login.html")
+
+@app.route("/api/login", methods=["POST"])
+def api_login():
+    user, errors = login_user_service(request.get_json())
+    if errors:
+        return jsonify({'errors': errors}), 401
+    login_user(user)
+    return jsonify({'redirect': url_for('index')}), 200
 
 @app.route("/game")
 def game():
