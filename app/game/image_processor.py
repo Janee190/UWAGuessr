@@ -1,4 +1,6 @@
-# No longer used, to be replaced with admin tools on the website
+# No longer used — replaced by app/image_upload.py (upload UI on website)
+# The EXIF extraction, WebP conversion, and CSV update logic now lives in
+# app/image_upload.py and is driven from the /image-upload web page.
 
 import os
 import re

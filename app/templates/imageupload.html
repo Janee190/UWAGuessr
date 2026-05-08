@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block title %}UWAGuessr | Manage Images{% endblock %}
+
+{% block body_class %}page-upload{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/upload-styles.css') }}">
+<link rel="stylesheet" href="https://api.mazemap.com/js/v2.2.6/mazemap.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.css">
+{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="row justify-content-center">
+    <div class="col-12 col-lg-10">
+
+      <!-- Page header -->
+      <div class="d-flex align-items-center justify-content-between mb-4">
+        <div>
+          <h1 class="h2 mb-1 orbitron-font">Image Manager</h1>
+          <p class="text-muted mb-0">Upload 360° panoramas, adjust their location, and add them to the game.</p>
+        </div>
+        <a href="{{ url_for('game') }}" class="btn btn-warning btn-game">Play Game</a>
+      </div>
+
+      <!-- ===== STATUS MESSAGE (shared) ===== -->
+      <div id="status-message" class="mt-2"></div>
+
+      <!-- ===== UPLOAD PANEL ===== -->
+      <div id="upload-panel">
+        <div id="upload-zone" class="upload-zone">
+          <div class="upload-icon">📷</div>
+          <p class="fw-semibold">Drop a 360° panorama here, or click to browse</p>
+          <p class="small">Supports JPG, PNG, WebP &mdash; images must contain GPS EXIF data</p>
+          <input type="file" id="image-input" accept=".jpg,.jpeg,.png,.webp" style="display:none">
+        </div>
+      </div>
+
+      <!-- ===== PROCESSING INDICATOR ===== -->
+      <div id="processing-indicator" class="processing-indicator" style="display:none;">
+        <div class="spinner-border text-warning" role="status">
+          <span class="visually-hidden">Processing…</span>
+        </div>
+        <p class="mt-2">Reading GPS data from image…</p>
+      </div>
+
+      <!-- ===== EDITOR PANEL ===== -->
+      <div id="editor-panel" class="editor-panel">
+
+        <!-- File info & coordinates -->
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+          <span class="file-info" id="file-name"></span>
+          <span class="coord-display" id="coord-display">—</span>
+        </div>
+
+        <div class="instructions-box">
+          <p><strong>📍 Pin Adjustment:</strong> The location was extracted from the image's GPS data. <br>
+          Drag the <span class="text-warning">yellow pin</span> on the map to fine-tune the position, or click anywhere on the map to move it.</p>
+        </div>
+
+        <!-- Two-column layout: preview + map -->
+        <div class="row g-3 mb-3">
+          <div class="col-md-6">
+            <h5 class="orbitron-font mb-2 small text-uppercase text-muted">Panorama Preview</h5>
+            <div id="pano-preview" class="pano-preview"></div>
+          </div>
+          <div class="col-md-6">
+            <h5 class="orbitron-font mb-2 small text-uppercase text-muted">Location Map</h5>
+            <div id="upload-map" class="map-container"></div>
+          </div>
+        </div>
+
+        <!-- Action buttons -->
+        <div class="d-flex flex-wrap gap-2">
+          <button id="save-btn" class="btn btn-warning btn-game px-4">Save Location</button>
+          <button id="cancel-btn" class="btn btn-outline-light btn-game">Cancel</button>
+          <button id="upload-another-btn" class="btn btn-outline-success btn-game" style="display:none;">Upload Another</button>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://api.mazemap.com/js/v2.2.6/mazemap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js"></script>
+<script src="{{ url_for('static', filename='game/js/image-upload.js') }}"></script>
+{% endblock %}

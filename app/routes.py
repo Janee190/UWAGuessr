@@ -1,5 +1,11 @@
-from flask import Flask, render_template, jsonify, request
+import os
+import uuid
+
+from flask import Flask, render_template, jsonify, request, url_for, send_from_directory
+from werkzeug.utils import secure_filename
+
 from app import app
+from app.image_upload import extract_gps, convert_to_webp, append_to_csv
 
 @app.route("/")
 def index():
@@ -50,6 +56,101 @@ def how_to_play():
 @app.route("/leaderboard")
 def leaderboard():
     return render_template("leaderboard.html")
+
+
+# ── Image upload page ─────────────────────────────────────────────────────
+
+@app.route("/image-upload")
+def image_upload():
+    return render_template("imageupload.html")
+
+
+# ── Temporary upload directory ────────────────────────────────────────────
+
+UPLOAD_TEMP_DIR = os.path.join(app.instance_path, 'uploads')
+os.makedirs(UPLOAD_TEMP_DIR, exist_ok=True)
+
+ALLOWED_EXTENSIONS = {'.jpg', '.jpeg', '.png', '.webp'}
+
+
+@app.route('/instance/uploads/<path:filename>')
+def serve_temp_upload(filename):
+    """Serve temporarily uploaded files (for panorama preview)."""
+    return send_from_directory(UPLOAD_TEMP_DIR, filename)
+
+
+@app.route("/api/upload-image", methods=["POST"])
+def api_upload_image():
+    """Upload a panorama, extract GPS coords, return temp path + coords."""
+    if 'image' not in request.files:
+        return jsonify({'error': 'No image file provided'}), 400
+
+    file = request.files['image']
+    if not file.filename:
+        return jsonify({'error': 'No file selected'}), 400
+
+    ext = os.path.splitext(file.filename)[1].lower()
+    if ext not in ALLOWED_EXTENSIONS:
+        return jsonify({'error': f'Unsupported file type: {ext}'}), 400
+
+    # Save to a temp location with a unique name to avoid collisions
+    temp_name = f"{uuid.uuid4().hex}{ext}"
+    temp_path = os.path.join(UPLOAD_TEMP_DIR, temp_name)
+    file.save(temp_path)
+
+    # Extract GPS
+    coords = extract_gps(temp_path)
+    if coords is None:
+        # Clean up — no GPS found
+        os.remove(temp_path)
+        return jsonify({'error': 'No GPS location data found in the image. Ensure the image has EXIF coordinates.'}), 400
+
+    lat, lng = coords
+    return jsonify({
+        'tempPath': temp_name,
+        'lat': lat,
+        'lng': lng,
+        'originalName': file.filename,
+    })
+
+
+@app.route("/api/confirm-image", methods=["POST"])
+def api_confirm_image():
+    """Confirm final location, convert to WebP, and save to CSV."""
+    data = request.json
+    temp_name = data.get('tempPath')
+    lat = data.get('lat')
+    lng = data.get('lng')
+
+    if not temp_name or lat is None or lng is None:
+        return jsonify({'error': 'Missing required fields'}), 400
+
+    temp_path = os.path.join(UPLOAD_TEMP_DIR, temp_name)
+    if not os.path.isfile(temp_path):
+        return jsonify({'error': 'Temporary file not found. Please re-upload.'}), 404
+
+    try:
+        lat = float(lat)
+        lng = float(lng)
+    except (TypeError, ValueError):
+        return jsonify({'error': 'Invalid coordinates'}), 400
+
+    # Convert to WebP (strips EXIF)
+    webp_filename = convert_to_webp(temp_path)
+
+    # Clean up temp file
+    os.remove(temp_path)
+
+    # Append to CSV
+    new_id = append_to_csv(webp_filename, lat, lng)
+
+    return jsonify({
+        'success': True,
+        'id': new_id,
+        'imagePath': f'/static/game/photos/{webp_filename}',
+        'lat': lat,
+        'lng': lng,
+    })
 
 
 if __name__ == "__main__":
