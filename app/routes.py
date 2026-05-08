@@ -7,6 +7,18 @@ from flask_login import login_user
 def index():
     return render_template("index.html")
 
+@app.route("/signup")
+def signup():
+    return render_template("signup.html")
+
+@app.route("/api/signup", methods=["POST"])
+def api_register():
+    user, errors = register_user(request.get_json())
+    if errors:
+        return jsonify({'errors': errors}), 400
+    login_user(user)
+    return jsonify({'redirect': url_for('index')}), 201
+
 
 @app.route("/login")
 def login():
