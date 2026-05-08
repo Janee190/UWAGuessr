@@ -4,7 +4,7 @@ import re
 
 def validate_username(username):
     if not username:
-        return 'Username is required'
+        return 'Please enter a username'
     if len(username) < 3:
         return 'Username must be at least 3 characters'
     if len(username) > 80:
