@@ -1,4 +1,4 @@
-from app import db, models
+from app import db
 from models import User
 import re
 
@@ -15,16 +15,16 @@ def validate_username(username):
 
 def validate_email(email):
     if not email:
-        return 'Email is required'
+        return 'Please enter a valid email address'
     if len(email) > 120:
         return 'Email must be less than 120 characters'
     if not re.match(r'^[^\s@]+@[^\s@]+\.[^\s@]+$', email):
-        return 'Invalid email address'
+        return 'Please enter a valid email address'
     return None
 
 def validate_password(password):
     if not password:
-        return 'Password is required'
+        return 'Please enter a password'
     if len(password) < 8:
         return 'Password must be at least 8 characters'
     if len(password) > 128:

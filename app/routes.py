@@ -9,6 +9,7 @@ def index():
 @app.route("/login")
 def login():
     return render_template("login.html")
+
 @app.route("/game")
 def game():
     return render_template("game.html")

@@ -162,12 +162,12 @@
           const password = $("#password").val();
 
           if (!email || !isValidEmail(email)) {
-            showAlert("Please enter a valid email address.", "danger");
+            showAlert("Please enter a valid email address", "danger");
             $("#email").trigger("focus");
             return;
           }
           if (!password) {
-            showAlert("Please enter your password.", "danger");
+            showAlert("Please enter a password", "danger");
             $("#password").trigger("focus");
             return;
           }
@@ -184,7 +184,7 @@
             success: function (response) {
               showAlert("Welcome back! Redirecting…", "success");
               setTimeout(function () {
-                window.location.href = "game.html";
+                window.location.href = "{{ url_for('game') }}";
               }, 900);
             },
             error: function (xhr) {
