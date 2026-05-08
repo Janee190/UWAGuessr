@@ -1,11 +1,15 @@
 from app import db
 from werkzeug.security import generate_password_hash, check_password_hash
+from flask_login import UserMixin
 
-class User(db.Model):
+class User(UserMixin, db.Model):
     uid = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(64), unique=True, nullable=False)
     email = db.Column(db.String(128), unique=True, nullable=False)
     password_hash = db.Column(db.String(256), nullable=False)
+
+    def get_id(self):
+        return str(self.uid)
 
     def to_dict(self):
         # Helper function to return a dictionary representation of user
