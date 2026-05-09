@@ -66,7 +66,7 @@
 
         <div class="instructions-box">
           <p><strong>📍 Pin Adjustment:</strong> The location was extracted from the image's GPS data. <br>
-          Drag the <span class="text-warning">yellow pin</span> on the map to fine-tune the position, or click anywhere on the map to move it.</p>
+           Click anywhere on the map to move the pin to the precise correct location.</p>
         </div>
 
         <!-- Two-column layout: preview + map -->
@@ -99,5 +99,6 @@
 {% block scripts %}
 <script src="https://api.mazemap.com/js/v2.2.6/mazemap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js"></script>
+<script src="{{ url_for('static', filename='game/js/pano-utils.js') }}"></script>
 <script src="{{ url_for('static', filename='game/js/image-upload.js') }}"></script>
 {% endblock %}

@@ -10,11 +10,8 @@ let photoViewerInitialized = false;
 let panoViewer = null;
 const ROUNDS_PER_GAME = 5;
 const DEFAULT_HFOV = 85;
-const MIN_HFOV = 40;
+const MIN_HFOV = 25;
 const MAX_HFOV = 90;
-const MIN_PITCH = -15;
-const MAX_PITCH = 15;
-const PITCH_EDGE_BUFFER = 4;
 
 // Resets game state and starts the first round.
 async function startGame() {
@@ -151,50 +148,18 @@ function loadPanorama(imageUrl) {
     // If a viewer already exists, destroy it first
     if (panoViewer !== null) {
         panoViewer.destroy();
+        panoViewer = null;
     }
 
-    // Create a temporary hidden image to read the true dimensions
-    const tempImg = new Image();
+    if (!window.UWAPano || typeof window.UWAPano.buildViewer !== 'function') return;
 
-    // Wait for the image to load in the background so we get accurate dimensions
-    tempImg.onload = function () {
-
-        // Calculate the correct vertical angle of view (vaov) based on aspect ratio
-        // We assume your panoramas are a full 360 degrees horizontally
-        const haov = 360;
-        const vaov = haov * (tempImg.naturalHeight / tempImg.naturalWidth);
-        const minPitchLimit = -(vaov / 2) + PITCH_EDGE_BUFFER;
-        const maxPitchLimit = (vaov / 2) - PITCH_EDGE_BUFFER;
-
-        // Now initialize Pannellum using the exact geometry of the image
-        panoViewer = pannellum.viewer('photo-viewer', {
-            "type": "equirectangular",
-            "panorama": imageUrl,
-
-            // The Magic Fix: Explicitly tell Pannellum the image dimensions
-            "haov": haov,
-            "vaov": vaov,
-            "vOffset": 0, // Keeps it perfectly centered horizontally
-
-            "autoLoad": true,
-            "showControls": false,
-
-            // Lock the vertical pitch so they can't look into the black void
-            "minPitch": minPitchLimit,
-            "maxPitch": maxPitchLimit,
-            "pitch": 0,
-
-            "hfov": DEFAULT_HFOV,
-            "minHfov": MIN_HFOV,
-            "maxHfov": MAX_HFOV,
-
-            "compass": false,
-            "mouseZoom": true
-        });
-    };
-
-    // Trigger the load
-    tempImg.src = imageUrl;
+    window.UWAPano.buildViewer('photo-viewer', imageUrl, {
+        hfov: DEFAULT_HFOV,
+        minHfov: MIN_HFOV,
+        maxHfov: MAX_HFOV,
+        avoidShowingBackground: true,
+        onReady: function (viewer) { panoViewer = viewer; },
+    });
 }
 
 // Handles +/- zoom controls by converting scale into Pannellum field-of-view.

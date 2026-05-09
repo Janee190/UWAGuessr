@@ -118,31 +118,15 @@ function showPanoramaPreview(imageUrl) {
     if (!container) return;
     container.style.display = 'block';
 
-    var tempImg = new Image();
-    tempImg.onload = function () {
-        var haov = 360;
-        var vaov = haov * (tempImg.naturalHeight / tempImg.naturalWidth);
-        var pitchBuffer = 4;
+    if (!window.UWAPano || typeof window.UWAPano.buildViewer !== 'function') return;
 
-        panoViewer = pannellum.viewer('pano-preview', {
-            type: 'equirectangular',
-            panorama: imageUrl,
-            haov: haov,
-            vaov: vaov,
-            vOffset: 0,
-            autoLoad: true,
-            showControls: false,
-            pitch: 0,
-            hfov: 85,
-            minHfov: 40,
-            maxHfov: 90,
-            minPitch: -(vaov / 2) + pitchBuffer,
-            maxPitch: (vaov / 2) - pitchBuffer,
-            compass: false,
-            mouseZoom: true,
-        });
-    };
-    tempImg.src = imageUrl;
+    window.UWAPano.buildViewer('pano-preview', imageUrl, {
+        hfov: 85,
+        minHfov: 25,
+        maxHfov: 90,
+        avoidShowingBackground: true,
+        onReady: function (viewer) { panoViewer = viewer; },
+    });
 }
 
 // ── Queue rendering ──────────────────────────────────────────────────────
