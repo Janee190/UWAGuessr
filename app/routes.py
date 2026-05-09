@@ -1,17 +1,48 @@
+<<<<<<< HEAD
 from flask import Flask, render_template, jsonify, request,redirect, url_for
+=======
+from flask import Flask, render_template, jsonify, request, url_for
+>>>>>>> 131d8ba205223ec6749575864dc08d92904be3d4
 from app import app
+from app.controllers import login_user_service, register_user
+from flask_login import login_user
 
 @app.route("/")
 def index():
     return render_template("index.html")
 
+@app.route("/signup")
+def signup():
+    return render_template("signup.html")
+
+@app.route("/api/signup", methods=["POST"])
+def api_register():
+    user, errors = register_user(request.get_json())
+    if errors:
+        return jsonify({'errors': errors}), 400
+    login_user(user)
+    return jsonify({'redirect': url_for('index')}), 201
+
 
 @app.route("/login")
 def login():
     return render_template("login.html")
+
+@app.route("/api/login", methods=["POST"])
+def api_login():
+    user, errors = login_user_service(request.get_json())
+    if errors:
+        return jsonify({'errors': errors}), 401
+    login_user(user)
+    return jsonify({'redirect': url_for('index')}), 200
+
 @app.route("/game")
 def game():
     return render_template("game.html")
+
+@app.route("/forgot-password")
+def forgot_password():
+    return render_template("forgot_password.html")
 
 @app.route("/api/game-images")
 def api_game_images():
