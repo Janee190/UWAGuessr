@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-from flask import Flask, render_template, jsonify, request,redirect, url_for
-=======
-from flask import Flask, render_template, jsonify, request, url_for
->>>>>>> 131d8ba205223ec6749575864dc08d92904be3d4
+from flask import Flask, render_template, jsonify, request, url_for, redirect
 from app import app
 from app.controllers import login_user_service, register_user
 from flask_login import login_user
@@ -34,7 +30,7 @@ def api_login():
     if errors:
         return jsonify({'errors': errors}), 401
     login_user(user)
-    return jsonify({'redirect': url_for('index')}), 200
+    return jsonify({'redirect': url_for('dashboard')}), 200
 
 @app.route("/game")
 def game():
@@ -82,65 +78,7 @@ def how_to_play():
 def leaderboard():
     return render_template("leaderboard.html")
 
-@app.route("/signup")
-def signup():
-    return render_template("signup.html")
 
-@app.route("/api/signup", methods=["POST"])
-def api_signup():
-    from app.models import User
-    from app import db
-    data = request.json
-    username = data.get('username', '').strip()
-    email = data.get('email', '').strip()
-    password = data.get('password', '')
-
-    if not username or not email or not password:
-        return jsonify({'error': 'Missing required fields'}), 400
-
-    if User.query.filter_by(email=email).first():
-        return jsonify({'error': 'An account with this email already exists.'}), 409
-    if User.query.filter_by(username=username).first():
-        return jsonify({'error': 'That username is already taken.'}), 409
-
-    user = User(username=username, email=email)
-    user.set_password(password)
-    db.session.add(user)
-    db.session.commit()
-
-    return jsonify({'message': 'Account created successfully'}), 201
-
-@app.route("/api/login", methods=["POST"])
-def api_login():
-    from app.models import User
-    from app import db
-    from flask_login import login_user
-    data = request.json
-    email = data.get('email', '').strip()
-    password = data.get('password', '')
-
-    if not email or not password:
-        return jsonify({'error': 'Missing required fields'}), 400
-
-    user = User.query.filter_by(email=email).first()
-    if user is None or not user.check_password(password):
-        return jsonify({'error': 'Incorrect email or password'}), 401
-
-    login_user(user)
-    return jsonify({'message': 'Login successful'}), 200
-
-@app.route("/logout")
-def logout():
-    from flask_login import logout_user
-    logout_user()
-    return redirect(url_for('index'))
-
-from flask_login import login_required
-
-@app.route("/dashboard")
-@login_required
-def dashboard():
-    return render_template("dashboard.html")
 
 if __name__ == "__main__":
     app.run(debug=True)
