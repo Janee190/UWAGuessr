@@ -52,6 +52,6 @@ def get_game_images():
         reader = csv.DictReader(f)
         for row in reader:
             data.append({"id": int(row["id"]), "imagePath": row["imagePath"]})
-    images = random.sample(data, 5)  # select 5 random pictures
+    images = random.sample(data, min(len(data), 5))  # select up to 5 random pictures
 
     return images
