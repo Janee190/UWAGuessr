@@ -11,7 +11,7 @@ let panoViewer = null;
 
 let fileQueue = [];
 let currentIdx = -1;    // Index of item currently shown in editor
-let isSaving = false;   // Prevent double-save
+let savingIds = new Set();   // Prevent double-save per item
 
 const UWA_CAMPUS_ID = 119;
 
@@ -198,7 +198,15 @@ function renderQueue() {
             editBtn.textContent = 'Edit';
             editBtn.addEventListener('click', function () { openInEditor(idx); });
             div.appendChild(editBtn);
-        } else if (item.status === 'error' || item.status === 'saved') {
+        } else if (item.status === 'error' && idx !== currentIdx) {
+            var retryBtn = document.createElement('button');
+            retryBtn.className = 'queue-item-action-btn';
+            retryBtn.textContent = 'Retry';
+            retryBtn.addEventListener('click', function () { openInEditor(idx); });
+            div.appendChild(retryBtn);
+        }
+
+        if (item.status === 'error' || item.status === 'saved') {
             var rmBtn = document.createElement('button');
             rmBtn.className = 'queue-item-action-btn remove-btn';
             rmBtn.textContent = 'Remove';
@@ -264,6 +272,22 @@ function findNextReady(fromIdx) {
     return -1;
 }
 
+function preloadPanoramaForItem(item) {
+    if (!item || !item.tempPath || item.preloaded) return;
+    var img = new Image();
+    img.onload = function () { item.preloaded = true; };
+    img.onerror = function () { item.preloaded = true; };
+    img.src = '/instance/uploads/' + encodeURIComponent(item.tempPath);
+}
+
+function preloadNextReady(fromIdx) {
+    var next = findNextReady(fromIdx);
+    if (next === -1) next = findNextReady(0);
+    if (next !== -1 && next !== currentIdx) {
+        preloadPanoramaForItem(fileQueue[next]);
+    }
+}
+
 function destroyEditor() {
     if (panoViewer) { panoViewer.destroy(); panoViewer = null; }
     if (uploadMap) { uploadMap.remove(); uploadMap = null; locationMarker = null; }
@@ -275,7 +299,7 @@ function destroyEditor() {
 
 function openInEditor(idx) {
     var item = fileQueue[idx];
-    if (!item || (item.status !== 'ready' && item.status !== 'saving')) return;
+    if (!item || (item.status !== 'ready' && item.status !== 'error')) return;
 
     currentIdx = idx;
     document.getElementById('editor-panel').style.display = 'block';
@@ -294,7 +318,13 @@ function openInEditor(idx) {
     saveBtn.classList.add('btn-warning');
 
     setTimeout(function () { initUploadMap(item.lat, item.lng); }, 300);
-    setStatus('Adjust the pin if needed, then click "Save & Next".', false);
+    if (item.status === 'error' && item.errorMsg) {
+        setStatus('Previous save failed: ' + item.errorMsg + '. Adjust the pin if needed, then click "Save & Next".', true);
+    } else {
+        setStatus('Adjust the pin if needed, then click "Save & Next".', false);
+    }
+
+    preloadNextReady(currentIdx + 1);
 }
 
 // ── Upload flow ──────────────────────────────────────────────────────────
@@ -335,6 +365,10 @@ async function startUploading() {
             item.lng = data.lng;
             renderQueue();
 
+            if (currentIdx !== -1) {
+                preloadNextReady(currentIdx + 1);
+            }
+
             if (currentIdx === -1) {
                 openInEditor(fileQueue.indexOf(item));
             }
@@ -370,6 +404,40 @@ function setStatus(msg, isError) {
     if (!el) return;
     el.textContent = msg;
     el.className = 'mt-2' + (isError ? ' text-danger' : ' text-success');
+}
+
+function saveInBackground(item) {
+    if (!item || savingIds.has(item.id)) return;
+    savingIds.add(item.id);
+
+    fetch('/api/confirm-image', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            tempPath: item.tempPath,
+            lat: item.lat,
+            lng: item.lng,
+        }),
+    })
+        .then(function (resp) { return resp.json(); })
+        .then(function (data) {
+            if (data.error) throw new Error(data.error);
+            item.status = 'saved';
+            item.errorMsg = null;
+            renderQueue();
+            if (currentIdx === -1) {
+                setStatus('Saved as location #' + data.id + '!', false);
+            }
+        })
+        .catch(function (err) {
+            item.status = 'error';
+            item.errorMsg = err.message;
+            renderQueue();
+            setStatus('Save failed for ' + item.originalName + ': ' + err.message, true);
+        })
+        .finally(function () {
+            savingIds.delete(item.id);
+        });
 }
 
 // ── DOMContentLoaded ─────────────────────────────────────────────────────
@@ -443,11 +511,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // ── Save & Next ──
     saveBtn.addEventListener('click', async function () {
-        if (isSaving) return;
         var item = fileQueue[currentIdx];
         if (!item || item.status !== 'ready') return;
 
-        isSaving = true;
         item.status = 'saving';
         saveBtn.disabled = true;
         saveBtn.textContent = 'Saving\u2026';
@@ -461,57 +527,28 @@ document.addEventListener('DOMContentLoaded', function () {
             item.lng = pos.lng;
         }
 
-        try {
-            var resp = await fetch('/api/confirm-image', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    tempPath: item.tempPath,
-                    lat: item.lat,
-                    lng: item.lng,
-                }),
+        saveInBackground(item);
+
+        destroyEditor();
+
+        // Find next ready item immediately
+        var next = findNextReady(currentIdx + 1);
+        if (next === -1) next = findNextReady(0);
+        if (next !== -1 && next !== currentIdx) {
+            openInEditor(next);
+        } else {
+            currentIdx = -1;
+            document.getElementById('upload-panel').style.display = 'block';
+            renderQueue();
+            var anyWaiting = fileQueue.some(function (i) {
+                return i.status === 'waiting' || i.status === 'uploading';
             });
-            var data = await resp.json();
-
-            if (data.error) {
-                setStatus(data.error, true);
-                item.status = 'ready';
-                isSaving = false;
-                saveBtn.disabled = false;
-                saveBtn.textContent = 'Save & Next';
-                renderQueue();
-                return;
+            if (anyWaiting) {
+                setStatus('Uploading next image\u2026', false);
+            } else if (fileQueue.every(function (i) { return i.status === 'saved'; })) {
+                setStatus('All images saved! You can upload more or go play the game.', false);
             }
-
-            item.status = 'saved';
-            renderQueue();
-
-            destroyEditor();
-            setStatus('Saved as location #' + data.id + '!', false);
-
-            // Find next ready item
-            var next = findNextReady(currentIdx + 1);
-            if (next === -1) next = findNextReady(0);
-            if (next !== -1 && next !== currentIdx) {
-                openInEditor(next);
-            } else {
-                // Show upload zone if all done
-                document.getElementById('upload-panel').style.display = 'block';
-                currentIdx = -1;
-                renderQueue();
-                if (fileQueue.every(function (i) { return i.status === 'saved'; })) {
-                    setStatus('All images saved! You can upload more or go play the game.', false);
-                }
-            }
-        } catch (err) {
-            setStatus('Save failed: ' + err.message, true);
-            item.status = 'ready';
-            renderQueue();
         }
-
-        isSaving = false;
-        saveBtn.disabled = false;
-        saveBtn.textContent = 'Save & Next';
     });
 
     // ── Skip ──
