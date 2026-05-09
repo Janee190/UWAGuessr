@@ -401,17 +401,6 @@ img {
     }
 }
 
-/* Deep Gaming Background */
-.how-to-container {
-    background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
-    min-height: 100vh;
-}
-
-/* Stylized Title */
-.bangers-font {
-    font-family: 'Bangers', cursive;
-    letter-spacing: 2px;
-}
 
 .tilted-header {
     transform: rotate(-2deg);
@@ -433,10 +422,6 @@ img {
     background: rgba(255, 255, 255, 0.08);
 }
 
-/* Hero Title Glow */
-.hero-title {
-    text-shadow: 0 0 20px rgba(255, 193, 7, 0.5);
-}
 
 .how-to-container {
     
