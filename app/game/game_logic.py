@@ -38,7 +38,7 @@ def calculate_score(guess_lat, guess_lng, img_id):
     max_score = 5000
     dropoff_rate = 0.005
 
-    if distance < 20:
+    if distance < 10:
         score = max_score
     else:
         score = max_score * math.exp(-dropoff_rate * (distance - 20))
