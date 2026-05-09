@@ -1,7 +1,8 @@
 from flask import Flask, render_template, jsonify, request, url_for, redirect
 from app import app
 from app.controllers import login_user_service, register_user
-from flask_login import login_user
+from flask_login import login_user,login_required, logout_user
+
 
 @app.route("/")
 def index():
@@ -78,6 +79,15 @@ def how_to_play():
 def leaderboard():
     return render_template("leaderboard.html")
 
+@app.route("/dashboard")
+@login_required
+def dashboard():
+    return render_template("dashboard.html")
+
+@app.route("/logout")
+def logout():
+    logout_user()
+    return redirect(url_for('index'))
 
 
 if __name__ == "__main__":
