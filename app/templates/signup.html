@@ -1,4 +1,4 @@
-{% extends "base.html" %} {% block title %}UWAGuessr - Sign In{% endblock %} {%
+{% extends "base.html" %} {% block title %}UWAGuessr - Sign Up{% endblock %} {%
 block body_class %}page-login{% endblock %} {% block content %}
 <div class="page-wrap">
   <div class="card-shell">
@@ -16,7 +16,20 @@ block body_class %}page-login{% endblock %} {% block content %}
 
       <div class="alert-area" id="alertArea"></div>
 
-      <form id="loginForm" novalidate>
+      <form id="signupForm" novalidate>
+        <div class="mb-3">
+          <label class="form-label" for="username">Username</label>
+          <input
+            type="text"
+            class="form-control"
+            id="username"
+            name="username"
+            placeholder="coolexplorer42"
+            autocomplete="username"
+            required
+          />
+        </div>
+
         <div class="mb-3">
           <label class="form-label" for="email">Email</label>
           <input
@@ -38,14 +51,56 @@ block body_class %}page-login{% endblock %} {% block content %}
             id="password"
             name="password"
             placeholder="•••••••••••"
-            autocomplete="current-password"
+            autocomplete="new-password"
             required
           />
         </div>
 
-        <button type="submit" class="btn-signin" id="signinBtn">
+        <div class="mb-3">
+          <label class="form-label" for="confirmPassword"
+            >Confirm Password</label
+          >
+          <input
+            type="password"
+            class="form-control"
+            id="confirmPassword"
+            name="confirmPassword"
+            placeholder="•••••••••••"
+            autocomplete="new-password"
+            required
+          />
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label" for="securityQuestion"
+            >Security Question</label
+          >
+          <input
+            type="text"
+            class="form-control"
+            id="securityQuestion"
+            name="securityQuestion"
+            placeholder="What is your mother's maiden name?"
+            autocomplete="off"
+            required
+          />
+        </div>
+        <div class="mb-3">
+          <label class="form-label" for="securityAnswer">Answer</label>
+          <input
+            type="text"
+            class="form-control"
+            id="securityAnswer"
+            name="securityAnswer"
+            placeholder="Your answer"
+            autocomplete="off"
+            required
+          />
+        </div>
+
+        <button type="submit" class="btn-signin" id="signupBtn">
           <span class="spinner-border" role="status" aria-hidden="true"></span>
-          <span class="btn-label">Sign in</span>
+          <span class="btn-label">Create account</span>
         </button>
       </form>
 
@@ -54,9 +109,7 @@ block body_class %}page-login{% endblock %} {% block content %}
       <button class="btn-guest" id="guestBtn">Continue as guest</button>
 
       <div class="form-footer">
-        No account? <a href="{{ url_for('signup') }}">Sign up free</a>
-        &nbsp;·&nbsp;
-        <a href="forgot.html">Forgot password?</a>
+        Already have an account? <a href="{{ url_for('login') }}">Sign in</a>
       </div>
     </div>
   </div>
@@ -143,21 +196,45 @@ block body_class %}page-login{% endblock %} {% block content %}
       $("#alertArea").html(html);
     }
 
-    // ── Helper: basic email format check ──────────────────────────────────
-    function isValidEmail(email) {
-      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-    }
-
-    // ── Login form submit ──────────────────────────────────────────────────
-    $("#loginForm").on("submit", function (e) {
+    // ── Signup form submit ─────────────────────────────────────────────────
+    $("#signupForm").on("submit", function (e) {
       e.preventDefault();
 
+      const username = $("#username").val().trim();
       const email = $("#email").val().trim();
       const password = $("#password").val();
+      const confirmPassword = $("#confirmPassword").val();
+      const securityQuestion = $("#securityQuestion").val().trim();
+      const securityAnswer = $("#securityAnswer").val().trim();
+
+      // Username
+      if (!username) {
+        showAlert("Username is required.", "danger");
+        $("#username").trigger("focus");
+        return;
+      }
+      if (username.length < 3) {
+        showAlert("Username must be at least 3 characters.", "danger");
+        $("#username").trigger("focus");
+        return;
+      }
+      if (username.length > 80) {
+        showAlert("Username must be less than 80 characters.", "danger");
+        $("#username").trigger("focus");
+        return;
+      }
+      if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+        showAlert(
+          "Username can only contain letters, numbers and underscores.",
+          "danger",
+        );
+        $("#username").trigger("focus");
+        return;
+      }
 
       // Email
       if (!email) {
-        showAlert("Please enter a valid email address.", "danger");
+        showAlert("Email is required.", "danger");
         $("#email").trigger("focus");
         return;
       }
@@ -174,7 +251,7 @@ block body_class %}page-login{% endblock %} {% block content %}
 
       // Password
       if (!password) {
-        showAlert("Please enter a password.", "danger");
+        showAlert("Password is required.", "danger");
         $("#password").trigger("focus");
         return;
       }
@@ -188,32 +265,80 @@ block body_class %}page-login{% endblock %} {% block content %}
         $("#password").trigger("focus");
         return;
       }
+      if (!/[A-Z]/.test(password)) {
+        showAlert(
+          "Password must contain at least one uppercase letter.",
+          "danger",
+        );
+        $("#password").trigger("focus");
+        return;
+      }
+      if (!/[0-9]/.test(password)) {
+        showAlert("Password must contain at least one number.", "danger");
+        $("#password").trigger("focus");
+        return;
+      }
 
-      const $btn = $("#signinBtn");
+      // Confirm password
+      if (password !== confirmPassword) {
+        showAlert("Passwords do not match.", "danger");
+        $("#confirmPassword").trigger("focus");
+        return;
+      }
+
+      // Security question
+      if (!securityQuestion) {
+        showAlert("Please enter a security question.", "danger");
+        $("#securityQuestion").trigger("focus");
+        return;
+      }
+      if (securityQuestion.length > 256) {
+        showAlert(
+          "Security question must be less than 256 characters.",
+          "danger",
+        );
+        $("#securityQuestion").trigger("focus");
+        return;
+      }
+      if (!securityAnswer) {
+        showAlert("Please enter a security answer.", "danger");
+        $("#securityAnswer").trigger("focus");
+        return;
+      }
+
+      const $btn = $("#signupBtn");
       $btn.addClass("loading").prop("disabled", true);
-      $btn.find(".btn-label").text("Signing in…");
+      $btn.find(".btn-label").text("Creating account…");
 
       $.ajax({
-        url: "/api/login",
+        url: "/api/signup",
         method: "POST",
         contentType: "application/json",
-        data: JSON.stringify({ email: email, password: password }),
+        data: JSON.stringify({
+          username: username,
+          email: email,
+          password: password,
+          securityQuestion: securityQuestion,
+          securityAnswer: securityAnswer,
+        }),
         success: function (response) {
-          showAlert("Welcome back! Redirecting…", "success");
+          showAlert("Account created! Redirecting…", "success");
           setTimeout(function () {
             window.location.href = "{{ url_for('index') }}";
           }, 900);
         },
         error: function (xhr) {
           let msg = "Something went wrong. Please try again.";
-          if (xhr.status === 401) msg = "Incorrect email or password.";
-          if (xhr.status === 429)
-            msg = "Too many attempts. Please wait a moment.";
+          if (xhr.responseJSON && xhr.responseJSON.errors) {
+            const errors = xhr.responseJSON.errors;
+            msg = errors.username || errors.email || errors.password || msg;
+          }
+          if (xhr.status === 409) msg = "Email or username already taken";
           showAlert(msg, "danger");
         },
         complete: function () {
           $btn.removeClass("loading").prop("disabled", false);
-          $btn.find(".btn-label").text("Sign in");
+          $btn.find(".btn-label").text("Create account");
         },
       });
     });
@@ -221,11 +346,11 @@ block body_class %}page-login{% endblock %} {% block content %}
     // ── Guest button ───────────────────────────────────────────────────────
     $("#guestBtn").on("click", function () {
       sessionStorage.setItem("guest", "true");
-      window.location.href = "game.html";
+      window.location.href = "{{ url_for('game') }}";
     });
 
-    // ── Auto-focus email field ─────────────────────────────────────────────
-    $("#email").trigger("focus");
+    // ── Auto-focus username field ──────────────────────────────────────────
+    $("#username").trigger("focus");
   });
 </script>
 {% endblock %}

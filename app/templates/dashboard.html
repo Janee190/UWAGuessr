@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - UWAGuessr{% endblock %}
+{% block body_class %}page-dashboard{% endblock %}
+
+{% block content %}
+
+<section class="dashboard-hero-section d-flex align-items-center">
+    <div class="container py-5">
+        <div class="row mb-5">
+            <div class="col-12">
+                <div class="dashboard-welcome p-4">
+                    <div class="d-flex align-items-center gap-4">
+                        <div class="avatar-circle">
+                            <span>{{ current_user.username[0].upper() }}</span>
+                        </div>
+                        <div>
+                            <h1 class="orbitron-font mb-1">Welcome back, {{ current_user.username }}!</h1>
+                            <p class="text-muted-light mb-0">Ready to explore UWA?</p>
+                        </div>
+                        <div class="ms-auto">
+                            <a href="{{ url_for('game') }}" class="btn btn-warning btn-lg bangers-font">
+                                Play Now
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row g-4">
+
+            <!-- profile info  -->
+            <div class="col-lg-4">
+                <div class="dashboard-card h-100 p-4">
+                    <h2 class="orbitron-font h5 mb-4 card-title-gold">Profile</h2>
+                    <div class="profile-stat mb-3">
+                        <span class="stat-label">Username</span>
+                        <span class="stat-value">{{ current_user.username }}</span>
+                    </div>
+                    <div class="profile-stat mb-3">
+                        <span class="stat-label">Email</span>
+                        <span class="stat-value">{{ current_user.email }}</span>
+                    </div>
+                    <div class="profile-stat mb-3">
+                        <span class="stat-label">Total Games</span>
+                        <span class="stat-value" id="totalGames">—</span>
+                    </div>
+                    <div class="profile-stat">
+                        <span class="stat-label">Best Score</span>
+                        <span class="stat-value" id="bestScore">—</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- recent games -->
+            <div class="col-lg-4">
+                <div class="dashboard-card h-100 p-4">
+                    <h2 class="orbitron-font h5 mb-4 card-title-gold">Recent Scores</h2>
+                    <div id="recentScores">
+                        <div class="empty-state">
+                            <p class="text-muted-light">No games played yet.</p>
+                            <a href="{{ url_for('game') }}" class="btn btn-outline-warning btn-sm bangers-font">
+                            Play your first game!
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- friends list -->
+            <div class="col-lg-4">  
+                <div class="dashboard-card h-100 p-4">
+                    <h2 class="orbitron-font h5 mb-4 card-title-gold">Friends</h2>
+                    <div id="friendsList">
+                        <div class="empty-state">
+                            <p class="text-muted-light">No friends added yet.</p>
+                            <button class="btn btn-outline-warning btn-sm bangers-font" disabled>
+                                Coming Soon
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+        <!-- Leaderboard Preview -->
+            <div class="col-12">
+                <div class="dashboard-card p-4">
+                <h2 class="orbitron-font h5 mb-4 card-title-gold">🏆 Friends Leaderboard</h2>
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th class="bangers-font" style="color: var(--golden);">Rank</th>
+                                    <th class="bangers-font" style="color: var(--golden);">Friend</th>
+                                    <th class="bangers-font" style="color: var(--golden);">Score</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td colspan="3" class="text-center text-muted-light py-4">
+                                        Add friends to see how you compare!<br>
+                                        <small style="color: var(--text-muted);">Coming Soon</small>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="text-end mt-3">
+                        <a href="{{ url_for('leaderboard') }}" class="btn btn-outline-warning btn-sm bangers-font">
+                        View Global Leaderboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}
+
+
+
