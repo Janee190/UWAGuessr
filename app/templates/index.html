@@ -81,26 +81,5 @@
     style="position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; overflow: hidden; z-index: -1;">
 </div>
 <script src="https://api.mazemap.com/js/v2.2.6/mazemap.min.js"></script>
-<script>
-    // After the home page is fully loaded, silently load the UWA map tiles into the browser cache
-    window.addEventListener('load', function () {
-        setTimeout(function () {
-            if (typeof Mazemap !== 'undefined') {
-                const preloadMap = new Mazemap.Map({
-                    container: 'hidden-preload-map',
-                    campuses: 119,
-                    center: [115.818, -31.98],
-                    zoom: 15,
-                    zLevel: 1
-                });
-                
-                // Once the map has downloaded all tiles and finished rendering,
-                // destroy the WebGL context to free memory. The tiles stay in the browser cache.
-                preloadMap.once('idle', function() {
-                    preloadMap.remove();
-                });
-            }
-        }, 800); // Wait 800ms to ensure it doesn't interrupt any home page animations
-    });
-</script>
+<script src="{{ url_for('static', filename='js/index.js') }}"></script>
 {% endblock %}
