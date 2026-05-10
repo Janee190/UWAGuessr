@@ -56,7 +56,7 @@ block body_class %}page-login{% endblock %} {% block content %}
       <div class="form-footer">
         No account? <a href="{{ url_for('signup') }}">Sign up free</a>
         &nbsp;·&nbsp;
-        <a href="forgot.html">Forgot password?</a>
+        <a href="{{ url_for('forgot_password') }}">Forgot password?</a>
       </div>
     </div>
   </div>
