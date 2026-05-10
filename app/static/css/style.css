@@ -436,6 +436,19 @@ img {
     padding: 60px 0;
 } 
 
+.how-to-play-title{
+    color: #ffc107;
+    font-size: 64px;
+}
+
+.how-to-play-subtitle{
+    color: #ffc107;
+}
+
+.how-to-play-img {
+    max-height: 250px;
+}
+
 /* --- MAIN PAGE PARALLAX --- */
 .hero-section {
     min-height: 100vh;
@@ -637,5 +650,6 @@ img {
   text-align: center;
   padding: 1.5rem 0;
 }
+
 
 
