@@ -1,0 +1,120 @@
+{% extends "base.html" %} {% block title %}UWAGuessr - Sign Up{% endblock %} {%
+block body_class %}page-login{% endblock %} {% block content %}
+<div class="page-wrap">
+  <div class="card-shell">
+    <div class="map-panel">
+      <svg viewBox="0 0 340 520" xmlns="http://www.w3.org/2000/svg"></svg>
+    </div>
+
+    <div class="form-panel">
+      <img
+        src="{{ url_for('static', filename='images/UWAGuessr-logo.png') }}"
+        alt="UWAGuessr Logo"
+        class="brand-logo"
+      />
+      <div class="brand-sub">Explore UWA</div>
+
+      <div class="alert-area" id="alertArea"></div>
+
+      <form id="signupForm" novalidate>
+        <div class="mb-3">
+          <label class="form-label" for="username">Username</label>
+          <input
+            type="text"
+            class="form-control"
+            id="username"
+            name="username"
+            placeholder="coolexplorer42"
+            autocomplete="username"
+            required
+          />
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label" for="email">Email</label>
+          <input
+            type="email"
+            class="form-control"
+            id="email"
+            name="email"
+            placeholder="email@example.com"
+            autocomplete="email"
+            required
+          />
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label" for="password">Password</label>
+          <input
+            type="password"
+            class="form-control"
+            id="password"
+            name="password"
+            placeholder="•••••••••••"
+            autocomplete="new-password"
+            required
+          />
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label" for="confirmPassword"
+            >Confirm Password</label
+          >
+          <input
+            type="password"
+            class="form-control"
+            id="confirmPassword"
+            name="confirmPassword"
+            placeholder="•••••••••••"
+            autocomplete="new-password"
+            required
+          />
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label" for="securityQuestion"
+            >Security Question</label
+          >
+          <input
+            type="text"
+            class="form-control"
+            id="securityQuestion"
+            name="securityQuestion"
+            placeholder="What is your mother's maiden name?"
+            autocomplete="off"
+            required
+          />
+        </div>
+        <div class="mb-3">
+          <label class="form-label" for="securityAnswer">Answer</label>
+          <input
+            type="text"
+            class="form-control"
+            id="securityAnswer"
+            name="securityAnswer"
+            placeholder="Your answer"
+            autocomplete="off"
+            required
+          />
+        </div>
+
+        <button type="submit" class="btn-signin" id="signupBtn">
+          <span class="spinner-border" role="status" aria-hidden="true"></span>
+          <span class="btn-label">Create account</span>
+        </button>
+      </form>
+
+      <div class="divider">or</div>
+
+      <button class="btn-guest" id="guestBtn">Continue as guest</button>
+
+      <div class="form-footer">
+        Already have an account? <a href="{{ url_for('login') }}">Sign in</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %} {% block scripts %}
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="{{ url_for('static', filename='js/signup.js') }}"></script>
+{% endblock %}

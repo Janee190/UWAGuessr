@@ -1,23 +1,51 @@
 import os
 import uuid
 
-from flask import Flask, render_template, jsonify, request, url_for, send_from_directory
+from flask import Flask, render_template, jsonify, request, url_for, send_from_directory, redirect
 from werkzeug.utils import secure_filename
+from flask_login import login_user, login_required, logout_user
 
 from app import app
 from app.image_upload import extract_gps, convert_to_webp, append_to_csv
+from app.controllers import login_user_service, register_user
+
 
 @app.route("/")
 def index():
     return render_template("index.html")
 
+@app.route("/signup")
+def signup():
+    return render_template("signup.html")
+
+@app.route("/api/signup", methods=["POST"])
+def api_register():
+    user, errors = register_user(request.get_json())
+    if errors:
+        return jsonify({'errors': errors}), 400
+    login_user(user)
+    return jsonify({'redirect': url_for('index')}), 201
+
 
 @app.route("/login")
 def login():
     return render_template("login.html")
+
+@app.route("/api/login", methods=["POST"])
+def api_login():
+    user, errors = login_user_service(request.get_json())
+    if errors:
+        return jsonify({'errors': errors}), 401
+    login_user(user)
+    return jsonify({'redirect': url_for('dashboard')}), 200
+
 @app.route("/game")
 def game():
     return render_template("game.html")
+
+@app.route("/forgot-password")
+def forgot_password():
+    return render_template("forgot_password.html")
 
 @app.route("/api/game-images")
 def api_game_images():
@@ -56,6 +84,16 @@ def how_to_play():
 @app.route("/leaderboard")
 def leaderboard():
     return render_template("leaderboard.html")
+
+@app.route("/dashboard")
+@login_required
+def dashboard():
+    return render_template("dashboard.html")
+
+@app.route("/logout")
+def logout():
+    logout_user()
+    return redirect(url_for('index'))
 
 
 # ── Image upload page ─────────────────────────────────────────────────────
@@ -207,3 +245,4 @@ def api_confirm_image():
 
 if __name__ == "__main__":
     app.run(debug=True)
+
