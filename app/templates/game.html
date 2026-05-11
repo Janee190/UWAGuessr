@@ -74,6 +74,7 @@
 {% block scripts %}
 <script src="https://api.mazemap.com/js/v2.2.6/mazemap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js"></script>
+<script src="{{ url_for('static', filename='game/js/pano-utils.js') }}"></script>
 <script src="{{ url_for('static', filename='game/js/map.js') }}"></script>
 <script src="{{ url_for('static', filename='game/js/game.js') }}"></script>
 {% endblock %}

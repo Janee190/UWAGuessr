@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block title %}UWAGuessr | Manage Images{% endblock %}
+
+{% block body_class %}page-upload{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/upload-styles.css') }}">
+<link rel="stylesheet" href="https://api.mazemap.com/js/v2.2.6/mazemap.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.css">
+{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="row justify-content-center">
+    <div class="col-12 col-lg-10">
+
+      <!-- Page header -->
+      <div class="d-flex align-items-center justify-content-between mb-4">
+        <div>
+          <h1 class="h2 mb-1 orbitron-font">Image Manager</h1>
+          <p class="text-light opacity-75 mb-0">Upload 360° panoramas, adjust their location, and add them to the game.</p>
+        </div>
+        <a href="{{ url_for('game') }}" class="btn btn-warning btn-game bangers-font">Play Game</a>
+      </div>
+
+      <!-- ===== STATUS MESSAGE ===== -->
+      <div id="status-message" class="mt-2"></div>
+
+      <!-- ===== UPLOAD ZONE ===== -->
+      <div id="upload-panel">
+        <div id="upload-zone" class="upload-zone">
+          <div class="upload-icon">📷</div>
+          <p class="fw-semibold">Drop 360° panoramas here, or click to browse</p>
+          <p class="small">Supports JPG, PNG, WebP &mdash; multiple files supported &mdash; images must contain GPS EXIF data</p>
+          <input type="file" id="image-input" accept=".jpg,.jpeg,.png,.webp" multiple style="display:none">
+        </div>
+        <!-- Upload progress bar -->
+        <div id="upload-progress-container" class="upload-progress-bar" style="display:none;">
+          <div class="fill" id="upload-progress-fill"></div>
+        </div>
+      </div>
+
+      <!-- ===== QUEUE PANEL ===== -->
+      <div id="queue-panel" class="queue-panel">
+        <div class="queue-header">
+          <h3 class="orbitron-font">Upload Queue</h3>
+          <span class="queue-counter" id="queue-counter">0 images</span>
+        </div>
+        <div class="queue-list" id="queue-list"></div>
+      </div>
+
+      <!-- ===== EDITOR PANEL ===== -->
+      <div id="editor-panel" class="editor-panel">
+
+        <!-- Queue position + filename -->
+        <div class="d-flex align-items-center gap-2 mb-2">
+          <span class="badge bg-warning text-dark" id="editor-queue-badge">1 of 1</span>
+          <span class="file-info" id="file-name"></span>
+        </div>
+
+        <!-- Coordinates -->
+        <div class="mb-3">
+          <span class="coord-display" id="coord-display">—</span>
+        </div>
+
+        <div class="instructions-box">
+          <p><strong>📍 Pin Adjustment:</strong> The location was extracted from the image's GPS data. <br>
+           Click anywhere on the map to move the pin to the precise correct location.</p>
+        </div>
+
+        <!-- Two-column layout: preview + map -->
+        <div class="row g-3 mb-3">
+          <div class="col-md-6">
+            <h5 class="orbitron-font mb-2 small text-uppercase text-light opacity-75">Panorama Preview</h5>
+            <div id="pano-preview" class="pano-preview"></div>
+          </div>
+          <div class="col-md-6">
+            <h5 class="orbitron-font mb-2 small text-uppercase text-light opacity-75">Location Map</h5>
+            <div id="upload-map" class="map-container"></div>
+          </div>
+        </div>
+
+        <!-- Action buttons -->
+        <div class="d-flex flex-wrap gap-2 align-items-center">
+          <button id="save-btn" class="btn btn-warning btn-game bangers-font px-4">Save &amp; Next</button>
+          <button id="skip-btn" class="btn btn-outline-light btn-game bangers-font">Skip</button>
+          <button id="cancel-btn" class="btn btn-outline-light btn-game bangers-font">Cancel All</button>
+          <span id="queue-remaining" class="text-light opacity-75 small ms-2"></span>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://api.mazemap.com/js/v2.2.6/mazemap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js"></script>
+<script src="{{ url_for('static', filename='game/js/pano-utils.js') }}"></script>
+<script src="{{ url_for('static', filename='game/js/image-upload.js') }}"></script>
+{% endblock %}

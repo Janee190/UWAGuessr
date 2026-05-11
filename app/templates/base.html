@@ -18,7 +18,7 @@
     {% block extra_head %}{% endblock %}
   </head>
 
-  <body class="{% block body_class %}{% endblock %}">
+<body class="{% block body_class %}{% endblock %}">
     {% block navbar %}
     <header>
       <nav class="navbar navbar-expand-lg navbar-dark custom-navbar">
@@ -41,8 +41,14 @@
                   Leaderboard
                 </a>
               </li>
-
+              
               {% if current_user.is_authenticated %}
+              <li class="nav-item">
+                <a class="nav-link bangers-font text-nowrap" href="{{ url_for('image_upload') }}">
+                  Manage Images
+                </a>
+              </li>
+              
               <li class="nav-item">
                 <a class="btn btn-outline-light ms-lg-3 me-lg-2 mt-2 mt-lg-0 bangers-font text-nowrap"
                   href="{{ url_for('dashboard') }}">
@@ -64,7 +70,7 @@
               {% endif %}
 
               <li class="nav-item">
-                <a class="btn btn-warning mt-2 mt-lg-0 bangers-font text-nowrap" href="{{ url_for('game') }}">
+                <a class="btn btn-warning mt-2 mt-lg-0 ms-lg-2 bangers-font text-nowrap" href="{{ url_for('game') }}">
                   Play Now
                 </a>
               </li>
@@ -74,7 +80,7 @@
       </nav>
     </header>
     {% endblock %}
-
+  
     <main>
       {% block content %}{% endblock %}
     </main>

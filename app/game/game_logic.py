@@ -38,10 +38,10 @@ def calculate_score(guess_lat, guess_lng, img_id):
     max_score = 5000
     dropoff_rate = 0.005
 
-    if distance < 20:
+    if distance < 10:
         score = max_score
     else:
-        score = max_score * math.exp(-dropoff_rate * (distance - 20))
+        score = max_score * math.exp(-dropoff_rate * (distance - 10))
 
     return max(0, round(score)), distance, actual_lat, actual_lng
 
@@ -52,6 +52,7 @@ def get_game_images():
         reader = csv.DictReader(f)
         for row in reader:
             data.append({"id": int(row["id"]), "imagePath": row["imagePath"]})
-    images = random.sample(data, 5)  # select 5 random pictures
+    random.shuffle(data)
+    images = data[:5]  # select up to 5 random pictures
 
     return images
