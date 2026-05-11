@@ -9,6 +9,7 @@ class User(UserMixin, db.Model):
     password_hash = db.Column(db.String(256), nullable=False)
     security_question = db.Column(db.String(256), nullable=True)
     security_answer_hash = db.Column(db.String(256), nullable=True)
+    total_score = db.Column(db.Integer, default=0)
 
     def get_id(self):
         return str(self.uid)
@@ -21,7 +22,8 @@ class User(UserMixin, db.Model):
         return {
             'uid': self.uid,
             'username': self.username,
-            'email': self.email
+            'email': self.email,
+            'total_score': self.total_score
         }
 
     def set_password(self, password):
@@ -35,3 +37,7 @@ class User(UserMixin, db.Model):
     
     def check_security_answer(self, answer):
         return check_password_hash(self.security_answer_hash, answer)
+    
+    def add_total_score(self, points):
+        self.total_score += points
+        db.session.commit()
