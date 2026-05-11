@@ -3,7 +3,7 @@ import uuid
 
 from flask import Flask, render_template, jsonify, request, url_for, send_from_directory, redirect
 from werkzeug.utils import secure_filename
-from flask_login import login_user, login_required, logout_user
+from flask_login import login_user, login_required, logout_user, current_user
 
 from app import app
 from app.image_upload import extract_gps, convert_to_webp, append_to_csv
@@ -241,6 +241,27 @@ def api_confirm_image():
         'lat': lat,
         'lng': lng,
     })
+
+@app.route("/api/game-complete", methods=["POST"])
+@login_required
+def api_game_complete():
+    data = request.get_json(silent=True) or {}
+    total_score = data.get('totalScore', data.get('score'))
+
+    if total_score is None:
+        return jsonify({'error': 'Missing required fields'}), 400
+
+    try:
+        total_score = int(total_score)
+    except (TypeError, ValueError):
+        return jsonify({'error': 'Invalid field types'}), 400
+
+    if total_score < 0:
+        return jsonify({'error': 'Invalid field values'}), 400
+
+    current_user.add_total_score(total_score)
+
+    return jsonify({'success': True, 'totalScore': current_user.total_score})
 
 
 if __name__ == "__main__":

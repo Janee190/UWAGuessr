@@ -129,9 +129,32 @@ async function submitGuess() {
 
 // Displays the game-over overlay with the final score.
 function showGameOver() {
+    
     document.getElementById('game-board').style.display = 'none';
     document.getElementById('game-over').style.display = 'block';
     document.getElementById('final-score').innerText = `Final Score: ${totalScore}`;
+    sendGameComplete(totalScore);
+}
+
+function sendGameComplete(finalScore) {
+    fetch('/api/game-complete', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ totalScore: finalScore })
+    })
+        .then((response) => {
+            if (!response.ok) {
+                return response.json().then((data) => {
+                    throw new Error(data?.error || 'Failed to save score');
+                });
+            }
+            return response.json();
+        })
+        .catch((e) => {
+            console.warn('Score save failed:', e.message || e);
+        });
 }
 
 // Ensures the panorama container exists before rounds begin.
