@@ -175,6 +175,7 @@ async function startGame() {
     localStorage.setItem('uwa_totalScore', totalScore); // Reset local storage
     document.getElementById('game-board').style.display = 'block';
     document.getElementById('game-over').style.display = 'none';
+    document.getElementById('game-start-overlay').style.display = 'flex';
     setupPhotoViewer();
 
     // Show map loading spinner
@@ -182,7 +183,12 @@ async function startGame() {
     if (spinner) spinner.style.display = '';
 
     initMap();
-    loadNextRound();
+    loadNextRound(false);
+}
+
+function beginGame() {
+    document.getElementById('game-start-overlay').style.display = 'none';
+    startTimer();
 }
 
 // Chooses a unique random subset of rounds for one game session.
@@ -203,7 +209,7 @@ function buildRandomRounds() {
 }
 
 // Loads the next round photo and resets round-specific UI.
-function loadNextRound() {
+function loadNextRound(startTimerImmediately = true) {
     currentRoundData = activeRounds[currentRoundIndex];
 
     if (!currentRoundData) {
@@ -225,7 +231,9 @@ function loadNextRound() {
 
     // Start countdown timer for this round
     resetTimer();
-    startTimer();
+    if (startTimerImmediately) {
+        startTimer();
+    }
 }
 
 // Submits the current map guess, scores it, and unlocks the next round button.

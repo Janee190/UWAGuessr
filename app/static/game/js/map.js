@@ -140,6 +140,13 @@ function initMap() {
     map.once('idle', function () {
         var spinner = document.getElementById('map-spinner');
         if (spinner) spinner.style.display = 'none';
+
+        var startBtn = document.getElementById('btn-start-game');
+        var startBtnText = document.getElementById('start-btn-text');
+        if (startBtn && startBtnText) {
+            startBtn.disabled = false;
+            startBtnText.innerText = "START GAME";
+        }
     });
 
     // Hide labels on every style-related event so they never have a chance to

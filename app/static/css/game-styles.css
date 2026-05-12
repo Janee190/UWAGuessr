@@ -21,6 +21,25 @@ all general purpose css should be in style.css
     overflow: hidden;
     background-color: #0f1d33;
 }
+/* Game Start Overlay */
+.page-game #game-start-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 2000;
+    background: rgba(15, 29, 51, 0.7);
+    backdrop-filter: blur(5px);
+    display: none; /* Initially hidden, managed by js */
+    align-items: center;
+    justify-content: center;
+}
+
+.page-game .start-panel {
+    padding: 40px;
+    min-width: 400px;
+}
 
 /* Full Screen Photo Viewer */
 .page-game .photo-viewer {
