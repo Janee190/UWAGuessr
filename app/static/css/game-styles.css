@@ -71,6 +71,48 @@ all general purpose css should be in style.css
     transition: none;
 }
 
+/* Pannellum Loading Styles */
+#photo-viewer.pnlm-container {
+    background-color: #0f1d33 !important;
+    background-image: none !important;
+}
+
+#photo-viewer .pnlm-load-box {
+    background-color: var(--navy-overlay) !important;
+    border-radius: var(--radius-md) !important;
+    box-shadow: var(--shadow-lg) !important;
+    color: var(--text-light) !important;
+    padding-top: 15px;
+}
+
+#photo-viewer .pnlm-lmsg {
+    font-family: var(--font-heading) !important;
+    font-size: 14px !important;
+    color: var(--golden) !important;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+#photo-viewer .pnlm-lbar {
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    border-radius: 4px !important;
+    background: rgba(0, 0, 0, 0.5) !important;
+}
+
+#photo-viewer .pnlm-lbar-fill {
+    background: var(--golden) !important;
+}
+
+#photo-viewer .pnlm-load-button {
+    background-color: var(--navy-overlay) !important;
+    border-radius: var(--radius-md) !important;
+    box-shadow: var(--shadow-lg) !important;
+}
+
+#photo-viewer .pnlm-load-button:hover {
+    background-color: var(--navy-800) !important;
+}
+
 /* --- New Game UI Layout --- */
 
 .page-game .game-panel {
