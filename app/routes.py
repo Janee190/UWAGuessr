@@ -6,7 +6,7 @@ from werkzeug.utils import secure_filename
 from flask_login import login_user, login_required, logout_user, current_user
 
 from app import app
-from app.image_upload import extract_gps, convert_to_webp, append_to_csv
+from app.image_upload import extract_gps, convert_to_webp, add_photo_record
 from app.controllers import login_user_service, register_user
 
 
@@ -206,7 +206,7 @@ def api_upload_images():
 
 @app.route("/api/confirm-image", methods=["POST"])
 def api_confirm_image():
-    """Confirm final location, convert to WebP, and save to CSV."""
+    """Confirm final location, convert to WebP, and save to the database."""
     data = request.json
     temp_name = data.get('tempPath')
     lat = data.get('lat')
@@ -231,8 +231,8 @@ def api_confirm_image():
     # Clean up temp file
     os.remove(temp_path)
 
-    # Append to CSV
-    new_id = append_to_csv(webp_filename, lat, lng)
+    # Insert into database
+    new_id = add_photo_record(webp_filename, lat, lng)
 
     return jsonify({
         'success': True,
