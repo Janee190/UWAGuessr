@@ -139,18 +139,27 @@ async function autoSubmitMiss() {
         totalScore += result.score;
         localStorage.setItem('uwa_totalScore', totalScore);
 
-        showResultOnMap(0, 0, actualLat, actualLng);
+        drawResultOnMap(0, 0, actualLat, actualLng);
 
-        var feedbackMsg = "Time's up! You didn't place a marker.";
-        if (result.score > 0) {
-            feedbackMsg += " Scored " + result.score + " points.";
-        } else {
-            feedbackMsg += " +0 points.";
-        }
-        document.getElementById('feedback-text').innerText = feedbackMsg;
+        document.getElementById('game-board').classList.add('show-results');
+        
+        let start = performance.now();
+        requestAnimationFrame(function animateResize(time) {
+            if (typeof map !== 'undefined' && map) map.resize();
+            if (time - start < 550) {
+                requestAnimationFrame(animateResize);
+            } else {
+                focusResultOnMap(0, 0, actualLat, actualLng);
+            }
+        });
 
+        document.getElementById('result-message').innerText = "Time's up! No marker placed.";
+        document.getElementById('result-distance').innerText = "-";
+        document.getElementById('result-points').innerText = `You scored ${result.score} points. Total: ${totalScore}`;
+
+        document.getElementById('next-round-btn').disabled = false;
         actionBtn.innerText = "NEXT ROUND";
-        actionBtn.disabled = false;
+        actionBtn.disabled = true; // keep hidden actionBtn disabled
 
         currentRoundIndex++;
     } catch (e) {
@@ -224,8 +233,12 @@ function loadNextRound(startTimerImmediately = true) {
     const actionBtn = document.getElementById('action-btn');
     actionBtn.innerText = "SUBMIT GUESS";
     actionBtn.disabled = true; // Wait for guess
+    
+    document.getElementById('next-round-btn').disabled = true;
 
-    document.getElementById('feedback-text').innerText = '';
+    document.getElementById('game-board').classList.remove('show-results');
+    setTimeout(() => { if (typeof map !== 'undefined' && map) map.resize(); }, 50);
+    setTimeout(() => { if (typeof map !== 'undefined' && map) map.resize(); }, 400);
 
     clearMapForNextRound();
 
@@ -281,13 +294,39 @@ async function submitGuess() {
         localStorage.setItem('uwa_totalScore', totalScore);
 
         // Show Map Results
-        showResultOnMap(guessLat, guessLng, actualLat, actualLng);
+        drawResultOnMap(guessLat, guessLng, actualLat, actualLng);
 
-        // Show UI Feedback (You will need HTML elements for these)
-        document.getElementById('feedback-text').innerText = `You were ${Math.round(distanceMeters)}m away! You scored ${roundScore} points.`;
+        document.getElementById('game-board').classList.add('show-results');
+        
+        let start = performance.now();
+        requestAnimationFrame(function animateResize(time) {
+            if (typeof map !== 'undefined' && map) map.resize();
+            if (time - start < 550) {
+                requestAnimationFrame(animateResize);
+            } else {
+                focusResultOnMap(guessLat, guessLng, actualLat, actualLng);
+            }
+        });
 
+        let distanceMsg = Math.round(distanceMeters) + " m";
+        if (distanceMeters > 1000) {
+            distanceMsg = (distanceMeters / 1000).toFixed(1) + " km";
+        }
+
+        let resultTitle = "Good guess!";
+        if (distanceMeters < 50) resultTitle = "Perfect! Right on top of it.";
+        else if (distanceMeters < 200) resultTitle = "Great guess!";
+        else if (distanceMeters < 500) resultTitle = "Not bad!";
+        else resultTitle = "At least it was on the correct planet.";
+
+        document.getElementById('result-message').innerText = resultTitle;
+        document.getElementById('result-distance').innerText = distanceMsg;
+        document.getElementById('result-points').innerText = `You scored ${roundScore} points. Total: ${totalScore}`;
+
+        document.getElementById('next-round-btn').disabled = false;
+        
         actionBtn.innerText = "NEXT ROUND";
-        actionBtn.disabled = false;
+        actionBtn.disabled = true; // keep hidden actionBtn disabled
 
         // Prepare for next round
         currentRoundIndex++;

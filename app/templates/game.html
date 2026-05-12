@@ -50,8 +50,24 @@
 			<a class="btn-game-exit shadow rounded-3" href="{{ url_for('index') }}">EXIT</a>
 		</div>
 
-		<!-- Feedback Text overlay -->
-		<p id="feedback-text" class="shadow-lg rounded-3" aria-live="polite"></p>
+		<!-- Round Result Overlay -->
+		<div id="round-result-overlay" class="round-result-overlay">
+			<div class="result-row message-row mb-2">
+				<span id="result-message" class="text-uppercase font-heading text-golden"></span>
+				<div class="distance-badge">
+					<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-geo-alt-fill" viewBox="0 0 16 16">
+						<path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10m0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6"/>
+					</svg>
+					<span id="result-distance"></span>
+				</div>
+			</div>
+			<div class="result-row action-row">
+				<span id="result-points" class="result-points"></span>
+				<button id="next-round-btn" class="btn-game-action px-4 py-2 text-dark fs-5" onclick="handleAction()">CONTINUE <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-chevron-right ms-1" viewBox="0 0 16 16">
+					<path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708"/>
+				</svg></button>
+			</div>
+		</div>
 
 		<!-- Bottom Right Map & Actions -->
 		<aside class="bottom-right-container">

@@ -205,7 +205,7 @@ function clearResultLine() {
 }
 
 // Show the actual location and draw a line after guessing
-function showResultOnMap(guessLat, guessLng, actualLat, actualLng) {
+function drawResultOnMap(guessLat, guessLng, actualLat, actualLng) {
     if (!isMapReady()) return;
 
     if (actualMarker) {
@@ -253,14 +253,20 @@ function showResultOnMap(guessLat, guessLng, actualLat, actualLng) {
         });
 
         resultLine = true;
+    }
+}
 
+function focusResultOnMap(guessLat, guessLng, actualLat, actualLng) {
+    if (!isMapReady()) return;
+    
+    if (guessMarker) {
         const minLng = Math.min(guessLng, actualLng);
         const maxLng = Math.max(guessLng, actualLng);
         const minLat = Math.min(guessLat, actualLat);
         const maxLat = Math.max(guessLat, actualLat);
 
         var fitDuration = typeof map.loaded === 'function' && !map.loaded() ? 0 : 700;
-        map.fitBounds([[minLng, minLat], [maxLng, maxLat]], { padding: 50, duration: fitDuration });
+        map.fitBounds([[minLng, minLat], [maxLng, maxLat]], { padding: { top: 60, bottom: 250, left: 60, right: 60 }, duration: fitDuration, maxZoom: 18 });
     } else {
         // If there was no guess, just center on the actual location
         map.setCenter([actualLng, actualLat]);
