@@ -22,51 +22,49 @@
 
 		<div id="photo-viewer" class="photo-viewer"></div>
 
-		<div class="photo-controls">
-			<button class="btn btn-dark btn-game" type="button" onclick="zoomPhoto(1.2)">+</button>
-			<button class="btn btn-dark btn-game" type="button" onclick="zoomPhoto(1 / 1.2)">-</button>
-			<button class="btn btn-outline-light btn-game" type="button" onclick="resetPhotoTransform()">Reset</button>
+		<!-- Top Left Logo -->
+		<div class="top-left-logo">
+			<img src="{{ url_for('static', filename='images/UWAGuessr-logo.png') }}" alt="UWAGuessr">
 		</div>
 
-		<div class="exit-btn">
-			<a class="btn btn-dark btn-game" href="{{ url_for('index') }}">Exit</a>
+		<!-- Top Right Stats -->
+		<div class="top-right-stats game-panel d-flex flex-column align-items-center justify-content-center">
+			<div id="round-counter">Round 1/5</div>
+			<div class="stats-divider"></div>
+			<div id="timer-display">30</div>
 		</div>
 
-		<article class="game-ui-panel">
-			<div class="d-flex justify-content-between align-items-center mb-3">
-				<h1 class="h3 mb-0 text-uppercase">Campus Guess</h1>
-				<div id="timer-display" class="timer-display">30</div>
+		<!-- Bottom Left Exit -->
+		<div class="bottom-left-exit">
+			<a class="btn-game-exit" href="{{ url_for('index') }}">EXIT</a>
+		</div>
+
+		<!-- Feedback Text overlay -->
+		<p id="feedback-text" aria-live="polite"></p>
+
+		<!-- Bottom Right Map & Actions -->
+		<aside class="bottom-right-container">
+			<div class="map-wrapper game-panel">
+				<div class="map-spinner" id="map-spinner"></div>
+				<div id="map" aria-label="Interactive UWA campus map"></div>
 			</div>
-			<div class="mb-3">
-				<span id="round-counter">Round 1 / 5</span>
+			
+			<div class="action-btn-wrapper">
+				<button id="action-btn" class="btn-game-action w-100 h-100" type="button" disabled
+					onclick="handleAction()">SUBMIT GUESS</button>
 			</div>
-
-			<p class="small text-light mb-2 opacity-75">Pan & zoom the photo, then place your marker on the map.</p>
-
-			<p id="feedback-text" aria-live="polite"></p>
-
-			<div class="d-flex flex-column gap-2 mt-3">
-				<button id="submit-btn" class="btn btn-warning btn-game w-100" type="button"
-					onclick="submitGuess()">Submit Guess</button>
-
-				<button id="next-btn" class="btn btn-outline-light btn-game w-100" type="button" disabled
-					onclick="loadNextRound()">Next Round</button>
-			</div>
-		</article>
-
-		<aside class="floating-map-container">
-			<div class="map-spinner" id="map-spinner"></div>
-			<div id="map" aria-label="Interactive UWA campus map"></div>
 		</aside>
 
 	</div>
 
-	<section id="game-over">
-		<h2 class="display-6 mb-3 text-uppercase">Game Over</h2>
-		<p id="final-score">Final Score: 0</p>
+	<section id="game-over" class="game-panel">
+		<h2 class="display-6 mb-3 text-uppercase font-heading game-over-title">Game Over</h2>
+		<div class="final-score-box mb-4">
+			<p id="final-score" class="mb-0">Final Score: 0</p>
+		</div>
 		<div class="d-flex justify-content-center gap-3 mt-4">
-			<a class="btn btn-warning btn-game" href="{{ url_for('game') }}">Play Again</a>
-			<a class="btn btn-outline-light btn-game" href="{{ url_for('index') }}">Back to Home</a>
+			<a class="btn-game-action px-4 py-2 text-decoration-none text-dark" href="{{ url_for('game') }}">Play Again</a>
+			<a class="btn-game-secondary px-4 py-2 text-decoration-none" href="{{ url_for('index') }}">Back to Home</a>
 		</div>
 	</section>
 

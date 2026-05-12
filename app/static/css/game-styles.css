@@ -52,114 +52,206 @@ all general purpose css should be in style.css
     transition: none;
 }
 
-/* Top Right Controls */
-.page-game .photo-controls {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    z-index: 1000;
-    display: flex;
-    gap: 10px;
-}
+/* --- New Game UI Layout --- */
 
-.page-game .photo-controls .btn {
-    font-family: var(--font-accent);
-    font-size: 1.1rem;
-    letter-spacing: 1px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
-}
-
-/* Exit Button */
-.page-game .exit-btn {
-    position: absolute;
-    top: 20px;
-    left: 20px;
-    z-index: 1000;
-    display: flex;
-    gap: 10px;
-}
-
-/* Bottom Left Game UI Panel (styled like signup-card) */
-.page-game .game-ui-panel {
-    position: absolute;
-    bottom: 20px;
-    left: 20px;
-    z-index: 1000;
-    width: 350px;
+.page-game .game-panel {
     background-color: var(--navy-overlay);
     border: 2px solid #5b5bff;
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-lg);
-    padding: 20px;
-}
-
-.page-game .game-ui-panel h1 {
-    font-family: var(--font-heading);
-    font-size: 1.5rem;
-    margin-bottom: 0;
-}
-
-.page-game #round-counter {
-    font-family: 'Press Start 2P', sans-serif;
-    font-size: 0.6rem;
-    color: var(--golden);
-}
-
-/* ── Timer ──────────────────────────────────────────── */
-
-.page-game .timer-display {
-    font-family: 'Press Start 2P', sans-serif;
-    font-size: 1.3rem;
-    color: #00e676;
-    background: rgba(0, 0, 0, 0.4);
-    border: 2px solid #00e676;
-    border-radius: 8px;
-    padding: 6px 12px;
-    min-width: 56px;
-    text-align: center;
-    transition: color 0.3s, border-color 0.3s;
-    line-height: 1;
-}
-
-.page-game .timer-display.timer-warning {
-    color: #ffc107;
-    border-color: #ffc107;
-}
-
-.page-game .timer-display.timer-danger {
-    color: #ff1744;
-    border-color: #ff1744;
-    animation: timer-pulse 0.6s ease-in-out infinite alternate;
-}
-
-@keyframes timer-pulse {
-    from { transform: scale(1); opacity: 1; }
-    to   { transform: scale(1.1); opacity: 0.7; }
-}
-
-.page-game .timer-display.timer-expired {
-    color: #ff1744;
-    border-color: #ff1744;
-    animation: none;
-    opacity: 0.5;
-}
-
-.page-game #feedback-text {
-    font-family: 'Russo One', sans-serif;
-    font-size: 1rem;
-    min-height: 2.5rem;
     color: var(--text-light);
 }
 
-.page-game .btn-game {
+.page-game .btn-game-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--golden);
+    color: #000;
+    border: none;
+    border-radius: var(--radius-md);
     font-family: var(--font-accent);
-    font-size: 1.2rem;
-    letter-spacing: 1px;
+    font-size: 1.5rem;
+    font-weight: 200;
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+    text-decoration: none;
 }
 
-/* Bottom Right Floating Map */
+.page-game .btn-game-action:hover:not(:disabled) {
+    background: var(--golden-hover);
+    transform: scale(1.04);
+    box-shadow: 0 0 20px rgba(255, 202, 44, 0.8);
+}
 
-/* Map loading spinner */
+.page-game .btn-game-action:active:not(:disabled) {
+    transform: scale(0.98);
+}
+
+.page-game .btn-game-action:disabled {
+    background: #6c757d;
+    color: #d3d3d3;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.page-game .btn-game-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: 1px solid #d4d9d2;
+    border-radius: var(--radius-md);
+    font-family: var(--font-accent);
+    font-size: 1.5rem;
+    color: var(--text-light);
+    cursor: pointer;
+    transition: background 0.15s ease;
+    text-decoration: none;
+}
+
+.page-game .btn-game-secondary:hover {
+    background: var(--navy-800);
+}
+
+/* Top Left Logo */
+.page-game .top-left-logo {
+    position: absolute;
+    top: 24px;
+    left: 24px;
+    z-index: 1000;
+}
+
+.page-game .top-left-logo img {
+    height: 60px;
+    width: auto;
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.6));
+}
+
+/* Top Right Stats */
+.page-game .top-right-stats {
+    position: absolute;
+    top: 24px;
+    right: 24px;
+    z-index: 1000;
+    padding: 16px 32px;
+    font-family: var(--font-heading);
+}
+
+.page-game #round-counter {
+    font-size: 1.2rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    color: var(--golden);
+    margin-bottom: 8px;
+}
+
+.page-game .stats-divider {
+    width: 100%;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.2);
+    margin: 0 0 8px 0;
+}
+
+.page-game #timer-display {
+    font-size: 2.25rem;
+    font-weight: 700;
+    transition: color 0.3s;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    font-variant-numeric: tabular-nums;
+    min-width: 85px;
+    display: inline-block;
+}
+
+.page-game #timer-display.timer-warning {
+    color: #ffc107;
+}
+
+.page-game #timer-display.timer-danger {
+    color: #ff3b30;
+}
+
+/* Bottom Left Exit */
+.page-game .bottom-left-exit {
+    position: absolute;
+    bottom: 24px;
+    left: 24px;
+    z-index: 1000;
+}
+
+.page-game .btn-game-exit {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--navy-overlay);
+    color: var(--text-light);
+    border: 2px solid #5b5bff;
+    border-radius: var(--radius-md);
+    padding: 10px 28px;
+    font-family: var(--font-accent);
+    font-size: 1.5rem;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.page-game .btn-game-exit:hover {
+    background: var(--navy-800);
+    border-color: var(--golden);
+    color: var(--golden);
+}
+
+/* Feedback Text */
+.page-game #feedback-text {
+    position: absolute;
+    bottom: 36px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    font-family: var(--font-main);
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: #fff;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+    text-align: center;
+    background: var(--navy-overlay);
+    border: 1px solid #5b5bff;
+    padding: 8px 20px;
+    border-radius: var(--radius-md);
+    pointer-events: none;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.page-game #feedback-text:empty {
+    display: none;
+}
+
+/* Bottom Right Map & Actions */
+.page-game .bottom-right-container {
+    position: absolute;
+    bottom: 24px;
+    right: 24px;
+    z-index: 1000;
+    width: 360px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.page-game .map-wrapper {
+    width: 100%;
+    height: 260px;
+    padding: 6px;
+}
+
+.page-game #map {
+    width: 100%;
+    height: 100%;
+    border-radius: calc(var(--radius-lg) - 6px);
+    background-color: #e4edf6;
+}
+
 .page-game .map-spinner {
     position: absolute;
     top: 50%;
@@ -167,7 +259,7 @@ all general purpose css should be in style.css
     width: 36px;
     height: 36px;
     margin: -18px 0 0 -18px;
-    border: 4px solid rgba(91, 91, 255, 0.25);
+    border: 4px solid rgba(255, 255, 255, 0.2);
     border-top-color: #5b5bff;
     border-radius: 50%;
     z-index: 10;
@@ -178,25 +270,10 @@ all general purpose css should be in style.css
     to { transform: rotate(360deg); }
 }
 
-.page-game .floating-map-container {
-    position: absolute;
-    bottom: 20px;
-    right: 20px;
-    z-index: 1000;
-    width: 400px;
-    height: 300px;
-    background-color: var(--navy-overlay);
-    border: 2px solid #5b5bff;
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-lg);
-    overflow: hidden;
-}
-
-/* Map resizes with its container — no hover expansion to avoid WebGL pop-in */
-.page-game #map {
+/* Action Button Container */
+.page-game .action-btn-wrapper {
     width: 100%;
-    height: 100%;
-    background-color: #e4edf6;
+    height: 60px;
 }
 
 /* Game Over Overlay */
@@ -207,24 +284,31 @@ all general purpose css should be in style.css
     left: 50%;
     transform: translate(-50%, -50%);
     z-index: 2000;
-    background-color: var(--navy-nav);
-    border: 2px solid #5b5bff;
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-lg);
     padding: 40px;
     text-align: center;
-    min-width: 400px;
+    min-width: 420px;
 }
 
-.page-game #game-over h2 {
-    font-family: var(--font-heading);
+.page-game .game-over-title {
+    color: var(--golden);
+    text-shadow: 0 2px 10px rgba(255, 202, 44, 0.3);
+    letter-spacing: 0.05em;
+}
+
+.page-game .final-score-box {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-md);
+    padding: 20px;
+    margin-top: 20px;
 }
 
 .page-game #final-score {
-    font-family: 'Press Start 2P', sans-serif;
-    font-size: 1.2rem;
-    color: var(--golden);
-    margin: 20px 0;
+    font-family: var(--font-heading);
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #fff;
+    text-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
 }
 
 .page-game #map canvas {
@@ -232,19 +316,29 @@ all general purpose css should be in style.css
 }
 
 @media (max-width: 768px) {
-    .page-game .floating-map-container {
-        width: 260px;
-        height: 200px;
+    .page-game .bottom-right-container {
+        width: 280px;
         bottom: auto;
-        top: 80px;
+        top: 120px;
     }
 
-    .page-game #map {
-        width: 100%;
-        height: 100%;
+    .page-game .map-wrapper {
+        height: 220px;
     }
 
-    .page-game .game-ui-panel {
-        width: calc(100% - 40px);
+    .page-game .top-left-logo img {
+        height: 48px;
+    }
+    
+    .page-game .top-right-stats {
+        padding: 12px 20px;
+    }
+    
+    .page-game #timer-display {
+        font-size: 1.8rem;
+    }
+    
+    .page-game #round-counter {
+        font-size: 1rem;
     }
 }

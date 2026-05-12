@@ -19,20 +19,24 @@ let isTimerExpired = false;
 
 // ── Timer Functions ────────────────────────────────────────────────────────
 
+let startTime = null;
+
 function startTimer() {
     stopTimer();
     isTimerExpired = false;
     timeRemaining = TIME_LIMIT;
+    startTime = performance.now();
     updateTimerDisplay();
 
     timerInterval = setInterval(function () {
-        timeRemaining--;
+        let elapsedTime = (performance.now() - startTime) / 1000;
+        timeRemaining = Math.max(0, TIME_LIMIT - elapsedTime);
         updateTimerDisplay();
 
         if (timeRemaining <= 0) {
             handleTimerExpiry();
         }
-    }, 1000);
+    }, 10);
 }
 
 function stopTimer() {
@@ -56,7 +60,7 @@ function resetTimer() {
 function updateTimerDisplay() {
     var el = document.getElementById('timer-display');
     if (!el) return;
-    el.textContent = timeRemaining;
+    el.textContent = timeRemaining.toFixed(1) + "s";
 
     el.classList.remove('timer-warning', 'timer-danger', 'timer-expired');
 
@@ -74,7 +78,7 @@ function handleTimerExpiry() {
     isTimerExpired = true;
     stopTimer();
 
-    document.getElementById('submit-btn').disabled = true;
+    document.getElementById('action-btn').disabled = true;
 
     if (guessMarker) {
         submitGuess();
@@ -84,8 +88,8 @@ function handleTimerExpiry() {
 }
 
 async function autoSubmitMiss() {
-    var submitBtn = document.getElementById('submit-btn');
-    submitBtn.disabled = true;
+    var actionBtn = document.getElementById('action-btn');
+    actionBtn.disabled = true;
 
     try {
         var response = await fetch('/api/guess', {
@@ -97,7 +101,7 @@ async function autoSubmitMiss() {
         var result = await response.json();
         if (result.error) {
             console.error(result.error);
-            submitBtn.disabled = false;
+            actionBtn.disabled = false;
             return;
         }
 
@@ -116,12 +120,14 @@ async function autoSubmitMiss() {
             feedbackMsg += " +0 points.";
         }
         document.getElementById('feedback-text').innerText = feedbackMsg;
-        document.getElementById('next-btn').disabled = false;
+        
+        actionBtn.innerText = "NEXT ROUND";
+        actionBtn.disabled = false;
 
         currentRoundIndex++;
     } catch (e) {
         console.error('Auto-submit failed:', e);
-        submitBtn.disabled = false;
+        actionBtn.disabled = false;
     }
 }
 
@@ -180,8 +186,11 @@ function loadNextRound() {
     // Update UI
     loadPanorama(currentRoundData.imagePath);
     document.getElementById('round-counter').innerText = `Round ${currentRoundIndex + 1} / ${activeRounds.length}`;
-    document.getElementById('submit-btn').disabled = true; // Wait for guess
-    document.getElementById('next-btn').disabled = true;
+    
+    const actionBtn = document.getElementById('action-btn');
+    actionBtn.innerText = "SUBMIT GUESS";
+    actionBtn.disabled = true; // Wait for guess
+
     document.getElementById('feedback-text').innerText = '';
 
     clearMapForNextRound();
@@ -199,8 +208,8 @@ async function submitGuess() {
     const guessLat = markerPosition.lat;
     const guessLng = markerPosition.lng;
 
-    const submitBtn = document.getElementById('submit-btn');
-    submitBtn.disabled = true;
+    const actionBtn = document.getElementById('action-btn');
+    actionBtn.disabled = true;
 
     // Stop the timer since the guess was submitted
     stopTimer();
@@ -222,7 +231,7 @@ async function submitGuess() {
         const result = await response.json();
         if (result.error) {
             console.error(result.error);
-            submitBtn.disabled = false;
+            actionBtn.disabled = false;
             return;
         }
 
@@ -240,14 +249,24 @@ async function submitGuess() {
 
         // Show UI Feedback (You will need HTML elements for these)
         document.getElementById('feedback-text').innerText = `You were ${Math.round(distanceMeters)}m away! You scored ${roundScore} points.`;
-        document.getElementById('submit-btn').disabled = true;
-        document.getElementById('next-btn').disabled = false;
+        
+        actionBtn.innerText = "NEXT ROUND";
+        actionBtn.disabled = false;
 
         // Prepare for next round
         currentRoundIndex++;
     } catch (e) {
         console.error("Failed to submit guess:", e);
-        submitBtn.disabled = false;
+        actionBtn.disabled = false;
+    }
+}
+
+function handleAction() {
+    const actionBtn = document.getElementById('action-btn');
+    if (actionBtn.innerText === "SUBMIT GUESS") {
+        submitGuess();
+    } else {
+        loadNextRound();
     }
 }
 

@@ -180,7 +180,7 @@ function placeGuessMarker(lat, lng) {
         .setLngLat([lng, lat])
         .addTo(map);
 
-    document.getElementById('submit-btn').disabled = false;
+    document.getElementById('action-btn').disabled = false;
 }
 
 function clearResultLine() {
