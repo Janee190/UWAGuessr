@@ -184,7 +184,11 @@ async function startGame() {
     localStorage.setItem('uwa_totalScore', totalScore); // Reset local storage
     document.getElementById('game-board').style.display = 'block';
     document.getElementById('game-over').style.display = 'none';
-    document.getElementById('game-start-overlay').style.display = 'flex';
+    
+    var overlay = document.getElementById('game-start-overlay');
+    overlay.classList.remove('ready');
+    overlay.style.display = 'flex';
+    
     setupPhotoViewer();
 
     // Show map loading spinner

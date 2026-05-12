@@ -151,6 +151,9 @@ function initMap() {
             startBtn.disabled = false;
             startBtnText.innerText = "START GAME";
         }
+
+        var overlay = document.getElementById('game-start-overlay');
+        if (overlay) overlay.classList.add('ready');
     });
 
     // Hide labels on every style-related event so they never have a chance to

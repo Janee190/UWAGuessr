@@ -29,11 +29,17 @@ all general purpose css should be in style.css
     right: 0;
     bottom: 0;
     z-index: var(--z-modal);
-    background: rgba(15, 29, 51, 0.7);
-    backdrop-filter: blur(5px);
+    background: rgba(15, 29, 51, 1);
+    backdrop-filter: blur(0px);
     display: none; /* Initially hidden, managed by js */
     align-items: center;
     justify-content: center;
+    transition: background 1.5s ease, backdrop-filter 1.5s ease;
+}
+
+.page-game #game-start-overlay.ready {
+    background: rgba(15, 29, 51, 0.7);
+    backdrop-filter: blur(5px);
 }
 
 .page-game .start-panel {
