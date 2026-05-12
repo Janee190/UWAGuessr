@@ -19,21 +19,41 @@ function isMapReady() {
 
 function hideMapLabelsAndIcons() {
     if (!map || typeof map.getStyle !== 'function') return;
+    if (typeof map.isStyleLoaded === 'function' && !map.isStyleLoaded()) return;
 
     const style = map.getStyle();
     if (!style || !Array.isArray(style.layers)) return;
 
-    style.layers.forEach(function(layer) {
+    var hiddenCount = 0;
+    style.layers.forEach(function (layer) {
         if (layer.type !== 'symbol') return;
         if (!map.getLayer(layer.id)) return;
 
         // Symbol layers carry both POI icons and text labels in Mapbox/MazeMap styles.
         try {
             map.setLayoutProperty(layer.id, 'visibility', 'none');
+            hiddenCount++;
         } catch (_err) {
             // Ignore transient style update races and continue hiding remaining layers.
         }
     });
+
+    return hiddenCount;
+}
+
+// Retry hiding labels up to 5 times (every 400ms) to catch late style updates.
+function scheduleLabelHideRetry(attempts) {
+    if (!map || attempts <= 0) return;
+    setTimeout(function () {
+        var hidden = hideMapLabelsAndIcons();
+        if (hidden === 0 && typeof map.isStyleLoaded === 'function' && map.isStyleLoaded()) {
+            // Style is loaded but no symbol layers found — the style may have just
+            // been set. Try again.
+            scheduleLabelHideRetry(attempts - 1);
+        } else if (hidden === 0 && typeof map.isStyleLoaded === 'function' && !map.isStyleLoaded()) {
+            scheduleLabelHideRetry(attempts - 1);
+        }
+    }, 400);
 }
 
 function recenterMapView() {
@@ -48,7 +68,8 @@ function recenterMapView() {
             center: UWA_CENTER,
             zoom: UWA_DEFAULT_ZOOM,
             bearing: 0,
-            pitch: 0
+            pitch: 0,
+            padding: { top: 0, bottom: 0, left: 0, right: 0 }
         });
     } else {
         if (typeof map.setCenter === 'function') {
@@ -62,6 +83,9 @@ function recenterMapView() {
         }
         if (typeof map.setPitch === 'function') {
             map.setPitch(0);
+        }
+        if (typeof map.setPadding === 'function') {
+            map.setPadding({ top: 0, bottom: 0, left: 0, right: 0 });
         }
     }
 
@@ -79,14 +103,14 @@ function attachResizeHandlers() {
 
     const floatingMapContainer = document.querySelector('.floating-map-container');
     if (floatingMapContainer) {
-        floatingMapContainer.addEventListener('transitionend', function() {
+        floatingMapContainer.addEventListener('transitionend', function () {
             if (map) {
                 map.resize();
             }
         });
     }
 
-    window.addEventListener('resize', function() {
+    window.addEventListener('resize', function () {
         if (map) {
             map.resize();
         }
@@ -111,23 +135,45 @@ function initMap() {
         center: UWA_CENTER,
         zoom: UWA_DEFAULT_ZOOM,
         zLevel: UWA_DEFAULT_ZLEVEL,
-        scrollZoom: true
+        scrollZoom: true,
+        preserveDrawingBuffer: false,
+        failIfMajorPerformanceCaveat: false
     });
 
-    map.on('load', function() {
+    // Hide map loading spinner once the map is ready
+    map.once('idle', function () {
+        var spinner = document.getElementById('map-spinner');
+        if (spinner) spinner.style.display = 'none';
+
+        var startBtn = document.getElementById('btn-start-game');
+        var startBtnText = document.getElementById('start-btn-text');
+        if (startBtn && startBtnText) {
+            startBtn.disabled = false;
+            startBtnText.innerText = "START GAME";
+        }
+
+        var overlay = document.getElementById('game-start-overlay');
+        if (overlay) overlay.classList.add('ready');
+    });
+
+    // Hide labels on every style-related event so they never have a chance to
+    // render. These listeners are registered BEFORE 'load' so they catch the
+    // initial style loading, not just subsequent updates.
+    map.on('styledata', hideMapLabelsAndIcons);
+    map.on('idle', hideMapLabelsAndIcons);
+    scheduleLabelHideRetry(5);
+
+    map.on('load', function () {
         recenterMapView();
         hideMapLabelsAndIcons();
 
-        // Keep labels/icons hidden if MazeMap refreshes style data.
-        map.on('styledata', hideMapLabelsAndIcons);
-
-        map.on('click', function(e) {
+        map.on('click', function (e) {
             placeGuessMarker(e.lngLat.lat, e.lngLat.lng);
         });
     });
 
     attachResizeHandlers();
-    
+
 }
 
 
@@ -148,7 +194,7 @@ function placeGuessMarker(lat, lng) {
         .setLngLat([lng, lat])
         .addTo(map);
 
-    document.getElementById('submit-btn').disabled = false;
+    document.getElementById('action-btn').disabled = false;
 }
 
 function clearResultLine() {
@@ -166,7 +212,7 @@ function clearResultLine() {
 }
 
 // Show the actual location and draw a line after guessing
-function showResultOnMap(guessLat, guessLng, actualLat, actualLng) {
+function drawResultOnMap(guessLat, guessLng, actualLat, actualLng) {
     if (!isMapReady()) return;
 
     if (actualMarker) {
@@ -174,52 +220,68 @@ function showResultOnMap(guessLat, guessLng, actualLat, actualLng) {
     }
 
     actualMarker = new Mazemap.MazeMarker({
-        color: '#22c55e',
-        size: 34
+        color: '#222222',
+        size: 36,
+        glyphColor: '#ffc107',
+        glyphSize: 22,
+        glyph: '★'
     })
         .setLngLat([actualLng, actualLat])
         .addTo(map);
 
     clearResultLine();
 
-    const resultLineGeoJson = {
-        type: 'Feature',
-        geometry: {
-            type: 'LineString',
-            coordinates: [
-                [guessLng, guessLat],
-                [actualLng, actualLat]
-            ]
-        }
-    };
+    if (guessMarker) {
+        const resultLineGeoJson = {
+            type: 'Feature',
+            geometry: {
+                type: 'LineString',
+                coordinates: [
+                    [guessLng, guessLat],
+                    [actualLng, actualLat]
+                ]
+            }
+        };
 
-    map.addSource(RESULT_LINE_SOURCE_ID, {
-        type: 'geojson',
-        data: resultLineGeoJson
-    });
+        map.addSource(RESULT_LINE_SOURCE_ID, {
+            type: 'geojson',
+            data: resultLineGeoJson
+        });
 
-    map.addLayer({
-        id: RESULT_LINE_LAYER_ID,
-        type: 'line',
-        source: RESULT_LINE_SOURCE_ID,
-        layout: {
-            'line-cap': 'round',
-            'line-join': 'round'
-        },
-        paint: {
-            'line-color': '#ff3b30',
-            'line-width': 3
-        }
-    });
+        map.addLayer({
+            id: RESULT_LINE_LAYER_ID,
+            type: 'line',
+            source: RESULT_LINE_SOURCE_ID,
+            layout: {
+                'line-cap': 'round',
+                'line-join': 'round'
+            },
+            paint: {
+                'line-color': '#222222',
+                'line-width': 4,
+                'line-dasharray': [1, 2]
+            }
+        });
 
-    resultLine = true;
+        resultLine = true;
+    }
+}
 
-    const minLng = Math.min(guessLng, actualLng);
-    const maxLng = Math.max(guessLng, actualLng);
-    const minLat = Math.min(guessLat, actualLat);
-    const maxLat = Math.max(guessLat, actualLat);
+function focusResultOnMap(guessLat, guessLng, actualLat, actualLng) {
+    if (!isMapReady()) return;
 
-    map.fitBounds([[minLng, minLat], [maxLng, maxLat]], { padding: 50, duration: 700 });
+    if (guessMarker) {
+        const minLng = Math.min(guessLng, actualLng);
+        const maxLng = Math.max(guessLng, actualLng);
+        const minLat = Math.min(guessLat, actualLat);
+        const maxLat = Math.max(guessLat, actualLat);
+
+        var fitDuration = typeof map.loaded === 'function' && !map.loaded() ? 0 : 700;
+        map.fitBounds([[minLng, minLat], [maxLng, maxLat]], { padding: { top: 60, bottom: 250, left: 60, right: 60 }, duration: fitDuration, maxZoom: 18 });
+    } else {
+        // If there was no guess, just center on the actual location
+        map.setCenter([actualLng, actualLat]);
+    }
 }
 
 // Reset map for the next round
