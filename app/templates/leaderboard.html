@@ -2,30 +2,30 @@
 
 {% block content %}
 
-{% macro render_leaderboard(scores, id, display_style) %}
-<div id="{{ id }}" style="display: {{ display_style }};">
-    <div class="Top-three">
+{% macro render_leaderboard(scores, id, display_style, user_stat) %}
+<div id="{{ id }}" style="display: {{ display_style }}; padding-bottom: 80px;">
+    <div class="top-three">
         {% if scores|length >= 1 %}
         <div class="rank-card rank-1">
-            <div class="h2 bangers-font" style="color: #ffd700;">#1</div>
-            <div class="fw-bold">{{ scores[0].username }}</div>
-            <div class="text-muted small">{{ "{:,}".format(scores[0].high_score) }} pts</div>
+            <div class="bangers-font rank-number" style="color: #ffd700;">#1</div>
+            <div class="fw-bold rank-name">{{ scores[0].username }}</div>
+            <div class="text-muted rank-score">{{ "{:,}".format(scores[0].high_score) }} pts</div>
         </div>
         {% endif %}
 
         {% if scores|length >= 2 %}
         <div class="rank-card rank-2">
-            <div class="h3 bangers-font" style="color: #c0c0c0;">#2</div>
-            <div class="fw-bold">{{ scores[1].username }}</div>
-            <div class="text-muted small">{{ "{:,}".format(scores[1].high_score) }} pts</div>
+            <div class="bangers-font rank-number" style="color: #c0c0c0;">#2</div>
+            <div class="fw-bold rank-name">{{ scores[1].username }}</div>
+            <div class="text-muted rank-score">{{ "{:,}".format(scores[1].high_score) }} pts</div>
         </div>
         {% endif %}
 
         {% if scores|length >= 3 %}
         <div class="rank-card rank-3">
-            <div class="h3 bangers-font" style="color: #cd7f32;">#3</div>
-            <div class="fw-bold">{{ scores[2].username }}</div>
-            <div class="text-muted small">{{ "{:,}".format(scores[2].high_score) }} pts</div>
+            <div class="bangers-font rank-number" style="color: #cd7f32;">#3</div>
+            <div class="fw-bold rank-name">{{ scores[2].username }}</div>
+            <div class="text-muted rank-score">{{ "{:,}".format(scores[2].high_score) }} pts</div>
         </div>
         {% endif %}
     </div>
@@ -36,9 +36,9 @@
             <tbody>
                 {% for score in scores[3:] %}
                 <tr>
-                    <td class="ps-4 fw-bold">#{{ loop.index + 3 }}</td>
-                    <td class="fw-bold" style="color: var(--golden);">{{ score.username }}</td>
-                    <td class="text-end pe-4">{{ "{:,}".format(score.high_score) }} pts</td>
+                    <td class="ps-4 fw-bold row-rank">#{{ loop.index + 3 }}</td>
+                    <td class="fw-bold row-name" style="color: var(--golden);">{{ score.username }}</td>
+                    <td class="text-end pe-4 row-score">{{ "{:,}".format(score.high_score) }} pts</td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -51,6 +51,16 @@
         <p class="text-muted">No scores yet. Be the first to play!</p>
     </div>
     {% endif %}
+
+    {% if current_user.is_authenticated and user_stat %}
+    <div class="sticky-user-row">
+        <div class="container d-flex justify-content-between align-items-center">
+            <div class="fw-bold fs-4">#{{ user_stat.rank }}</div>
+            <div class="fw-bold fs-4">{{ current_user.username }}</div>
+            <div class="fw-bold fs-4">{{ "{:,}".format(user_stat.score) }} pts</div>
+        </div>
+    </div>
+    {% endif %}
 </div>
 {% endmacro %}
 
@@ -59,16 +69,16 @@
         <h1 class="text-centre bangers-font mb-4" style="color: var(--golden); font-size: 60px;">CAMPUS LEGENDS</h1>
 
         <div class="d-flex justify-content-center mb-5">
-            <div class="btn-group" role="group">
-                <button type="button" class="btn btn-outline-warning active" id="btn-daily"
+            <div class="d-flex gap-3" role="group">
+                <button type="button" class="btn btn-toggle rounded-3 active" id="btn-daily"
                     onclick="showLeaderboard('daily')">Daily Best</button>
-                <button type="button" class="btn btn-outline-warning" id="btn-all-time"
+                <button type="button" class="btn btn-toggle rounded-3" id="btn-all-time"
                     onclick="showLeaderboard('all-time')">Total All-Time</button>
             </div>
         </div>
 
-        {{ render_leaderboard(daily_scores, 'board-daily', 'block') }}
-        {{ render_leaderboard(all_time_scores, 'board-all-time', 'none') }}
+        {{ render_leaderboard(daily_scores, 'board-daily', 'block', user_daily) }}
+        {{ render_leaderboard(all_time_scores, 'board-all-time', 'none', user_all_time) }}
     </div>
 </main>
 

@@ -7,7 +7,7 @@ from flask_login import login_user, login_required, logout_user, current_user
 
 from app import app
 from app.image_upload import extract_gps, convert_to_webp, add_photo_record
-from app.controllers import login_user_service, register_user, get_leaderboard_data, get_all_time_leaderboard_data, add_score
+from app.controllers import login_user_service, register_user, get_leaderboard_data, get_all_time_leaderboard_data, add_score, get_user_daily_stat, get_user_all_time_stat
 
 
 @app.route("/")
@@ -85,7 +85,18 @@ def how_to_play():
 def leaderboard():
     daily_scores = get_leaderboard_data()
     all_time_scores = get_all_time_leaderboard_data()
-    return render_template("leaderboard.html", daily_scores=daily_scores, all_time_scores=all_time_scores)
+    
+    user_daily = None
+    user_all_time = None
+    if current_user.is_authenticated:
+        user_daily = get_user_daily_stat(current_user.uid)
+        user_all_time = get_user_all_time_stat(current_user.uid)
+        
+    return render_template("leaderboard.html", 
+                           daily_scores=daily_scores, 
+                           all_time_scores=all_time_scores,
+                           user_daily=user_daily,
+                           user_all_time=user_all_time)
 
 @app.route("/dashboard")
 @login_required

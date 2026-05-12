@@ -117,6 +117,25 @@ def get_all_time_leaderboard_data():
     
     return leaderboard
 
+def get_user_daily_stat(user_id):
+    today_start = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
+    all_scores = db.session.query(
+        User.uid, 
+        func.max(Score.score).label('high_score')
+    ).join(Score).filter(Score.timestamp >= today_start).group_by(User.uid).order_by(desc('high_score')).all()
+    
+    for idx, row in enumerate(all_scores):
+        if row.uid == user_id:
+            return {'rank': idx + 1, 'score': row.high_score}
+    return {'rank': '-', 'score': 0}
+
+def get_user_all_time_stat(user_id):
+    all_users = db.session.query(User.uid, User.total_score).order_by(desc(User.total_score)).all()
+    for idx, row in enumerate(all_users):
+        if row.uid == user_id:
+            return {'rank': idx + 1, 'score': row.total_score or 0}
+    return {'rank': '-', 'score': 0}
+
 def add_score(user_id, score_value):
     new_score = Score(user_id=user_id, score=score_value)
     db.session.add(new_score)
