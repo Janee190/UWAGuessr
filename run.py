@@ -19,5 +19,19 @@ def create_user(username, email, password):
     else:
         print(f"User created: {user.username} ({user.email})")
 
+@app.cli.command("dump-photos")
+def dump_photos_command():
+    """Exports photo data from the database to photos.json"""
+    from app.image_upload import sync_photos_to_json
+    sync_photos_to_json()
+    print("Photos exported to photos.json")
+
+@app.cli.command("load-photos")
+def load_photos_command():
+    """Imports photo data from photos.json to the database"""
+    from app.image_upload import load_photos_from_json
+    added = load_photos_from_json()
+    print(f"Loaded {added} new photos from photos.json into the database")
+
 if __name__ == "__main__":
     app.run(debug=True)
