@@ -141,7 +141,7 @@ all general purpose css should be in style.css
 .page-game .btn-game-action:hover:not(:disabled) {
     background: var(--golden-hover);
     transform: scale(1.04);
-    box-shadow: 0 0 20px rgba(255, 202, 44, 0.8);
+    box-shadow: var(--shadow-lg);
 }
 
 .page-game .btn-game-action:active:not(:disabled) {
@@ -287,11 +287,8 @@ all general purpose css should be in style.css
     left: 50%;
     transform: translateX(-50%) translateY(20px);
     z-index: calc(var(--z-game-ui) + 20); /* above the fullscreen map */
-    width: 600px;
+    width: 480px;
     max-width: 90vw;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.4s ease, visibility 0.4s ease, transform 0.4s ease;
@@ -301,45 +298,6 @@ all general purpose css should be in style.css
     opacity: 1;
     visibility: visible;
     transform: translateX(-50%) translateY(0);
-}
-
-.page-game .result-row {
-    background-color: var(--navy-overlay);
-    backdrop-filter: blur(10px);
-    border-radius: var(--radius-md);
-    padding: 16px 24px;
-    box-shadow: var(--shadow-lg);
-    display: flex;
-    align-items: center;
-    border: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.page-game .result-row.message-row {
-    justify-content: space-between;
-    font-size: 1.2rem;
-}
-
-.page-game .result-row.action-row {
-    justify-content: space-between;
-    background-color: rgba(15, 29, 51, 0.95);
-    padding: 12px 24px;
-}
-
-.page-game .distance-badge {
-    background: rgba(255, 255, 255, 0.1);
-    padding: 6px 14px;
-    border-radius: var(--radius-sm);
-    font-family: var(--font-heading);
-    color: var(--golden);
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.page-game .result-points {
-    color: var(--text-light);
-    font-size: 1.1rem;
-    opacity: 0.9;
 }
 
 /* Bottom Right Map & Actions */

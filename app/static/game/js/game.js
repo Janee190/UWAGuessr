@@ -155,13 +155,20 @@ async function autoSubmitMiss() {
 
         document.getElementById('result-message').innerText = "Time's up! No marker placed.";
         document.getElementById('result-distance').innerText = "-";
-        document.getElementById('result-points').innerText = `You scored ${result.score} points. Total: ${totalScore}`;
+        document.getElementById('result-points').innerText = `+${result.score} points`;
+        document.getElementById('result-total').innerText = `Total Score: ${totalScore}`;
 
+        let isLastRound = currentRoundIndex === activeRounds.length - 1;
+        document.getElementById('next-btn-text').innerText = isLastRound ? "FINISH GAME" : "CONTINUE";
         document.getElementById('next-round-btn').disabled = false;
+        
         actionBtn.innerText = "NEXT ROUND";
         actionBtn.disabled = true; // keep hidden actionBtn disabled
 
         currentRoundIndex++;
+        if (currentRoundIndex < activeRounds.length) {
+            loadPanorama(activeRounds[currentRoundIndex].imagePath);
+        }
     } catch (e) {
         console.error('Auto-submit failed:', e);
         actionBtn.disabled = false;
@@ -192,6 +199,7 @@ async function startGame() {
     if (spinner) spinner.style.display = '';
 
     initMap();
+    loadPanorama(activeRounds[0].imagePath);
     loadNextRound(false);
 }
 
@@ -227,7 +235,6 @@ function loadNextRound(startTimerImmediately = true) {
     }
 
     // Update UI
-    loadPanorama(currentRoundData.imagePath);
     document.getElementById('round-counter').innerText = `Round ${currentRoundIndex + 1} / ${activeRounds.length}`;
 
     const actionBtn = document.getElementById('action-btn');
@@ -321,8 +328,11 @@ async function submitGuess() {
 
         document.getElementById('result-message').innerText = resultTitle;
         document.getElementById('result-distance').innerText = distanceMsg;
-        document.getElementById('result-points').innerText = `You scored ${roundScore} points. Total: ${totalScore}`;
+        document.getElementById('result-points').innerText = `+${roundScore} points`;
+        document.getElementById('result-total').innerText = `Total Score: ${totalScore}`;
 
+        let isLastRound = currentRoundIndex === activeRounds.length - 1;
+        document.getElementById('next-btn-text').innerText = isLastRound ? "FINISH GAME" : "CONTINUE";
         document.getElementById('next-round-btn').disabled = false;
         
         actionBtn.innerText = "NEXT ROUND";
@@ -330,6 +340,9 @@ async function submitGuess() {
 
         // Prepare for next round
         currentRoundIndex++;
+        if (currentRoundIndex < activeRounds.length) {
+            loadPanorama(activeRounds[currentRoundIndex].imagePath);
+        }
     } catch (e) {
         console.error("Failed to submit guess:", e);
         actionBtn.disabled = false;

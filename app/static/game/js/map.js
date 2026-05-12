@@ -213,8 +213,11 @@ function drawResultOnMap(guessLat, guessLng, actualLat, actualLng) {
     }
 
     actualMarker = new Mazemap.MazeMarker({
-        color: '#3b3887',
-        size: 34
+        color: '#222222',
+        size: 36,
+        glyphColor: '#ffc107',
+        glyphSize: 22,
+        glyph: '★'
     })
         .setLngLat([actualLng, actualLat])
         .addTo(map);
@@ -247,8 +250,9 @@ function drawResultOnMap(guessLat, guessLng, actualLat, actualLng) {
                 'line-join': 'round'
             },
             paint: {
-                'line-color': '#ff3b30',
-                'line-width': 3
+                'line-color': '#222222',
+                'line-width': 4,
+                'line-dasharray': [1, 2]
             }
         });
 
