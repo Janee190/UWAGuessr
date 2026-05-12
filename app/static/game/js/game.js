@@ -237,6 +237,11 @@ function loadNextRound(startTimerImmediately = true) {
     document.getElementById('next-round-btn').disabled = true;
 
     document.getElementById('game-board').classList.remove('show-results');
+    
+    // Force a synchronous DOM reflow so the map container immediately adopts the 
+    // small dimensions before we tell Mapbox to resize and recenter.
+    void document.getElementById('map').offsetWidth;
+    
     if (typeof map !== 'undefined' && map) map.resize();
 
     clearMapForNextRound();

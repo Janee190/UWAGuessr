@@ -68,7 +68,8 @@ function recenterMapView() {
             center: UWA_CENTER,
             zoom: UWA_DEFAULT_ZOOM,
             bearing: 0,
-            pitch: 0
+            pitch: 0,
+            padding: { top: 0, bottom: 0, left: 0, right: 0 }
         });
     } else {
         if (typeof map.setCenter === 'function') {
@@ -82,6 +83,9 @@ function recenterMapView() {
         }
         if (typeof map.setPitch === 'function') {
             map.setPitch(0);
+        }
+        if (typeof map.setPadding === 'function') {
+            map.setPadding({ top: 0, bottom: 0, left: 0, right: 0 });
         }
     }
 
@@ -262,7 +266,7 @@ function drawResultOnMap(guessLat, guessLng, actualLat, actualLng) {
 
 function focusResultOnMap(guessLat, guessLng, actualLat, actualLng) {
     if (!isMapReady()) return;
-    
+
     if (guessMarker) {
         const minLng = Math.min(guessLng, actualLng);
         const maxLng = Math.max(guessLng, actualLng);
