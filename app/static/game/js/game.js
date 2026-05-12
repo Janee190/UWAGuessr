@@ -12,6 +12,118 @@ const ROUNDS_PER_GAME = 5;
 const DEFAULT_HFOV = 85;
 const MIN_HFOV = 25;
 const MAX_HFOV = 90;
+const TIME_LIMIT = 30;
+let timerInterval = null;
+let timeRemaining = TIME_LIMIT;
+let isTimerExpired = false;
+
+// ── Timer Functions ────────────────────────────────────────────────────────
+
+function startTimer() {
+    stopTimer();
+    isTimerExpired = false;
+    timeRemaining = TIME_LIMIT;
+    updateTimerDisplay();
+
+    timerInterval = setInterval(function () {
+        timeRemaining--;
+        updateTimerDisplay();
+
+        if (timeRemaining <= 0) {
+            handleTimerExpiry();
+        }
+    }, 1000);
+}
+
+function stopTimer() {
+    if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+    }
+}
+
+function resetTimer() {
+    stopTimer();
+    isTimerExpired = false;
+    timeRemaining = TIME_LIMIT;
+    var el = document.getElementById('timer-display');
+    if (el) {
+        el.classList.remove('timer-warning', 'timer-danger', 'timer-expired');
+    }
+    updateTimerDisplay();
+}
+
+function updateTimerDisplay() {
+    var el = document.getElementById('timer-display');
+    if (!el) return;
+    el.textContent = timeRemaining;
+
+    el.classList.remove('timer-warning', 'timer-danger', 'timer-expired');
+
+    if (timeRemaining <= 0) {
+        el.classList.add('timer-expired');
+    } else if (timeRemaining <= 5) {
+        el.classList.add('timer-danger');
+    } else if (timeRemaining <= 10) {
+        el.classList.add('timer-warning');
+    }
+}
+
+function handleTimerExpiry() {
+    if (isTimerExpired) return;
+    isTimerExpired = true;
+    stopTimer();
+
+    document.getElementById('submit-btn').disabled = true;
+
+    if (guessMarker) {
+        submitGuess();
+    } else {
+        autoSubmitMiss();
+    }
+}
+
+async function autoSubmitMiss() {
+    var submitBtn = document.getElementById('submit-btn');
+    submitBtn.disabled = true;
+
+    try {
+        var response = await fetch('/api/guess', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ lat: 0, lng: 0, id: currentRoundData.id })
+        });
+
+        var result = await response.json();
+        if (result.error) {
+            console.error(result.error);
+            submitBtn.disabled = false;
+            return;
+        }
+
+        var actualLat = result.actual_lat;
+        var actualLng = result.actual_lng;
+
+        totalScore += result.score;
+        localStorage.setItem('uwa_totalScore', totalScore);
+
+        showResultOnMap(0, 0, actualLat, actualLng);
+
+        var feedbackMsg = "Time's up! You didn't place a marker.";
+        if (result.score > 0) {
+            feedbackMsg += " Scored " + result.score + " points.";
+        } else {
+            feedbackMsg += " +0 points.";
+        }
+        document.getElementById('feedback-text').innerText = feedbackMsg;
+        document.getElementById('next-btn').disabled = false;
+
+        currentRoundIndex++;
+    } catch (e) {
+        console.error('Auto-submit failed:', e);
+        submitBtn.disabled = false;
+    }
+}
 
 // Resets game state and starts the first round.
 async function startGame() {
@@ -73,6 +185,10 @@ function loadNextRound() {
     document.getElementById('feedback-text').innerText = '';
 
     clearMapForNextRound();
+
+    // Start countdown timer for this round
+    resetTimer();
+    startTimer();
 }
 
 // Submits the current map guess, scores it, and unlocks the next round button.
@@ -85,6 +201,9 @@ async function submitGuess() {
 
     const submitBtn = document.getElementById('submit-btn');
     submitBtn.disabled = true;
+
+    // Stop the timer since the guess was submitted
+    stopTimer();
 
     // Send guess to backend
     try {
@@ -134,7 +253,8 @@ async function submitGuess() {
 
 // Displays the game-over overlay with the final score.
 function showGameOver() {
-    
+    stopTimer();
+
     document.getElementById('game-board').style.display = 'none';
     document.getElementById('game-over').style.display = 'block';
     document.getElementById('final-score').innerText = `Final Score: ${totalScore}`;
