@@ -2,48 +2,89 @@
 
 {% block content %}
 
+{% macro render_leaderboard(scores, id, display_style) %}
+<div id="{{ id }}" style="display: {{ display_style }};">
+    <div class="Top-three">
+        {% if scores|length >= 1 %}
+        <div class="rank-card rank-1">
+            <div class="h2 bangers-font" style="color: #ffd700;">#1</div>
+            <div class="fw-bold">{{ scores[0].username }}</div>
+            <div class="text-muted small">{{ "{:,}".format(scores[0].high_score) }} pts</div>
+        </div>
+        {% endif %}
+
+        {% if scores|length >= 2 %}
+        <div class="rank-card rank-2">
+            <div class="h3 bangers-font" style="color: #c0c0c0;">#2</div>
+            <div class="fw-bold">{{ scores[1].username }}</div>
+            <div class="text-muted small">{{ "{:,}".format(scores[1].high_score) }} pts</div>
+        </div>
+        {% endif %}
+
+        {% if scores|length >= 3 %}
+        <div class="rank-card rank-3">
+            <div class="h3 bangers-font" style="color: #cd7f32;">#3</div>
+            <div class="fw-bold">{{ scores[2].username }}</div>
+            <div class="text-muted small">{{ "{:,}".format(scores[2].high_score) }} pts</div>
+        </div>
+        {% endif %}
+    </div>
+
+    {% if scores|length > 3 %}
+    <div class="leaderboard-table">
+        <table class="table table-hover table-dark mb-0">
+            <tbody>
+                {% for score in scores[3:] %}
+                <tr>
+                    <td class="ps-4 fw-bold">#{{ loop.index + 3 }}</td>
+                    <td class="fw-bold" style="color: var(--golden);">{{ score.username }}</td>
+                    <td class="text-end pe-4">{{ "{:,}".format(score.high_score) }} pts</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    {% if scores|length == 0 %}
+    <div class="text-center mt-5">
+        <p class="text-muted">No scores yet. Be the first to play!</p>
+    </div>
+    {% endif %}
+</div>
+{% endmacro %}
+
 <main class="leaderboard-container">
     <div class="container">
-        <h1 class ="text-centre bangers-font mb-5" style="color: var(--golden); font-size: 60px;">CAMPUS LEGENDS</h1>
+        <h1 class="text-centre bangers-font mb-4" style="color: var(--golden); font-size: 60px;">CAMPUS LEGENDS</h1>
 
-        <div class="Top-three"> 
-            <div class="rank-card rank-1">
-                <div class="h2 bangers-font" style="color: #ffd700;">#1</div>
-                <div class="fw-bold">Tep Nguyen</div>
-                <div class="text-muted small">15,200 pts</div>
-            </div>
-
-            <div class="rank-card rank-2">
-                <div class="h3 bangers-font">#2</div>
-                <div class="fw-bold">Etienne Vinton Horn</div>
-                <div class="text-muted small">12,450 pts</div>
-            </div>
-            
-            <div class="rank-card rank-3">
-                <div class="h3 bangers-font">#3</div>
-                <div class="fw-bold">Janee Pandithasekara</div>
-                <div class="text-muted small">11,800 pts</div>
+        <div class="d-flex justify-content-center mb-5">
+            <div class="btn-group" role="group">
+                <button type="button" class="btn btn-outline-warning active" id="btn-daily"
+                    onclick="showLeaderboard('daily')">Daily Best</button>
+                <button type="button" class="btn btn-outline-warning" id="btn-all-time"
+                    onclick="showLeaderboard('all-time')">Total All-Time</button>
             </div>
         </div>
 
-        <div class="leaderboard-table">
-            <table class="table table-hover table-dark mb-0">
-                <tbody>
-                    <tr>
-                        <td class="ps-4 fw-bold">#4</td>
-                        <td class="fw-bold" style="color: var(--golden);">Mathew Nedumpurath Tomy</td>
-                        <td class="text-end pe-4">10,100 pts</td>
-                    </tr>
-                    <tr><td class="ps-4">#5</td><td>Player 52</td><td class="text-end pe-4">9,850 pts</td></tr>
-                    <tr><td class="ps-4">#6</td><td>Player 36</td><td class="text-end pe-4">8,900 pts</td></tr>
-                    <tr><td class="ps-4">#7</td><td>Player 74</td><td class="text-end pe-4">8,200 pts</td></tr>
-                    <tr><td class="ps-4">#8</td><td>UWA_Master_2026</td><td class="text-end pe-4">7,500 pts</td></tr>
-                    <tr><td class="ps-4">#9</td><td>Guild_President</td><td class="text-end pe-4">6,800 pts</td></tr>
-                    <tr><td class="ps-4">#10</td><td>Barry_Marshall_Fan</td><td class="text-end pe-4">5,500 pts</td></tr>
-                </tbody>
-            </table>
-        </div>
+        {{ render_leaderboard(daily_scores, 'board-daily', 'block') }}
+        {{ render_leaderboard(all_time_scores, 'board-all-time', 'none') }}
     </div>
 </main>
+
+<script>
+    function showLeaderboard(type) {
+        document.getElementById('board-daily').style.display = type === 'daily' ? 'block' : 'none';
+        document.getElementById('board-all-time').style.display = type === 'all-time' ? 'block' : 'none';
+
+        if (type === 'daily') {
+            document.getElementById('btn-daily').classList.add('active');
+            document.getElementById('btn-all-time').classList.remove('active');
+        } else {
+            document.getElementById('btn-all-time').classList.add('active');
+            document.getElementById('btn-daily').classList.remove('active');
+        }
+    }
+</script>
 
 {% endblock %}

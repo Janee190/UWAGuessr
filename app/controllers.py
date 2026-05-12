@@ -1,6 +1,7 @@
 from app import db
-from app.models import User
+from app.models import User, Score
 import re
+from sqlalchemy import desc, func
 
 def validate_username(username):
     if not username:
@@ -92,3 +93,38 @@ def login_user_service(data):
     if not user or not user.check_password(data['password']):
         return None, {'credentials': 'Invalid email or password'}
     return user, None
+
+from datetime import datetime
+
+def get_leaderboard_data():
+    # Get top 10 scores with usernames for today
+    today_start = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
+    
+    # Joining User and Score, grouping by user to get their max score for today
+    leaderboard = db.session.query(
+        User.username, 
+        func.max(Score.score).label('high_score')
+    ).join(Score).filter(Score.timestamp >= today_start).group_by(User.uid).order_by(desc('high_score')).limit(10).all()
+    
+    return leaderboard
+
+def get_all_time_leaderboard_data():
+    # Get top 10 players based on their all-time total_score
+    leaderboard = db.session.query(
+        User.username, 
+        User.total_score.label('high_score')
+    ).order_by(desc('high_score')).limit(10).all()
+    
+    return leaderboard
+
+def add_score(user_id, score_value):
+    new_score = Score(user_id=user_id, score=score_value)
+    db.session.add(new_score)
+    
+    # Also update the user's total_score if we want to keep that up to date
+    user = User.query.get(user_id)
+    if user:
+        user.total_score = (user.total_score or 0) + score_value
+        
+    db.session.commit()
+    return new_score

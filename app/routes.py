@@ -7,7 +7,7 @@ from flask_login import login_user, login_required, logout_user, current_user
 
 from app import app
 from app.image_upload import extract_gps, convert_to_webp, add_photo_record
-from app.controllers import login_user_service, register_user
+from app.controllers import login_user_service, register_user, get_leaderboard_data, get_all_time_leaderboard_data, add_score
 
 
 @app.route("/")
@@ -83,7 +83,9 @@ def how_to_play():
 
 @app.route("/leaderboard")
 def leaderboard():
-    return render_template("leaderboard.html")
+    daily_scores = get_leaderboard_data()
+    all_time_scores = get_all_time_leaderboard_data()
+    return render_template("leaderboard.html", daily_scores=daily_scores, all_time_scores=all_time_scores)
 
 @app.route("/dashboard")
 @login_required
@@ -260,7 +262,8 @@ def api_game_complete():
     if total_score < 0:
         return jsonify({'error': 'Invalid field values'}), 400
 
-    current_user.add_total_score(total_score)
+    # Save the score to the Scores table and update user's total_score
+    add_score(current_user.uid, total_score)
 
     return jsonify({'success': True, 'totalScore': current_user.total_score})
 
