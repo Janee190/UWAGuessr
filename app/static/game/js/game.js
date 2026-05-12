@@ -142,7 +142,7 @@ async function autoSubmitMiss() {
         drawResultOnMap(0, 0, actualLat, actualLng);
 
         document.getElementById('game-board').classList.add('show-results');
-        
+
         if (typeof map !== 'undefined' && map) map.resize();
         focusResultOnMap(0, 0, actualLat, actualLng);
 
@@ -154,7 +154,7 @@ async function autoSubmitMiss() {
         let isLastRound = currentRoundIndex === activeRounds.length - 1;
         document.getElementById('next-btn-text').innerText = isLastRound ? "FINISH GAME" : "CONTINUE";
         document.getElementById('next-round-btn').disabled = false;
-        
+
         actionBtn.innerText = "NEXT ROUND";
         actionBtn.disabled = true; // keep hidden actionBtn disabled
 
@@ -184,11 +184,11 @@ async function startGame() {
     localStorage.setItem('uwa_totalScore', totalScore); // Reset local storage
     document.getElementById('game-board').style.display = 'block';
     document.getElementById('game-over').style.display = 'none';
-    
+
     var overlay = document.getElementById('game-start-overlay');
     overlay.classList.remove('ready');
     overlay.style.display = 'flex';
-    
+
     setupPhotoViewer();
 
     // Show map loading spinner
@@ -237,15 +237,15 @@ function loadNextRound(startTimerImmediately = true) {
     const actionBtn = document.getElementById('action-btn');
     actionBtn.innerText = "SUBMIT GUESS";
     actionBtn.disabled = true; // Wait for guess
-    
+
     document.getElementById('next-round-btn').disabled = true;
 
     document.getElementById('game-board').classList.remove('show-results');
-    
+
     // Force a synchronous DOM reflow so the map container immediately adopts the 
     // small dimensions before we tell Mapbox to resize and recenter.
     void document.getElementById('map').offsetWidth;
-    
+
     if (typeof map !== 'undefined' && map) map.resize();
 
     clearMapForNextRound();
@@ -305,7 +305,7 @@ async function submitGuess() {
         drawResultOnMap(guessLat, guessLng, actualLat, actualLng);
 
         document.getElementById('game-board').classList.add('show-results');
-        
+
         if (typeof map !== 'undefined' && map) map.resize();
         focusResultOnMap(guessLat, guessLng, actualLat, actualLng);
 
@@ -315,7 +315,8 @@ async function submitGuess() {
         }
 
         let resultTitle = "Good guess!";
-        if (distanceMeters < 50) resultTitle = "Perfect! Right on top of it.";
+        if (distanceMeters < 10) resultTitle = "Perfect! Right on top of it.";
+        else if (distanceMeters < 50) resultTitle = "Excellent guess! Very close.";
         else if (distanceMeters < 200) resultTitle = "Great guess!";
         else if (distanceMeters < 500) resultTitle = "Not bad!";
         else resultTitle = "At least it was on the correct planet.";
@@ -328,7 +329,7 @@ async function submitGuess() {
         let isLastRound = currentRoundIndex === activeRounds.length - 1;
         document.getElementById('next-btn-text').innerText = isLastRound ? "FINISH GAME" : "CONTINUE";
         document.getElementById('next-round-btn').disabled = false;
-        
+
         actionBtn.innerText = "NEXT ROUND";
         actionBtn.disabled = true; // keep hidden actionBtn disabled
 
