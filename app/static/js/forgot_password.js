@@ -142,8 +142,8 @@ $(function () {
       contentType: "application/json",
       data: JSON.stringify({
         email: email,
-        security_answer: securityAnswer,
-        new_password: newPassword,
+        securityAnswer: securityAnswer,
+        newPassword: newPassword,
       }),
       success: function (response) {
         showAlert(

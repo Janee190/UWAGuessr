@@ -33,10 +33,10 @@ class User(UserMixin, db.Model):
         return check_password_hash(self.password_hash, password)
     
     def set_security_answer(self, answer):
-        self.security_answer_hash = generate_password_hash(answer)
+        self.security_answer_hash = generate_password_hash(answer.lower().strip())
     
     def check_security_answer(self, answer):
-        return check_password_hash(self.security_answer_hash, answer)
+        return check_password_hash(self.security_answer_hash, answer.lower().strip())
     
     def add_total_score(self, points):
         self.total_score += points
