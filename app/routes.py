@@ -7,7 +7,7 @@ from flask_login import login_user, login_required, logout_user, current_user
 
 from app import app
 from app.image_upload import extract_gps, convert_to_webp, add_photo_record
-from app.controllers import login_user_service, register_user
+from app.controllers import login_user_service, register_user, change_password
 
 
 @app.route("/")
@@ -24,7 +24,7 @@ def api_register():
     if errors:
         return jsonify({'errors': errors}), 400
     login_user(user)
-    return jsonify({'redirect': url_for('index')}), 201
+    return jsonify({'message': 'Signup successful'}), 201
 
 
 @app.route("/login")
@@ -37,7 +37,7 @@ def api_login():
     if errors:
         return jsonify({'errors': errors}), 401
     login_user(user)
-    return jsonify({'redirect': url_for('dashboard')}), 200
+    return jsonify({'message': 'Login successful'}), 200
 
 @app.route("/game")
 def game():
@@ -46,6 +46,10 @@ def game():
 @app.route("/forgot-password")
 def forgot_password():
     return render_template("forgot_password.html")
+
+@app.route("/api/forgot-password", methods=["POST"])
+def api_forgot_password():
+    pass
 
 @app.route("/api/game-images")
 def api_game_images():

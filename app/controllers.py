@@ -92,3 +92,12 @@ def login_user_service(data):
     if not user or not user.check_password(data['password']):
         return None, {'credentials': 'Invalid email or password'}
     return user, None
+
+def change_password(user, new_password):
+    password_error = validate_password(new_password)
+    if password_error:
+        return password_error
+
+    user.set_password(new_password)
+    db.session.commit()
+    return None
