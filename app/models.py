@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from app import db, login
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
@@ -9,10 +11,7 @@ class User(UserMixin, db.Model):
     password_hash = db.Column(db.String(256), nullable=False)
     security_question = db.Column(db.String(256), nullable=True)
     security_answer_hash = db.Column(db.String(256), nullable=True)
-    total_score = db.Column(db.Integer, default=0)
-
-    def get_id(self):
-        return str(self.uid)
+    total_score = db.Column(db.Integer, default=0, nullable=True)
 
     def get_id(self):
         return str(self.uid)
@@ -41,3 +40,13 @@ class User(UserMixin, db.Model):
     def add_total_score(self, points):
         self.total_score += points
         db.session.commit()
+
+class Photos(db.Model):
+    __tablename__ = 'photos'
+    pid = db.Column(db.Integer, primary_key=True)
+    image_path = db.Column(db.String(256), nullable=False)
+    latitude = db.Column(db.Float, nullable=False)
+    longitude = db.Column(db.Float, nullable=False)
+    timestamp = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+
+    

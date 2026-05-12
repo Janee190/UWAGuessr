@@ -1,12 +1,13 @@
-"""Image upload helper: EXIF extraction, WebP conversion, and CSV update."""
+"""Image upload helper: EXIF extraction, WebP conversion, and DB update."""
 
-import csv
 import os
 from PIL import Image
 
+from app import db
+from app.models import Photos
+
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 PHOTOS_DIR = os.path.join(BASE_DIR, 'static', 'game', 'photos')
-CSV_PATH = os.path.join(BASE_DIR, 'game', 'locations.csv')
 
 
 # ── EXIF extraction (from legacy image_processor.py) ──────────────────────
@@ -85,29 +86,15 @@ def convert_to_webp(source_path, quality=85):
     return webp_filename
 
 
-# ── CSV update ────────────────────────────────────────────────────────────
+# ── DB update ─────────────────────────────────────────────────────────────
 
-def append_to_csv(image_path, lat, lng):
-    """Append a new location entry to locations.csv and return the new id."""
-    rows = []
-    next_id = 1
-    if os.path.isfile(CSV_PATH):
-        with open(CSV_PATH, 'r', newline='', encoding='utf-8') as f:
-            reader = csv.DictReader(f)
-            for row in reader:
-                rows.append(row)
-                next_id = max(next_id, int(row['id']) + 1)
-
-    rows.append({
-        'id': str(next_id),
-        'imagePath': f"/static/game/photos/{image_path}",
-        'lat': f"{lat:.6f}",
-        'lng': f"{lng:.6f}",
-    })
-
-    with open(CSV_PATH, 'w', newline='', encoding='utf-8') as f:
-        writer = csv.DictWriter(f, fieldnames=['id', 'imagePath', 'lat', 'lng'])
-        writer.writeheader()
-        writer.writerows(rows)
-
-    return next_id
+def add_photo_record(image_path, lat, lng):
+    """Insert a new location entry and return the new id."""
+    photo = Photos(
+        image_path=f"/static/game/photos/{image_path}",
+        latitude=float(lat),
+        longitude=float(lng),
+    )
+    db.session.add(photo)
+    db.session.commit()
+    return photo.pid

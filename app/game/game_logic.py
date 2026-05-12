@@ -1,9 +1,7 @@
-import csv
 import math
 import random
-import os
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+from app.models import Photos
 
 def calculate_haversine(lat1, lon1, lat2, lon2):
     R = 6371e3  # Earth radius in meters
@@ -22,16 +20,17 @@ def calculate_haversine(lat1, lon1, lat2, lon2):
 
 
 def calculate_score(guess_lat, guess_lng, img_id):
-    actual_lat, actual_lng = None, None
-    with open(os.path.join(BASE_DIR, 'locations.csv'), 'r') as f:
-        reader = csv.DictReader(f)
-        for row in reader:
-            if int(row["id"]) == img_id:
-                actual_lat = float(row["lat"])
-                actual_lng = float(row["lng"])
-                break
-        else:
-            return None, None, None, None
+    try:
+        img_id = int(img_id)
+    except (TypeError, ValueError):
+        return None, None, None, None
+
+    photo = Photos.query.filter_by(pid=img_id).first()
+    if not photo:
+        return None, None, None, None
+
+    actual_lat = float(photo.latitude)
+    actual_lng = float(photo.longitude)
 
     distance = calculate_haversine(guess_lat, guess_lng, actual_lat, actual_lng)
 
@@ -47,11 +46,11 @@ def calculate_score(guess_lat, guess_lng, img_id):
 
 
 def get_game_images():
-    data = []
-    with open(os.path.join(BASE_DIR, 'locations.csv'), 'r') as f:
-        reader = csv.DictReader(f)
-        for row in reader:
-            data.append({"id": int(row["id"]), "imagePath": row["imagePath"]})
+    photos = Photos.query.with_entities(Photos.pid, Photos.image_path).all()
+    data = [
+        {"id": photo.pid, "imagePath": photo.image_path}
+        for photo in photos
+    ]
     random.shuffle(data)
     images = data[:5]  # select up to 5 random pictures
 
