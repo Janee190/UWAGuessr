@@ -99,6 +99,7 @@ def logout():
 # ── Image upload page ─────────────────────────────────────────────────────
 
 @app.route("/image-upload")
+@login_required
 def image_upload():
     return render_template("imageupload.html")
 
