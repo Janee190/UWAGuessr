@@ -25,7 +25,7 @@ function hideMapLabelsAndIcons() {
     if (!style || !Array.isArray(style.layers)) return;
 
     var hiddenCount = 0;
-    style.layers.forEach(function(layer) {
+    style.layers.forEach(function (layer) {
         if (layer.type !== 'symbol') return;
         if (!map.getLayer(layer.id)) return;
 
@@ -99,14 +99,14 @@ function attachResizeHandlers() {
 
     const floatingMapContainer = document.querySelector('.floating-map-container');
     if (floatingMapContainer) {
-        floatingMapContainer.addEventListener('transitionend', function() {
+        floatingMapContainer.addEventListener('transitionend', function () {
             if (map) {
                 map.resize();
             }
         });
     }
 
-    window.addEventListener('resize', function() {
+    window.addEventListener('resize', function () {
         if (map) {
             map.resize();
         }
@@ -149,17 +149,17 @@ function initMap() {
     map.on('idle', hideMapLabelsAndIcons);
     scheduleLabelHideRetry(5);
 
-    map.on('load', function() {
+    map.on('load', function () {
         recenterMapView();
         hideMapLabelsAndIcons();
 
-        map.on('click', function(e) {
+        map.on('click', function (e) {
             placeGuessMarker(e.lngLat.lat, e.lngLat.lng);
         });
     });
 
     attachResizeHandlers();
-    
+
 }
 
 
@@ -214,45 +214,50 @@ function showResultOnMap(guessLat, guessLng, actualLat, actualLng) {
 
     clearResultLine();
 
-    const resultLineGeoJson = {
-        type: 'Feature',
-        geometry: {
-            type: 'LineString',
-            coordinates: [
-                [guessLng, guessLat],
-                [actualLng, actualLat]
-            ]
-        }
-    };
+    if (guessMarker) {
+        const resultLineGeoJson = {
+            type: 'Feature',
+            geometry: {
+                type: 'LineString',
+                coordinates: [
+                    [guessLng, guessLat],
+                    [actualLng, actualLat]
+                ]
+            }
+        };
 
-    map.addSource(RESULT_LINE_SOURCE_ID, {
-        type: 'geojson',
-        data: resultLineGeoJson
-    });
+        map.addSource(RESULT_LINE_SOURCE_ID, {
+            type: 'geojson',
+            data: resultLineGeoJson
+        });
 
-    map.addLayer({
-        id: RESULT_LINE_LAYER_ID,
-        type: 'line',
-        source: RESULT_LINE_SOURCE_ID,
-        layout: {
-            'line-cap': 'round',
-            'line-join': 'round'
-        },
-        paint: {
-            'line-color': '#ff3b30',
-            'line-width': 3
-        }
-    });
+        map.addLayer({
+            id: RESULT_LINE_LAYER_ID,
+            type: 'line',
+            source: RESULT_LINE_SOURCE_ID,
+            layout: {
+                'line-cap': 'round',
+                'line-join': 'round'
+            },
+            paint: {
+                'line-color': '#ff3b30',
+                'line-width': 3
+            }
+        });
 
-    resultLine = true;
+        resultLine = true;
 
-    const minLng = Math.min(guessLng, actualLng);
-    const maxLng = Math.max(guessLng, actualLng);
-    const minLat = Math.min(guessLat, actualLat);
-    const maxLat = Math.max(guessLat, actualLat);
+        const minLng = Math.min(guessLng, actualLng);
+        const maxLng = Math.max(guessLng, actualLng);
+        const minLat = Math.min(guessLat, actualLat);
+        const maxLat = Math.max(guessLat, actualLat);
 
-    var fitDuration = typeof map.loaded === 'function' && !map.loaded() ? 0 : 700;
-    map.fitBounds([[minLng, minLat], [maxLng, maxLat]], { padding: 50, duration: fitDuration });
+        var fitDuration = typeof map.loaded === 'function' && !map.loaded() ? 0 : 700;
+        map.fitBounds([[minLng, minLat], [maxLng, maxLat]], { padding: 50, duration: fitDuration });
+    } else {
+        // If there was no guess, just center on the actual location
+        map.setCenter([actualLng, actualLat]);
+    }
 }
 
 // Reset map for the next round

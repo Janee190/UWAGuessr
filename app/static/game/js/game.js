@@ -12,7 +12,7 @@ const ROUNDS_PER_GAME = 5;
 const DEFAULT_HFOV = 85;
 const MIN_HFOV = 25;
 const MAX_HFOV = 90;
-const TIME_LIMIT = 30;
+const TIME_LIMIT = 20;
 let timerInterval = null;
 let timeRemaining = TIME_LIMIT;
 let isTimerExpired = false;
@@ -44,6 +44,8 @@ function stopTimer() {
         clearInterval(timerInterval);
         timerInterval = null;
     }
+    var dangerOverlay = document.getElementById('danger-overlay');
+    if (dangerOverlay) dangerOverlay.classList.remove('flash');
 }
 
 function resetTimer() {
@@ -64,12 +66,38 @@ function updateTimerDisplay() {
 
     el.classList.remove('timer-warning', 'timer-danger', 'timer-expired');
 
+    var divider = document.getElementById('stats-divider');
+    if (divider) divider.classList.remove('timer-warning', 'timer-danger', 'timer-expired');
+
+    var dangerOverlay = document.getElementById('danger-overlay');
+
     if (timeRemaining <= 0) {
         el.classList.add('timer-expired');
-    } else if (timeRemaining <= 5) {
-        el.classList.add('timer-danger');
+        if (divider) {
+            divider.classList.add('timer-bar-active', 'timer-expired');
+            divider.style.width = "0%";
+        }
+        if (dangerOverlay) dangerOverlay.classList.remove('flash');
     } else if (timeRemaining <= 10) {
-        el.classList.add('timer-warning');
+        if (timeRemaining <= 5) {
+            el.classList.add('timer-danger');
+            if (divider) divider.classList.add('timer-danger');
+            if (dangerOverlay) dangerOverlay.classList.add('flash');
+        } else {
+            el.classList.add('timer-warning');
+            if (divider) divider.classList.add('timer-warning');
+            if (dangerOverlay) dangerOverlay.classList.remove('flash');
+        }
+        if (divider) {
+            divider.classList.add('timer-bar-active');
+            divider.style.width = ((timeRemaining / 10) * 100) + "%";
+        }
+    } else {
+        if (divider) {
+            divider.classList.remove('timer-bar-active');
+            divider.style.width = "100%";
+        }
+        if (dangerOverlay) dangerOverlay.classList.remove('flash');
     }
 }
 
@@ -120,7 +148,7 @@ async function autoSubmitMiss() {
             feedbackMsg += " +0 points.";
         }
         document.getElementById('feedback-text').innerText = feedbackMsg;
-        
+
         actionBtn.innerText = "NEXT ROUND";
         actionBtn.disabled = false;
 
@@ -186,7 +214,7 @@ function loadNextRound() {
     // Update UI
     loadPanorama(currentRoundData.imagePath);
     document.getElementById('round-counter').innerText = `Round ${currentRoundIndex + 1} / ${activeRounds.length}`;
-    
+
     const actionBtn = document.getElementById('action-btn');
     actionBtn.innerText = "SUBMIT GUESS";
     actionBtn.disabled = true; // Wait for guess
@@ -249,7 +277,7 @@ async function submitGuess() {
 
         // Show UI Feedback (You will need HTML elements for these)
         document.getElementById('feedback-text').innerText = `You were ${Math.round(distanceMeters)}m away! You scored ${roundScore} points.`;
-        
+
         actionBtn.innerText = "NEXT ROUND";
         actionBtn.disabled = false;
 

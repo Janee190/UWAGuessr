@@ -17,6 +17,7 @@
 
 {% block content %}
 <div class="game-wrapper">
+	<div id="danger-overlay"></div>
 
 	<div id="game-board" style="width: 100%; height: 100%;">
 
@@ -28,36 +29,36 @@
 		</div>
 
 		<!-- Top Right Stats -->
-		<div class="top-right-stats game-panel d-flex flex-column align-items-center justify-content-center">
+		<div class="top-right-stats game-panel shadow-lg rounded-3 d-flex flex-column align-items-center justify-content-center">
 			<div id="round-counter">Round 1/5</div>
-			<div class="stats-divider"></div>
+			<div class="stats-divider-container w-100"><div class="stats-divider" id="stats-divider"></div></div>
 			<div id="timer-display">30</div>
 		</div>
 
 		<!-- Bottom Left Exit -->
 		<div class="bottom-left-exit">
-			<a class="btn-game-exit" href="{{ url_for('index') }}">EXIT</a>
+			<a class="btn-game-exit shadow rounded-3" href="{{ url_for('index') }}">EXIT</a>
 		</div>
 
 		<!-- Feedback Text overlay -->
-		<p id="feedback-text" aria-live="polite"></p>
+		<p id="feedback-text" class="shadow-lg rounded-3" aria-live="polite"></p>
 
 		<!-- Bottom Right Map & Actions -->
 		<aside class="bottom-right-container">
-			<div class="map-wrapper game-panel">
+			<div class="map-wrapper game-panel shadow-lg rounded-3">
 				<div class="map-spinner" id="map-spinner"></div>
 				<div id="map" aria-label="Interactive UWA campus map"></div>
 			</div>
 			
 			<div class="action-btn-wrapper">
-				<button id="action-btn" class="btn-game-action w-100 h-100" type="button" disabled
+				<button id="action-btn" class="btn-game-action w-100 h-100 shadow rounded-3" type="button" disabled
 					onclick="handleAction()">SUBMIT GUESS</button>
 			</div>
 		</aside>
 
 	</div>
 
-	<section id="game-over" class="game-panel">
+	<section id="game-over" class="game-panel shadow-lg rounded-3">
 		<h2 class="display-6 mb-3 text-uppercase font-heading game-over-title">Game Over</h2>
 		<div class="final-score-box mb-4">
 			<p id="final-score" class="mb-0">Final Score: 0</p>

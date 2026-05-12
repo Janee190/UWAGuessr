@@ -56,7 +56,6 @@ all general purpose css should be in style.css
 
 .page-game .game-panel {
     background-color: var(--navy-overlay);
-    border: 2px solid #5b5bff;
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-lg);
     color: var(--text-light);
@@ -147,15 +146,35 @@ all general purpose css should be in style.css
     margin-bottom: 8px;
 }
 
-.page-game .stats-divider {
+.page-game .stats-divider-container {
     width: 100%;
-    height: 1px;
+    height: 4px;
+    /* Thicker to see progress clearly */
     background: rgba(255, 255, 255, 0.2);
     margin: 0 0 8px 0;
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.page-game .stats-divider {
+    width: 100%;
+    height: 100%;
+    background: #fff;
+    margin: 0 auto;
+    transition: background-color 0.3s;
+}
+
+.page-game .stats-divider.timer-warning {
+    background-color: #ffc107;
+}
+
+.page-game .stats-divider.timer-danger,
+.page-game .stats-divider.timer-expired {
+    background-color: #ff3b30;
 }
 
 .page-game #timer-display {
-    font-size: 2.25rem;
+    font-size: 2.5rem;
     font-weight: 700;
     transition: color 0.3s;
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
@@ -186,7 +205,6 @@ all general purpose css should be in style.css
     justify-content: center;
     background: var(--navy-overlay);
     color: var(--text-light);
-    border: 2px solid #5b5bff;
     border-radius: var(--radius-md);
     padding: 10px 28px;
     font-family: var(--font-accent);
@@ -198,7 +216,6 @@ all general purpose css should be in style.css
 
 .page-game .btn-game-exit:hover {
     background: var(--navy-800);
-    border-color: var(--golden);
     color: var(--golden);
 }
 
@@ -216,7 +233,6 @@ all general purpose css should be in style.css
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
     text-align: center;
     background: var(--navy-overlay);
-    border: 1px solid #5b5bff;
     padding: 8px 20px;
     border-radius: var(--radius-md);
     pointer-events: none;
@@ -242,13 +258,12 @@ all general purpose css should be in style.css
 .page-game .map-wrapper {
     width: 100%;
     height: 260px;
-    padding: 6px;
+    overflow: hidden;
 }
 
 .page-game #map {
     width: 100%;
     height: 100%;
-    border-radius: calc(var(--radius-lg) - 6px);
     background-color: #e4edf6;
 }
 
@@ -267,7 +282,9 @@ all general purpose css should be in style.css
 }
 
 @keyframes map-spin {
-    to { transform: rotate(360deg); }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 /* Action Button Container */
@@ -315,6 +332,35 @@ all general purpose css should be in style.css
     outline: none;
 }
 
+/* Danger Overlay for last 5 seconds */
+.page-game #danger-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    z-index: 999;
+    box-shadow: inset 0 0 0px rgba(255, 59, 48, 0);
+    transition: box-shadow 0.2s ease;
+}
+
+.page-game #danger-overlay.flash {
+    animation: danger-flash 0.2s ease-in-out infinite alternate;
+}
+
+@keyframes danger-flash {
+    from {
+        box-shadow: inset 0 0 50px rgba(255, 0, 0, 0.2);
+        background: rgba(255, 0, 0, 0);
+    }
+
+    to {
+        box-shadow: inset 0 0 200px rgba(255, 0, 0, 0.9);
+        background: rgba(255, 0, 0, 0.15);
+    }
+}
+
 @media (max-width: 768px) {
     .page-game .bottom-right-container {
         width: 280px;
@@ -329,15 +375,15 @@ all general purpose css should be in style.css
     .page-game .top-left-logo img {
         height: 48px;
     }
-    
+
     .page-game .top-right-stats {
         padding: 12px 20px;
     }
-    
+
     .page-game #timer-display {
         font-size: 1.8rem;
     }
-    
+
     .page-game #round-counter {
         font-size: 1rem;
     }
