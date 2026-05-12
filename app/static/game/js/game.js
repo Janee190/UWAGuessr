@@ -30,6 +30,11 @@ async function startGame() {
     document.getElementById('game-board').style.display = 'block';
     document.getElementById('game-over').style.display = 'none';
     setupPhotoViewer();
+
+    // Show map loading spinner
+    var spinner = document.getElementById('map-spinner');
+    if (spinner) spinner.style.display = '';
+
     initMap();
     loadNextRound();
 }

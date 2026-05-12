@@ -1,17 +1,2 @@
-window.addEventListener('load', function () {
-    setTimeout(function () {
-        if (typeof Mazemap !== 'undefined') {
-            const preloadMap = new Mazemap.Map({
-                container: 'hidden-preload-map',
-                campuses: 119,
-                center: [115.818, -31.98],
-                zoom: 15,
-                zLevel: 1
-            });
-
-            preloadMap.once('idle', function () {
-                preloadMap.remove();
-            });
-        }
-    }, 800);
-});
+// Preload map removed — it was creating a hidden second map instance that
+// wasted API calls. The game page creates its own map when needed.

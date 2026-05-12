@@ -19,10 +19,12 @@ function isMapReady() {
 
 function hideMapLabelsAndIcons() {
     if (!map || typeof map.getStyle !== 'function') return;
+    if (typeof map.isStyleLoaded === 'function' && !map.isStyleLoaded()) return;
 
     const style = map.getStyle();
     if (!style || !Array.isArray(style.layers)) return;
 
+    var hiddenCount = 0;
     style.layers.forEach(function(layer) {
         if (layer.type !== 'symbol') return;
         if (!map.getLayer(layer.id)) return;
@@ -30,10 +32,28 @@ function hideMapLabelsAndIcons() {
         // Symbol layers carry both POI icons and text labels in Mapbox/MazeMap styles.
         try {
             map.setLayoutProperty(layer.id, 'visibility', 'none');
+            hiddenCount++;
         } catch (_err) {
             // Ignore transient style update races and continue hiding remaining layers.
         }
     });
+
+    return hiddenCount;
+}
+
+// Retry hiding labels up to 5 times (every 400ms) to catch late style updates.
+function scheduleLabelHideRetry(attempts) {
+    if (!map || attempts <= 0) return;
+    setTimeout(function () {
+        var hidden = hideMapLabelsAndIcons();
+        if (hidden === 0 && typeof map.isStyleLoaded === 'function' && map.isStyleLoaded()) {
+            // Style is loaded but no symbol layers found — the style may have just
+            // been set. Try again.
+            scheduleLabelHideRetry(attempts - 1);
+        } else if (hidden === 0 && typeof map.isStyleLoaded === 'function' && !map.isStyleLoaded()) {
+            scheduleLabelHideRetry(attempts - 1);
+        }
+    }, 400);
 }
 
 function recenterMapView() {
@@ -111,15 +131,27 @@ function initMap() {
         center: UWA_CENTER,
         zoom: UWA_DEFAULT_ZOOM,
         zLevel: UWA_DEFAULT_ZLEVEL,
-        scrollZoom: true
+        scrollZoom: true,
+        preserveDrawingBuffer: false,
+        failIfMajorPerformanceCaveat: false
     });
+
+    // Hide map loading spinner once the map is ready
+    map.once('idle', function () {
+        var spinner = document.getElementById('map-spinner');
+        if (spinner) spinner.style.display = 'none';
+    });
+
+    // Hide labels on every style-related event so they never have a chance to
+    // render. These listeners are registered BEFORE 'load' so they catch the
+    // initial style loading, not just subsequent updates.
+    map.on('styledata', hideMapLabelsAndIcons);
+    map.on('idle', hideMapLabelsAndIcons);
+    scheduleLabelHideRetry(5);
 
     map.on('load', function() {
         recenterMapView();
         hideMapLabelsAndIcons();
-
-        // Keep labels/icons hidden if MazeMap refreshes style data.
-        map.on('styledata', hideMapLabelsAndIcons);
 
         map.on('click', function(e) {
             placeGuessMarker(e.lngLat.lat, e.lngLat.lng);
@@ -174,7 +206,7 @@ function showResultOnMap(guessLat, guessLng, actualLat, actualLng) {
     }
 
     actualMarker = new Mazemap.MazeMarker({
-        color: '#22c55e',
+        color: '#3b3887',
         size: 34
     })
         .setLngLat([actualLng, actualLat])
@@ -219,7 +251,8 @@ function showResultOnMap(guessLat, guessLng, actualLat, actualLng) {
     const minLat = Math.min(guessLat, actualLat);
     const maxLat = Math.max(guessLat, actualLat);
 
-    map.fitBounds([[minLng, minLat], [maxLng, maxLat]], { padding: 50, duration: 700 });
+    var fitDuration = typeof map.loaded === 'function' && !map.loaded() ? 0 : 700;
+    map.fitBounds([[minLng, minLat], [maxLng, maxLat]], { padding: 50, duration: fitDuration });
 }
 
 // Reset map for the next round

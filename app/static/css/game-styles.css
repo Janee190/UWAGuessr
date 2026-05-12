@@ -119,27 +119,41 @@ all general purpose css should be in style.css
 }
 
 /* Bottom Right Floating Map */
+
+/* Map loading spinner */
+.page-game .map-spinner {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 36px;
+    height: 36px;
+    margin: -18px 0 0 -18px;
+    border: 4px solid rgba(91, 91, 255, 0.25);
+    border-top-color: #5b5bff;
+    border-radius: 50%;
+    z-index: 10;
+    animation: map-spin 0.7s linear infinite;
+}
+
+@keyframes map-spin {
+    to { transform: rotate(360deg); }
+}
+
 .page-game .floating-map-container {
     position: absolute;
     bottom: 20px;
     right: 20px;
     z-index: 1000;
-    width: 320px;
-    height: 240px;
+    width: 400px;
+    height: 300px;
     background-color: var(--navy-overlay);
     border: 2px solid #5b5bff;
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-lg);
     overflow: hidden;
-    transition: all 0.3s ease-in-out;
 }
 
-/* Expand map slightly on hover for easier clicking */
-.page-game .floating-map-container:hover {
-    width: 450px;
-    height: 350px;
-}
-
+/* Map resizes with its container — no hover expansion to avoid WebGL pop-in */
 .page-game #map {
     width: 100%;
     height: 100%;
@@ -180,15 +194,15 @@ all general purpose css should be in style.css
 
 @media (max-width: 768px) {
     .page-game .floating-map-container {
-        width: 200px;
-        height: 150px;
+        width: 260px;
+        height: 200px;
         bottom: auto;
         top: 80px;
     }
 
-    .page-game .floating-map-container:hover {
-        width: 300px;
-        height: 250px;
+    .page-game #map {
+        width: 100%;
+        height: 100%;
     }
 
     .page-game .game-ui-panel {
