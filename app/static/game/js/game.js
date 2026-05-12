@@ -143,15 +143,8 @@ async function autoSubmitMiss() {
 
         document.getElementById('game-board').classList.add('show-results');
         
-        let start = performance.now();
-        requestAnimationFrame(function animateResize(time) {
-            if (typeof map !== 'undefined' && map) map.resize();
-            if (time - start < 550) {
-                requestAnimationFrame(animateResize);
-            } else {
-                focusResultOnMap(0, 0, actualLat, actualLng);
-            }
-        });
+        if (typeof map !== 'undefined' && map) map.resize();
+        focusResultOnMap(0, 0, actualLat, actualLng);
 
         document.getElementById('result-message').innerText = "Time's up! No marker placed.";
         document.getElementById('result-distance').innerText = "-";
@@ -244,8 +237,7 @@ function loadNextRound(startTimerImmediately = true) {
     document.getElementById('next-round-btn').disabled = true;
 
     document.getElementById('game-board').classList.remove('show-results');
-    setTimeout(() => { if (typeof map !== 'undefined' && map) map.resize(); }, 50);
-    setTimeout(() => { if (typeof map !== 'undefined' && map) map.resize(); }, 400);
+    if (typeof map !== 'undefined' && map) map.resize();
 
     clearMapForNextRound();
 
@@ -305,15 +297,8 @@ async function submitGuess() {
 
         document.getElementById('game-board').classList.add('show-results');
         
-        let start = performance.now();
-        requestAnimationFrame(function animateResize(time) {
-            if (typeof map !== 'undefined' && map) map.resize();
-            if (time - start < 550) {
-                requestAnimationFrame(animateResize);
-            } else {
-                focusResultOnMap(guessLat, guessLng, actualLat, actualLng);
-            }
-        });
+        if (typeof map !== 'undefined' && map) map.resize();
+        focusResultOnMap(guessLat, guessLng, actualLat, actualLng);
 
         let distanceMsg = Math.round(distanceMeters) + " m";
         if (distanceMeters > 1000) {
