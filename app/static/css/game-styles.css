@@ -7,7 +7,7 @@ all general purpose css should be in style.css
 .page-game {
     overflow: hidden;
     /* Prevent scrolling for a true full-screen game feel */
-    background-color: #212529;
+    background-color: var(--game-bg);
     font-family: 'Russo One', sans-serif;
     color: var(--text-light);
 }
@@ -19,7 +19,7 @@ all general purpose css should be in style.css
     height: calc(100vh);
     /* Adjust based on navbar height */
     overflow: hidden;
-    background-color: #0f1d33;
+    background-color: var(--game-wrapper-bg);
 }
 /* Game Start Overlay */
 .page-game #game-start-overlay {
@@ -28,7 +28,7 @@ all general purpose css should be in style.css
     left: 0;
     right: 0;
     bottom: 0;
-    z-index: 2000;
+    z-index: var(--z-modal);
     background: rgba(15, 29, 51, 0.7);
     backdrop-filter: blur(5px);
     display: none; /* Initially hidden, managed by js */
@@ -73,7 +73,7 @@ all general purpose css should be in style.css
 
 /* Pannellum Loading Styles */
 #photo-viewer.pnlm-container {
-    background-color: #0f1d33 !important;
+    background-color: var(--game-wrapper-bg) !important;
     background-image: none !important;
 }
 
@@ -180,7 +180,7 @@ all general purpose css should be in style.css
     position: absolute;
     top: 24px;
     left: 24px;
-    z-index: 1000;
+    z-index: var(--z-game-ui);
 }
 
 .page-game .top-left-logo img {
@@ -194,7 +194,7 @@ all general purpose css should be in style.css
     position: absolute;
     top: 24px;
     right: 24px;
-    z-index: 1000;
+    z-index: var(--z-game-ui);
     padding: 16px 32px;
     font-family: var(--font-heading);
 }
@@ -226,12 +226,12 @@ all general purpose css should be in style.css
 }
 
 .page-game .stats-divider.timer-warning {
-    background-color: #ffc107;
+    background-color: var(--color-warning);
 }
 
 .page-game .stats-divider.timer-danger,
 .page-game .stats-divider.timer-expired {
-    background-color: #ff3b30;
+    background-color: var(--color-danger);
 }
 
 .page-game #timer-display {
@@ -245,11 +245,11 @@ all general purpose css should be in style.css
 }
 
 .page-game #timer-display.timer-warning {
-    color: #ffc107;
+    color: var(--color-warning);
 }
 
 .page-game #timer-display.timer-danger {
-    color: #ff3b30;
+    color: var(--color-danger);
 }
 
 /* Bottom Left Exit */
@@ -257,7 +257,7 @@ all general purpose css should be in style.css
     position: absolute;
     bottom: 24px;
     left: 24px;
-    z-index: 1000;
+    z-index: var(--z-game-ui);
 }
 
 .page-game .btn-game-exit {
@@ -286,7 +286,7 @@ all general purpose css should be in style.css
     bottom: 36px;
     left: 50%;
     transform: translateX(-50%);
-    z-index: 1000;
+    z-index: var(--z-game-ui);
     font-family: var(--font-main);
     font-weight: 600;
     font-size: 1.1rem;
@@ -309,7 +309,7 @@ all general purpose css should be in style.css
     position: absolute;
     bottom: 24px;
     right: 24px;
-    z-index: 1000;
+    z-index: var(--z-game-ui);
     width: 360px;
     display: flex;
     flex-direction: column;
@@ -325,7 +325,7 @@ all general purpose css should be in style.css
 .page-game #map {
     width: 100%;
     height: 100%;
-    background-color: #e4edf6;
+    background-color: var(--map-bg-game);
 }
 
 .page-game .map-spinner {
@@ -361,7 +361,7 @@ all general purpose css should be in style.css
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    z-index: 2000;
+    z-index: var(--z-modal);
     padding: 40px;
     text-align: center;
     min-width: 420px;
@@ -401,24 +401,24 @@ all general purpose css should be in style.css
     right: 0;
     bottom: 0;
     pointer-events: none;
-    z-index: 999;
+    z-index: var(--z-danger);
     box-shadow: inset 0 0 0px rgba(255, 59, 48, 0);
-    transition: box-shadow 0.2s ease;
+    transition: box-shadow 0.5s ease;
 }
 
 .page-game #danger-overlay.flash {
-    animation: danger-flash 0.2s ease-in-out infinite alternate;
+    animation: danger-flash 0.5s ease-in-out infinite alternate;
 }
 
 @keyframes danger-flash {
     from {
-        box-shadow: inset 0 0 50px rgba(255, 0, 0, 0.2);
+        box-shadow: inset 0 0 50px rgba(255, 0, 0, 0.1);
         background: rgba(255, 0, 0, 0);
     }
 
     to {
-        box-shadow: inset 0 0 200px rgba(255, 0, 0, 0.9);
-        background: rgba(255, 0, 0, 0.15);
+        box-shadow: inset 0 0 150px rgba(255, 0, 0, 0.6);
+        background: rgba(255, 0, 0, 0.1);
     }
 }
 

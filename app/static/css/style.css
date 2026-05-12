@@ -11,6 +11,18 @@
     --navy-overlay: rgba(22, 18, 70, 0.92);
     --navy-nav: rgba(10, 16, 40, 0.95);
     
+    /* Game Specific Colors */
+    --game-bg: #212529;
+    --game-wrapper-bg: #0f1d33;
+    --map-bg-game: #e4edf6;
+    --color-warning: #ffc107;
+    --color-danger: #ff3b30;
+    
+    /* Game Page Z-Indexes */
+    --z-danger: 999;
+    --z-game-ui: 1000;
+    --z-modal: 2000;
+    
     --text-dark: #0f172a;
     --text-light: #ffffff;
     --text-muted: rgba(255, 255, 255, 0.6);
