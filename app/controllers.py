@@ -112,7 +112,7 @@ def get_all_time_leaderboard_data():
     # Get top 10 players based on their all-time total_score
     leaderboard = db.session.query(
         User.username, 
-        User.total_score.label('high_score')
+        func.coalesce(User.total_score, 0).label('high_score')
     ).order_by(desc('high_score')).limit(10).all()
     
     return leaderboard
