@@ -50,12 +50,13 @@ class Photos(db.Model):
     longitude = db.Column(db.Float, nullable=False)
     timestamp = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
-class Score(db.Model):
+class GameResult(db.Model):
+    __tablename__ = 'game_results'
     sid = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.uid'), nullable=False)
     score = db.Column(db.Integer, nullable=False)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
-    user = db.relationship('User', backref=db.backref('scores', lazy=True))
+    user = db.relationship('User', backref=db.backref('game_results', lazy=True))
 
     

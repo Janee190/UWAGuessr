@@ -273,7 +273,7 @@ def api_game_complete():
     if total_score < 0:
         return jsonify({'error': 'Invalid field values'}), 400
 
-    # Save the score to the Scores table and update user's total_score
+    # Save the score to the GameResults table and update user's total_score
     add_score(current_user.uid, total_score)
 
     return jsonify({'success': True, 'totalScore': current_user.total_score})
