@@ -379,6 +379,30 @@ def api_add_friend():
 
     return jsonify({'message': f'Friend request sent to {receiver.username}'}), 201
 
+@app.route("/api/friends/respond", methods=["POST"])
+@login_required
+def api_respond_friend_request():
+    from app.models import Friendship
+    from app import db
+    data = request.get_json()
+    friendship_id = data.get('id')
+    action = data.get('action')  # 'accept' or 'reject'
+
+    if not friendship_id or action not in ['accept', 'reject']:
+        return jsonify({'error': 'Invalid request'}), 400
+
+    friendship = Friendship.query.get(friendship_id)
+    if not friendship or friendship.receiver_id != current_user.uid:
+        return jsonify({'error': 'Friend request not found'}), 404
+
+    if action == 'accept':
+        friendship.status = 'accepted'
+        db.session.commit()
+        return jsonify({'message': 'Friend request accepted'})
+    else:
+        db.session.delete(friendship)
+        db.session.commit()
+        return jsonify({'message': 'Friend request rejected'})
 
 if __name__ == "__main__":
     app.run(debug=True)
