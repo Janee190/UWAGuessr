@@ -1,0 +1,63 @@
+$(function () {
+    // Load friends list
+    $.ajax({
+        url: '/api/friends',
+        method: 'GET',
+        success: function (friends) {
+            const container = $('#friendsList');
+            if (friends.length === 0) {
+                container.html(`
+                    <div class="empty-state">
+                        <p class="text-muted-light">No friends added yet.</p>
+                        <a href="/" class="btn btn-outline-warning btn-sm bangers-font">
+                            Find Friends
+                        </a>
+                    </div>
+                `);
+                return;
+            }
+
+            let html = '';
+            friends.forEach(function (f) {
+                const initials = f.username.substring(0, 2).toUpperCase();
+                html += `
+                    <div class="profile-stat mb-2">
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="avatar-circle" style="width:2rem;height:2rem;font-size:0.8rem;">
+                                ${initials}
+                            </div>
+                            <span class="stat-value">${f.username}</span>
+                        </div>
+                        <span class="stat-label">${f.total_score ? f.total_score.toLocaleString() + ' pts' : '0 pts'}</span>
+                    </div>
+                `;
+            });
+            container.html(html);
+        },
+        error: function () {
+            $('#friendsList').html('<p class="text-muted-light small">Failed to load friends.</p>');
+        }
+    });
+
+    // Load friends leaderboard
+    $.ajax({
+        url: '/api/friends',
+        method: 'GET',
+        success: function (friends) {
+            if (friends.length === 0) return;
+
+            const sorted = friends.sort((a, b) => (b.total_score || 0) - (a.total_score || 0));
+            let html = '';
+            sorted.forEach(function (f, i) {
+                html += `
+                    <tr>
+                        <td><span class="fw-bold">#${i + 1}</span></td>
+                        <td>${f.username}</td>
+                        <td class="text-end">${f.total_score ? f.total_score.toLocaleString() : '0'} pts</td>
+                    </tr>
+                `;
+            });
+            $('table tbody').html(html);
+        }
+    });
+});
