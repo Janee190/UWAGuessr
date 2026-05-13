@@ -12,6 +12,161 @@ const ROUNDS_PER_GAME = 5;
 const DEFAULT_HFOV = 85;
 const MIN_HFOV = 25;
 const MAX_HFOV = 90;
+const TIME_LIMIT = 20;
+let timerInterval = null;
+let timeRemaining = TIME_LIMIT;
+let isTimerExpired = false;
+
+// ── Timer Functions ────────────────────────────────────────────────────────
+
+let startTime = null;
+
+function startTimer() {
+    stopTimer();
+    isTimerExpired = false;
+    timeRemaining = TIME_LIMIT;
+    startTime = performance.now();
+    updateTimerDisplay();
+
+    timerInterval = setInterval(function () {
+        let elapsedTime = (performance.now() - startTime) / 1000;
+        timeRemaining = Math.max(0, TIME_LIMIT - elapsedTime);
+        updateTimerDisplay();
+
+        if (timeRemaining <= 0) {
+            handleTimerExpiry();
+        }
+    }, 10);
+}
+
+function stopTimer() {
+    if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+    }
+    var dangerOverlay = document.getElementById('danger-overlay');
+    if (dangerOverlay) dangerOverlay.classList.remove('flash');
+}
+
+function resetTimer() {
+    stopTimer();
+    isTimerExpired = false;
+    timeRemaining = TIME_LIMIT;
+    var el = document.getElementById('timer-display');
+    if (el) {
+        el.classList.remove('timer-warning', 'timer-danger', 'timer-expired');
+    }
+    updateTimerDisplay();
+}
+
+function updateTimerDisplay() {
+    var el = document.getElementById('timer-display');
+    if (!el) return;
+    el.textContent = timeRemaining.toFixed(1) + "s";
+
+    el.classList.remove('timer-warning', 'timer-danger', 'timer-expired');
+
+    var divider = document.getElementById('stats-divider');
+    if (divider) divider.classList.remove('timer-warning', 'timer-danger', 'timer-expired');
+
+    var dangerOverlay = document.getElementById('danger-overlay');
+
+    if (timeRemaining <= 0) {
+        el.classList.add('timer-expired');
+        if (divider) {
+            divider.classList.add('timer-bar-active', 'timer-expired');
+            divider.style.width = "0%";
+        }
+        if (dangerOverlay) dangerOverlay.classList.remove('flash');
+    } else if (timeRemaining <= 10) {
+        if (timeRemaining <= 5) {
+            el.classList.add('timer-danger');
+            if (divider) divider.classList.add('timer-danger');
+            if (dangerOverlay) dangerOverlay.classList.add('flash');
+        } else {
+            el.classList.add('timer-warning');
+            if (divider) divider.classList.add('timer-warning');
+            if (dangerOverlay) dangerOverlay.classList.remove('flash');
+        }
+        if (divider) {
+            divider.classList.add('timer-bar-active');
+            divider.style.width = ((timeRemaining / 10) * 100) + "%";
+        }
+    } else {
+        if (divider) {
+            divider.classList.remove('timer-bar-active');
+            divider.style.width = "100%";
+        }
+        if (dangerOverlay) dangerOverlay.classList.remove('flash');
+    }
+}
+
+function handleTimerExpiry() {
+    if (isTimerExpired) return;
+    isTimerExpired = true;
+    stopTimer();
+
+    document.getElementById('action-btn').disabled = true;
+
+    if (guessMarker) {
+        submitGuess();
+    } else {
+        autoSubmitMiss();
+    }
+}
+
+async function autoSubmitMiss() {
+    var actionBtn = document.getElementById('action-btn');
+    actionBtn.disabled = true;
+
+    try {
+        var response = await fetch('/api/guess', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ lat: 0, lng: 0, id: currentRoundData.id })
+        });
+
+        var result = await response.json();
+        if (result.error) {
+            console.error(result.error);
+            actionBtn.disabled = false;
+            return;
+        }
+
+        var actualLat = result.actual_lat;
+        var actualLng = result.actual_lng;
+
+        totalScore += result.score;
+        localStorage.setItem('uwa_totalScore', totalScore);
+
+        drawResultOnMap(0, 0, actualLat, actualLng);
+
+        document.getElementById('game-board').classList.add('show-results');
+
+        if (typeof map !== 'undefined' && map) map.resize();
+        focusResultOnMap(0, 0, actualLat, actualLng);
+
+        document.getElementById('result-message').innerText = "Time's up! No marker placed.";
+        document.getElementById('result-distance').innerText = "-";
+        document.getElementById('result-points').innerText = `+${result.score} points`;
+        document.getElementById('result-total').innerText = `Total Score: ${totalScore}`;
+
+        let isLastRound = currentRoundIndex === activeRounds.length - 1;
+        document.getElementById('next-btn-text').innerText = isLastRound ? "FINISH GAME" : "CONTINUE";
+        document.getElementById('next-round-btn').disabled = false;
+
+        actionBtn.innerText = "NEXT ROUND";
+        actionBtn.disabled = true; // keep hidden actionBtn disabled
+
+        currentRoundIndex++;
+        if (currentRoundIndex < activeRounds.length) {
+            loadPanorama(activeRounds[currentRoundIndex].imagePath);
+        }
+    } catch (e) {
+        console.error('Auto-submit failed:', e);
+        actionBtn.disabled = false;
+    }
+}
 
 // Resets game state and starts the first round.
 async function startGame() {
@@ -29,9 +184,25 @@ async function startGame() {
     localStorage.setItem('uwa_totalScore', totalScore); // Reset local storage
     document.getElementById('game-board').style.display = 'block';
     document.getElementById('game-over').style.display = 'none';
+
+    var overlay = document.getElementById('game-start-overlay');
+    overlay.classList.remove('ready');
+    overlay.style.display = 'flex';
+
     setupPhotoViewer();
+
+    // Show map loading spinner
+    var spinner = document.getElementById('map-spinner');
+    if (spinner) spinner.style.display = '';
+
     initMap();
-    loadNextRound();
+    loadPanorama(activeRounds[0].imagePath);
+    loadNextRound(false);
+}
+
+function beginGame() {
+    document.getElementById('game-start-overlay').style.display = 'none';
+    startTimer();
 }
 
 // Chooses a unique random subset of rounds for one game session.
@@ -52,7 +223,7 @@ function buildRandomRounds() {
 }
 
 // Loads the next round photo and resets round-specific UI.
-function loadNextRound() {
+function loadNextRound(startTimerImmediately = true) {
     currentRoundData = activeRounds[currentRoundIndex];
 
     if (!currentRoundData) {
@@ -61,13 +232,29 @@ function loadNextRound() {
     }
 
     // Update UI
-    loadPanorama(currentRoundData.imagePath);
     document.getElementById('round-counter').innerText = `Round ${currentRoundIndex + 1} / ${activeRounds.length}`;
-    document.getElementById('submit-btn').disabled = true; // Wait for guess
-    document.getElementById('next-btn').disabled = true;
-    document.getElementById('feedback-text').innerText = '';
+
+    const actionBtn = document.getElementById('action-btn');
+    actionBtn.innerText = "SUBMIT GUESS";
+    actionBtn.disabled = true; // Wait for guess
+
+    document.getElementById('next-round-btn').disabled = true;
+
+    document.getElementById('game-board').classList.remove('show-results');
+
+    // Force a synchronous DOM reflow so the map container immediately adopts the 
+    // small dimensions before we tell Mapbox to resize and recenter.
+    void document.getElementById('map').offsetWidth;
+
+    if (typeof map !== 'undefined' && map) map.resize();
 
     clearMapForNextRound();
+
+    // Start countdown timer for this round
+    resetTimer();
+    if (startTimerImmediately) {
+        startTimer();
+    }
 }
 
 // Submits the current map guess, scores it, and unlocks the next round button.
@@ -78,8 +265,11 @@ async function submitGuess() {
     const guessLat = markerPosition.lat;
     const guessLng = markerPosition.lng;
 
-    const submitBtn = document.getElementById('submit-btn');
-    submitBtn.disabled = true;
+    const actionBtn = document.getElementById('action-btn');
+    actionBtn.disabled = true;
+
+    // Stop the timer since the guess was submitted
+    stopTimer();
 
     // Send guess to backend
     try {
@@ -98,7 +288,7 @@ async function submitGuess() {
         const result = await response.json();
         if (result.error) {
             console.error(result.error);
-            submitBtn.disabled = false;
+            actionBtn.disabled = false;
             return;
         }
 
@@ -112,24 +302,61 @@ async function submitGuess() {
         localStorage.setItem('uwa_totalScore', totalScore);
 
         // Show Map Results
-        showResultOnMap(guessLat, guessLng, actualLat, actualLng);
+        drawResultOnMap(guessLat, guessLng, actualLat, actualLng);
 
-        // Show UI Feedback (You will need HTML elements for these)
-        document.getElementById('feedback-text').innerText = `You were ${Math.round(distanceMeters)}m away! You scored ${roundScore} points.`;
-        document.getElementById('submit-btn').disabled = true;
-        document.getElementById('next-btn').disabled = false;
+        document.getElementById('game-board').classList.add('show-results');
+
+        if (typeof map !== 'undefined' && map) map.resize();
+        focusResultOnMap(guessLat, guessLng, actualLat, actualLng);
+
+        let distanceMsg = Math.round(distanceMeters) + " m";
+        if (distanceMeters > 1000) {
+            distanceMsg = (distanceMeters / 1000).toFixed(1) + " km";
+        }
+
+        let resultTitle = "Good guess!";
+        if (distanceMeters < 10) resultTitle = "Perfect! Right on top of it.";
+        else if (distanceMeters < 50) resultTitle = "Excellent guess! Very close.";
+        else if (distanceMeters < 200) resultTitle = "Great guess!";
+        else if (distanceMeters < 500) resultTitle = "Not bad!";
+        else resultTitle = "At least it was on the correct planet.";
+
+        document.getElementById('result-message').innerText = resultTitle;
+        document.getElementById('result-distance').innerText = distanceMsg;
+        document.getElementById('result-points').innerText = `+${roundScore} points`;
+        document.getElementById('result-total').innerText = `Total Score: ${totalScore}`;
+
+        let isLastRound = currentRoundIndex === activeRounds.length - 1;
+        document.getElementById('next-btn-text').innerText = isLastRound ? "FINISH GAME" : "CONTINUE";
+        document.getElementById('next-round-btn').disabled = false;
+
+        actionBtn.innerText = "NEXT ROUND";
+        actionBtn.disabled = true; // keep hidden actionBtn disabled
 
         // Prepare for next round
         currentRoundIndex++;
+        if (currentRoundIndex < activeRounds.length) {
+            loadPanorama(activeRounds[currentRoundIndex].imagePath);
+        }
     } catch (e) {
         console.error("Failed to submit guess:", e);
-        submitBtn.disabled = false;
+        actionBtn.disabled = false;
+    }
+}
+
+function handleAction() {
+    const actionBtn = document.getElementById('action-btn');
+    if (actionBtn.innerText === "SUBMIT GUESS") {
+        submitGuess();
+    } else {
+        loadNextRound();
     }
 }
 
 // Displays the game-over overlay with the final score.
 function showGameOver() {
-    
+    stopTimer();
+
     document.getElementById('game-board').style.display = 'none';
     document.getElementById('game-over').style.display = 'block';
     document.getElementById('final-score').innerText = `Final Score: ${totalScore}`;

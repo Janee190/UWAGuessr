@@ -4,7 +4,7 @@
 {% block body_class %}page-home{% endblock %}
 
 {% block extra_head %}
-<!-- Load Mazemap CSS directly so we can initialize a hidden map -->
+<!-- Load Mazemap CSS (needed by the hidden preload map) -->
 <link rel="stylesheet" href="https://api.mazemap.com/js/v2.2.6/mazemap.min.css">
 
 <!-- Preload Pannellum since we don't need to execute it here -->
@@ -495,10 +495,6 @@
 {% endblock %}
 
 {% block scripts %}
-<div id="hidden-preload-map"
-    style="position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; overflow: hidden; z-index: -1;">
-</div>
-<script src="https://api.mazemap.com/js/v2.2.6/mazemap.min.js"></script>
 <script src="{{ url_for('static', filename='js/index.js') }}"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {

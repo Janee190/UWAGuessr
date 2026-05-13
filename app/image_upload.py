@@ -97,4 +97,60 @@ def add_photo_record(image_path, lat, lng):
     )
     db.session.add(photo)
     db.session.commit()
+    
+    try:
+        sync_photos_to_json()
+    except Exception as e:
+        print(f"Error syncing photos to JSON: {e}")
+
     return photo.pid
+
+def sync_photos_to_json():
+    """Dump all photo records from the database to photos.json."""
+    import json
+    photos = Photos.query.all()
+    data = []
+    for p in photos:
+        data.append({
+            'pid': p.pid,
+            'image_path': p.image_path,
+            'latitude': p.latitude,
+            'longitude': p.longitude,
+            'timestamp': p.timestamp.isoformat() if p.timestamp else None
+        })
+    json_path = os.path.join(BASE_DIR, '..', 'photos.json')
+    with open(json_path, 'w') as f:
+        json.dump(data, f, indent=4)
+
+def load_photos_from_json():
+    """Load photo records from photos.json into the database."""
+    import json
+    from datetime import datetime
+    json_path = os.path.join(BASE_DIR, '..', 'photos.json')
+    if not os.path.exists(json_path):
+        return 0
+    with open(json_path, 'r') as f:
+        data = json.load(f)
+    
+    added = 0
+    for item in data:
+        existing = Photos.query.filter_by(image_path=item['image_path']).first()
+        if not existing:
+            dt = datetime.fromisoformat(item['timestamp']) if item.get('timestamp') else datetime.utcnow()
+            
+            existing_pid = Photos.query.get(item['pid'])
+            photo = Photos(
+                image_path=item['image_path'],
+                latitude=item['latitude'],
+                longitude=item['longitude'],
+                timestamp=dt
+            )
+            if not existing_pid:
+                photo.pid = item['pid']
+            
+            db.session.add(photo)
+            added += 1
+    
+    if added > 0:
+        db.session.commit()
+    return added

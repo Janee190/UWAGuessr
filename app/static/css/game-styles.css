@@ -7,7 +7,7 @@ all general purpose css should be in style.css
 .page-game {
     overflow: hidden;
     /* Prevent scrolling for a true full-screen game feel */
-    background-color: #212529;
+    background-color: var(--game-bg);
     font-family: 'Russo One', sans-serif;
     color: var(--text-light);
 }
@@ -19,7 +19,32 @@ all general purpose css should be in style.css
     height: calc(100vh);
     /* Adjust based on navbar height */
     overflow: hidden;
-    background-color: #0f1d33;
+    background-color: var(--game-wrapper-bg);
+}
+/* Game Start Overlay */
+.page-game #game-start-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: var(--z-modal);
+    background: rgba(15, 29, 51, 1);
+    backdrop-filter: blur(0px);
+    display: none; /* Initially hidden, managed by js */
+    align-items: center;
+    justify-content: center;
+    transition: background 1.5s ease, backdrop-filter 1.5s ease;
+}
+
+.page-game #game-start-overlay.ready {
+    background: rgba(15, 29, 51, 0.7);
+    backdrop-filter: blur(5px);
+}
+
+.page-game .start-panel {
+    padding: 40px;
+    min-width: 400px;
 }
 
 /* Full Screen Photo Viewer */
@@ -52,98 +77,311 @@ all general purpose css should be in style.css
     transition: none;
 }
 
-/* Top Right Controls */
-.page-game .photo-controls {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    z-index: 1000;
-    display: flex;
-    gap: 10px;
+/* Pannellum Loading Styles */
+#photo-viewer.pnlm-container {
+    background-color: var(--game-wrapper-bg) !important;
+    background-image: none !important;
 }
 
-.page-game .photo-controls .btn {
-    font-family: var(--font-accent);
-    font-size: 1.1rem;
-    letter-spacing: 1px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+#photo-viewer .pnlm-load-box {
+    background-color: var(--navy-overlay) !important;
+    border-radius: var(--radius-md) !important;
+    box-shadow: var(--shadow-lg) !important;
+    color: var(--text-light) !important;
+    padding-top: 15px;
 }
 
-/* Exit Button */
-.page-game .exit-btn {
-    position: absolute;
-    top: 20px;
-    left: 20px;
-    z-index: 1000;
-    display: flex;
-    gap: 10px;
+#photo-viewer .pnlm-lmsg {
+    font-family: var(--font-heading) !important;
+    font-size: 14px !important;
+    color: var(--golden) !important;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
 }
 
-/* Bottom Left Game UI Panel (styled like signup-card) */
-.page-game .game-ui-panel {
-    position: absolute;
-    bottom: 20px;
-    left: 20px;
-    z-index: 1000;
-    width: 350px;
+#photo-viewer .pnlm-lbar {
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    border-radius: 4px !important;
+    background: rgba(0, 0, 0, 0.5) !important;
+}
+
+#photo-viewer .pnlm-lbar-fill {
+    background: var(--golden) !important;
+}
+
+#photo-viewer .pnlm-load-button {
+    background-color: var(--navy-overlay) !important;
+    border-radius: var(--radius-md) !important;
+    box-shadow: var(--shadow-lg) !important;
+}
+
+#photo-viewer .pnlm-load-button:hover {
+    background-color: var(--navy-800) !important;
+}
+
+/* --- New Game UI Layout --- */
+
+.page-game .game-panel {
     background-color: var(--navy-overlay);
-    border: 2px solid #5b5bff;
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-lg);
-    padding: 20px;
-}
-
-.page-game .game-ui-panel h1 {
-    font-family: var(--font-heading);
-    font-size: 1.5rem;
-    margin-bottom: 0;
-}
-
-.page-game #round-counter {
-    font-family: 'Press Start 2P', sans-serif;
-    font-size: 0.6rem;
-    color: var(--golden);
-}
-
-.page-game #feedback-text {
-    font-family: 'Russo One', sans-serif;
-    font-size: 1rem;
-    min-height: 2.5rem;
     color: var(--text-light);
 }
 
-.page-game .btn-game {
+.page-game .btn-game-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--golden);
+    color: #000;
+    border: none;
+    border-radius: var(--radius-md);
     font-family: var(--font-accent);
-    font-size: 1.2rem;
-    letter-spacing: 1px;
+    font-size: 1.5rem;
+    font-weight: 200;
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+    text-decoration: none;
 }
 
-/* Bottom Right Floating Map */
-.page-game .floating-map-container {
-    position: absolute;
-    bottom: 20px;
-    right: 20px;
-    z-index: 1000;
-    width: 320px;
-    height: 240px;
-    background-color: var(--navy-overlay);
-    border: 2px solid #5b5bff;
-    border-radius: var(--radius-lg);
+.page-game .btn-game-action:hover:not(:disabled) {
+    background: var(--golden-hover);
+    transform: scale(1.04);
     box-shadow: var(--shadow-lg);
-    overflow: hidden;
-    transition: all 0.3s ease-in-out;
 }
 
-/* Expand map slightly on hover for easier clicking */
-.page-game .floating-map-container:hover {
-    width: 450px;
-    height: 350px;
+.page-game .btn-game-action:active:not(:disabled) {
+    transform: scale(0.98);
+}
+
+.page-game .btn-game-action:disabled {
+    background: #6c757d;
+    color: #d3d3d3;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.page-game .btn-game-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: 1px solid #d4d9d2;
+    border-radius: var(--radius-md);
+    font-family: var(--font-accent);
+    font-size: 1.5rem;
+    color: var(--text-light);
+    cursor: pointer;
+    transition: background 0.15s ease;
+    text-decoration: none;
+}
+
+.page-game .btn-game-secondary:hover {
+    background: var(--navy-800);
+}
+
+/* Top Left Logo */
+.page-game .top-left-logo {
+    position: absolute;
+    top: 24px;
+    left: 24px;
+    z-index: var(--z-game-ui);
+}
+
+.page-game .top-left-logo img {
+    height: 60px;
+    width: auto;
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.6));
+}
+
+/* Top Right Stats */
+.page-game .top-right-stats {
+    position: absolute;
+    top: 24px;
+    right: 24px;
+    z-index: var(--z-game-ui);
+    padding: 16px 32px;
+    font-family: var(--font-heading);
+}
+
+.page-game #round-counter {
+    font-size: 1.2rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    color: var(--golden);
+    margin-bottom: 8px;
+}
+
+.page-game .stats-divider-container {
+    width: 100%;
+    height: 4px;
+    /* Thicker to see progress clearly */
+    background: rgba(255, 255, 255, 0.2);
+    margin: 0 0 8px 0;
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.page-game .stats-divider {
+    width: 100%;
+    height: 100%;
+    background: #fff;
+    margin: 0 auto;
+    transition: background-color 0.3s;
+}
+
+.page-game .stats-divider.timer-warning {
+    background-color: var(--color-warning);
+}
+
+.page-game .stats-divider.timer-danger,
+.page-game .stats-divider.timer-expired {
+    background-color: var(--color-danger);
+}
+
+.page-game #timer-display {
+    font-size: 2.5rem;
+    font-weight: 700;
+    transition: color 0.3s;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    font-variant-numeric: tabular-nums;
+    min-width: 85px;
+    display: inline-block;
+}
+
+.page-game #timer-display.timer-warning {
+    color: var(--color-warning);
+}
+
+.page-game #timer-display.timer-danger {
+    color: var(--color-danger);
+}
+
+/* Bottom Left Exit */
+.page-game .bottom-left-exit {
+    position: absolute;
+    bottom: 24px;
+    left: 24px;
+    z-index: var(--z-game-ui);
+}
+
+.page-game .btn-game-exit {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--navy-overlay);
+    color: var(--text-light);
+    border-radius: var(--radius-md);
+    padding: 10px 28px;
+    font-family: var(--font-accent);
+    font-size: 1.5rem;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.page-game .btn-game-exit:hover {
+    background: var(--navy-800);
+    color: var(--golden);
+}
+
+/* Round Result Overlay */
+.page-game .round-result-overlay {
+    position: absolute;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    z-index: calc(var(--z-game-ui) + 20); /* above the fullscreen map */
+    width: 480px;
+    max-width: 90vw;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.4s ease, visibility 0.4s ease, transform 0.4s ease;
+}
+
+.page-game #game-board.show-results .round-result-overlay {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
+}
+
+/* Bottom Right Map & Actions */
+.page-game .bottom-right-container {
+    position: absolute;
+    bottom: 24px;
+    right: 24px;
+    z-index: var(--z-game-ui);
+    width: 360px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    transform-origin: bottom right;
+}
+
+.page-game .map-wrapper {
+    width: 100%;
+    height: 260px;
+    flex-grow: 1;
+    flex-shrink: 0;
+    overflow: hidden;
+}
+
+/* Fullscreen Map Result Mode */
+.page-game #game-board.show-results .bottom-right-container {
+    bottom: 0;
+    right: 0;
+    width: 100%;
+    height: 100%;
+    gap: 0;
+    z-index: calc(var(--z-game-ui) + 10);
+}
+
+.page-game #game-board.show-results .map-wrapper {
+    height: 100%;
+    border-radius: 0;
+}
+
+.page-game #game-board.show-results .action-btn-wrapper {
+    height: 0;
+    opacity: 0;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    pointer-events: none;
 }
 
 .page-game #map {
     width: 100%;
     height: 100%;
-    background-color: #e4edf6;
+    background-color: var(--map-bg-game);
+}
+
+.page-game .map-spinner {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 36px;
+    height: 36px;
+    margin: -18px 0 0 -18px;
+    border: 4px solid rgba(255, 255, 255, 0.2);
+    border-top-color: #5b5bff;
+    border-radius: 50%;
+    z-index: 10;
+    animation: map-spin 0.7s linear infinite;
+}
+
+@keyframes map-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Action Button Container */
+.page-game .action-btn-wrapper {
+    width: 100%;
+    height: 60px;
+    opacity: 1;
 }
 
 /* Game Over Overlay */
@@ -153,45 +391,91 @@ all general purpose css should be in style.css
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    z-index: 2000;
-    background-color: var(--navy-nav);
-    border: 2px solid #5b5bff;
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-lg);
+    z-index: var(--z-modal);
     padding: 40px;
     text-align: center;
-    min-width: 400px;
+    min-width: 420px;
 }
 
-.page-game #game-over h2 {
-    font-family: var(--font-heading);
+.page-game .game-over-title {
+    color: var(--golden);
+    text-shadow: 0 2px 10px rgba(255, 202, 44, 0.3);
+    letter-spacing: 0.05em;
+}
+
+.page-game .final-score-box {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-md);
+    padding: 20px;
+    margin-top: 20px;
 }
 
 .page-game #final-score {
-    font-family: 'Press Start 2P', sans-serif;
-    font-size: 1.2rem;
-    color: var(--golden);
-    margin: 20px 0;
+    font-family: var(--font-heading);
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #fff;
+    text-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
 }
 
 .page-game #map canvas {
     outline: none;
 }
 
+/* Danger Overlay for last 5 seconds */
+.page-game #danger-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    z-index: var(--z-danger);
+    box-shadow: inset 0 0 0px rgba(255, 59, 48, 0);
+    transition: box-shadow 0.5s ease;
+}
+
+.page-game #danger-overlay.flash {
+    animation: danger-flash 0.5s ease-in-out infinite alternate;
+}
+
+@keyframes danger-flash {
+    from {
+        box-shadow: inset 0 0 50px rgba(255, 0, 0, 0.1);
+        background: rgba(255, 0, 0, 0);
+    }
+
+    to {
+        box-shadow: inset 0 0 150px rgba(255, 0, 0, 0.6);
+        background: rgba(255, 0, 0, 0.1);
+    }
+}
+
 @media (max-width: 768px) {
-    .page-game .floating-map-container {
-        width: 200px;
-        height: 150px;
+    .page-game .bottom-right-container {
+        width: 280px;
         bottom: auto;
-        top: 80px;
+        top: 120px;
     }
 
-    .page-game .floating-map-container:hover {
-        width: 300px;
-        height: 250px;
+    .page-game .map-wrapper {
+        height: 220px;
     }
 
-    .page-game .game-ui-panel {
-        width: calc(100% - 40px);
+    .page-game .top-left-logo img {
+        height: 48px;
+    }
+
+    .page-game .top-right-stats {
+        padding: 12px 20px;
+    }
+
+    .page-game #timer-display {
+        font-size: 1.8rem;
+    }
+
+    .page-game #round-counter {
+        font-size: 1rem;
     }
 }

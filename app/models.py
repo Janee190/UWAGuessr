@@ -12,6 +12,7 @@ class User(UserMixin, db.Model):
     security_question = db.Column(db.String(256), nullable=True)
     security_answer_hash = db.Column(db.String(256), nullable=True)
     total_score = db.Column(db.Integer, default=0, nullable=True)
+    is_admin = db.Column(db.Boolean, default=False, nullable=True)
 
     def get_id(self):
         return str(self.uid)
