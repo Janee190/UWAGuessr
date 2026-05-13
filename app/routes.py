@@ -294,6 +294,21 @@ def api_get_friends():
         })
     return jsonify(result)
 
+@app.route("/api/friends/requests", methods=["GET"])
+@login_required
+def api_get_friend_requests():
+    from app.models import Friendship
+    requests = Friendship.query.filter_by(
+        receiver_id=current_user.uid,
+        status='pending'
+    ).all()
+    
+    return jsonify([{
+        'id': r.id,
+        'username': r.requester.username,
+        'uid': r.requester.uid
+    } for r in requests])
+
 
 if __name__ == "__main__":
     app.run(debug=True)
