@@ -309,6 +309,44 @@ def api_get_friend_requests():
         'uid': r.requester.uid
     } for r in requests])
 
+@app.route("/api/friends/search", methods=["GET"])
+@login_required
+def api_search_users():
+    from app.models import Friendship
+    query = request.args.get('q', '').strip()
+    if not query or len(query) < 2:
+        return jsonify([])
+    
+    users = User.query.filter(
+        User.username.ilike(f'%{query}%'),
+        User.uid != current_user.uid
+    ).limit(10).all()
+
+    # Check friendship status for each user
+    result = []
+    for u in users:
+        friendship = Friendship.query.filter(
+            ((Friendship.requester_id == current_user.uid) & (Friendship.receiver_id == u.uid)) |
+            ((Friendship.requester_id == u.uid) & (Friendship.receiver_id == current_user.uid))
+        ).first()
+
+        status = None
+        if friendship:
+            if friendship.status == 'accepted':
+                status = 'friends'
+            elif friendship.requester_id == current_user.uid:
+                status = 'sent'
+            else:
+                status = 'received'
+
+        result.append({
+            'uid': u.uid,
+            'username': u.username,
+            'friendship_status': status
+        })
+    
+    return jsonify(result)
+
 
 if __name__ == "__main__":
     app.run(debug=True)
