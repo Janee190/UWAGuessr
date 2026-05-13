@@ -274,6 +274,26 @@ def api_game_complete():
 
     return jsonify({'success': True, 'totalScore': current_user.total_score})
 
+@app.route("/api/friends", methods=["GET"])
+@login_required
+def api_get_friends():
+    from app.models import Friendship
+    friends = Friendship.query.filter(
+        ((Friendship.requester_id == current_user.uid) | 
+         (Friendship.receiver_id == current_user.uid)),
+        Friendship.status == 'accepted'
+    ).all()
+    
+    result = []
+    for f in friends:
+        friend = f.receiver if f.requester_id == current_user.uid else f.requester
+        result.append({
+            'uid': friend.uid,
+            'username': friend.username,
+            'total_score': friend.total_score
+        })
+    return jsonify(result)
+
 
 if __name__ == "__main__":
     app.run(debug=True)
