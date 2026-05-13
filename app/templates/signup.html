@@ -12,100 +12,148 @@ block body_class %}page-signup{% endblock %} {% block content %}
         alt="UWAGuessr Logo"
         class="brand-logo"
       />
-      <div class="brand-sub">Explore UWA</div>
+      <div class="brand-sub">Join the hunt</div>
 
       <div class="alert-area" id="alertArea"></div>
 
+      <!-- Step indicators -->
+      <div class="step-indicators">
+        <div class="step-indicator active" id="step-ind-1">
+          <div class="step-circle">1</div>
+          <div class="step-label">Account</div>
+        </div>
+        <div class="step-connector"></div>
+        <div class="step-indicator" id="step-ind-2">
+          <div class="step-circle">2</div>
+          <div class="step-label">Security</div>
+        </div>
+        <div class="step-connector"></div>
+        <div class="step-indicator" id="step-ind-3">
+          <div class="step-circle">3</div>
+          <div class="step-label">Recovery</div>
+        </div>
+      </div>
+
       <form id="signupForm" novalidate>
-        <div class="mb-3">
-          <label class="form-label" for="username">Username</label>
-          <input
-            type="text"
-            class="form-control"
-            id="username"
-            name="username"
-            placeholder="coolexplorer42"
-            autocomplete="username"
-            required
-          />
+        <!-- Step 1: Account -->
+        <div class="form-step" id="step-1">
+          <div class="mb-3">
+            <label class="form-label" for="username">Username</label>
+            <input
+              type="text"
+              class="form-control"
+              id="username"
+              name="username"
+              placeholder="coolexplorer42"
+              autocomplete="username"
+              required
+            />
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="email">Email</label>
+            <input
+              type="email"
+              class="form-control"
+              id="email"
+              name="email"
+              placeholder="email@example.com"
+              autocomplete="email"
+              required
+            />
+          </div>
+          <button type="button" class="btn-signin" id="nextBtn1">
+            <span class="btn-label">Next →</span>
+          </button>
         </div>
 
-        <div class="mb-3">
-          <label class="form-label" for="email">Email</label>
-          <input
-            type="email"
-            class="form-control"
-            id="email"
-            name="email"
-            placeholder="email@example.com"
-            autocomplete="email"
-            required
-          />
+        <!-- Step 2: Password -->
+        <div class="form-step" id="step-2" style="display: none">
+          <div class="mb-3">
+            <label class="form-label" for="password">Password</label>
+            <input
+              type="password"
+              class="form-control"
+              id="password"
+              name="password"
+              placeholder="•••••••••••"
+              autocomplete="new-password"
+              required
+            />
+            <div class="strength-bar-wrap">
+              <div class="strength-bar" id="strengthBar"></div>
+            </div>
+            <div class="strength-label" id="strengthLabel"></div>
+            <ul class="password-reqs">
+              <li id="req-len">At least 8 characters</li>
+              <li id="req-upper">At least one uppercase letter</li>
+              <li id="req-num">At least one number</li>
+            </ul>
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="confirmPassword"
+              >Confirm Password</label
+            >
+            <input
+              type="password"
+              class="form-control"
+              id="confirmPassword"
+              name="confirmPassword"
+              placeholder="•••••••••••"
+              autocomplete="new-password"
+              required
+            />
+          </div>
+          <div class="step-nav">
+            <button type="button" class="btn-back" id="backBtn2">← Back</button>
+            <button type="button" class="btn-signin" id="nextBtn2">
+              <span class="btn-label">Next →</span>
+            </button>
+          </div>
         </div>
 
-        <div class="mb-3">
-          <label class="form-label" for="password">Password</label>
-          <input
-            type="password"
-            class="form-control"
-            id="password"
-            name="password"
-            placeholder="•••••••••••"
-            autocomplete="new-password"
-            required
-          />
+        <!-- Step 3: Recovery -->
+        <div class="form-step" id="step-3" style="display: none">
+          <div class="mb-3">
+            <label class="form-label" for="securityQuestion"
+              >Security Question</label
+            >
+            <input
+              type="text"
+              class="form-control"
+              id="securityQuestion"
+              name="securityQuestion"
+              placeholder="What is your mother's maiden name?"
+              autocomplete="off"
+              required
+            />
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="securityAnswer">Answer</label>
+            <input
+              type="text"
+              class="form-control"
+              id="securityAnswer"
+              name="securityAnswer"
+              placeholder="Your answer"
+              autocomplete="off"
+              required
+            />
+          </div>
+          <div class="step-nav">
+            <button type="button" class="btn-back" id="backBtn3">← Back</button>
+            <button type="submit" class="btn-signin" id="signupBtn">
+              <span
+                class="spinner-border"
+                role="status"
+                aria-hidden="true"
+              ></span>
+              <span class="btn-label">Start playing</span>
+            </button>
+          </div>
         </div>
-
-        <div class="mb-3">
-          <label class="form-label" for="confirmPassword"
-            >Confirm Password</label
-          >
-          <input
-            type="password"
-            class="form-control"
-            id="confirmPassword"
-            name="confirmPassword"
-            placeholder="•••••••••••"
-            autocomplete="new-password"
-            required
-          />
-        </div>
-
-        <div class="mb-3">
-          <label class="form-label" for="securityQuestion"
-            >Security Question</label
-          >
-          <input
-            type="text"
-            class="form-control"
-            id="securityQuestion"
-            name="securityQuestion"
-            placeholder="What is your mother's maiden name?"
-            autocomplete="off"
-            required
-          />
-        </div>
-        <div class="mb-3">
-          <label class="form-label" for="securityAnswer">Answer</label>
-          <input
-            type="text"
-            class="form-control"
-            id="securityAnswer"
-            name="securityAnswer"
-            placeholder="Your answer"
-            autocomplete="off"
-            required
-          />
-        </div>
-
-        <button type="submit" class="btn-signin" id="signupBtn">
-          <span class="spinner-border" role="status" aria-hidden="true"></span>
-          <span class="btn-label">Create account</span>
-        </button>
       </form>
 
       <div class="divider">or</div>
-
       <button class="btn-guest" id="guestBtn">Continue as guest</button>
 
       <div class="form-footer">

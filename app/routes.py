@@ -24,7 +24,7 @@ def api_register():
     if errors:
         return jsonify({'errors': errors}), 400
     login_user(user)
-    return jsonify({'message': 'Signup successful'}), 201
+    return jsonify({'redirect': url_for('index')}), 201
 
 
 @app.route("/login")
@@ -37,7 +37,7 @@ def api_login():
     if errors:
         return jsonify({'errors': errors}), 401
     login_user(user)
-    return jsonify({'message': 'Login successful'}), 200
+    return jsonify({'redirect': url_for('index')}), 200
 
 @app.route("/game")
 def game():
@@ -52,7 +52,7 @@ def api_forgot_password():
     errors = change_user_password(request.get_json())
     if errors:
         return jsonify({'errors': errors}), 401
-    return jsonify({'message': 'Password updated successfully'}), 200
+    return jsonify({'redirect': url_for('login')}), 200
 
 @app.route("/api/game-images")
 def api_game_images():

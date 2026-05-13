@@ -57,27 +57,63 @@ $(function () {
     svg.appendChild(g);
   }
 
+  // ── Helpers ────────────────────────────────────────────────────────────
   function showAlert(message, type) {
-    const html =
+    $("#alertArea").html(
       '<div class="alert alert-' +
-      type +
-      ' alert-dismissible fade show py-2 px-3 mb-0" role="alert" style="font-size:13.5px;">' +
-      message +
-      '<button type="button" class="btn-close btn-sm" data-bs-dismiss="alert" aria-label="Close"></button>' +
-      "</div>";
-    $("#alertArea").html(html);
+        type +
+        ' alert-dismissible fade show py-2 px-3 mb-0" role="alert" style="font-size:13.5px;">' +
+        message +
+        '<button type="button" class="btn-close btn-sm" data-bs-dismiss="alert" aria-label="Close"></button></div>',
+    );
   }
 
-  $("#signupForm").on("submit", function (e) {
-    e.preventDefault();
+  function isValidEmail(email) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  }
 
+  function goToStep(step) {
+    $(".form-step").hide();
+    $("#step-" + step).show();
+    for (let i = 1; i <= 3; i++) {
+      const $ind = $("#step-ind-" + i);
+      $ind.removeClass("active complete");
+      if (i < step) $ind.addClass("complete");
+      if (i === step) $ind.addClass("active");
+    }
+    $(".step-connector").each(function (i) {
+      $(this).toggleClass("complete", i + 1 < step);
+    });
+    $("#alertArea").html("");
+  }
+
+  // Strength meter
+  $("#password").on("input", function () {
+    const pw = $(this).val();
+    const hasLen = pw.length >= 8;
+    const hasUpper = /[A-Z]/.test(pw);
+    const hasNum = /[0-9]/.test(pw);
+    let score = [hasLen, hasUpper, hasNum, pw.length >= 12].filter(
+      Boolean,
+    ).length;
+
+    $("#req-len").toggleClass("met", hasLen);
+    $("#req-upper").toggleClass("met", hasUpper);
+    $("#req-num").toggleClass("met", hasNum);
+
+    const widths = ["0%", "33%", "66%", "85%", "100%"];
+    const colours = ["", "#e74c3c", "#f39c12", "#3498db", "#28a745"];
+    const labels = ["", "Weak", "Fair", "Good", "Strong"];
+    $("#strengthBar").css({ width: widths[score], background: colours[score] });
+    $("#strengthLabel")
+      .text(score > 0 ? labels[score] : "")
+      .css("color", colours[score]);
+  });
+
+  // Step 1
+  $("#nextBtn1").on("click", function () {
     const username = $("#username").val().trim();
     const email = $("#email").val().trim();
-    const password = $("#password").val();
-    const confirmPassword = $("#confirmPassword").val();
-    const securityQuestion = $("#securityQuestion").val().trim();
-    const securityAnswer = $("#securityAnswer").val().trim();
-
     if (!username) {
       showAlert("Username is required.", "danger");
       $("#username").trigger("focus");
@@ -101,13 +137,12 @@ $(function () {
       $("#username").trigger("focus");
       return;
     }
-
     if (!email) {
       showAlert("Email is required.", "danger");
       $("#email").trigger("focus");
       return;
     }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    if (!isValidEmail(email)) {
       showAlert("Please enter a valid email address.", "danger");
       $("#email").trigger("focus");
       return;
@@ -117,7 +152,18 @@ $(function () {
       $("#email").trigger("focus");
       return;
     }
+    goToStep(2);
+    $("#password").trigger("focus");
+  });
 
+  // Step 2
+  $("#backBtn2").on("click", function () {
+    goToStep(1);
+  });
+
+  $("#nextBtn2").on("click", function () {
+    const password = $("#password").val();
+    const confirmPassword = $("#confirmPassword").val();
     if (!password) {
       showAlert("Password is required.", "danger");
       $("#password").trigger("focus");
@@ -146,28 +192,39 @@ $(function () {
       $("#password").trigger("focus");
       return;
     }
-
     if (password !== confirmPassword) {
       showAlert("Passwords do not match.", "danger");
       $("#confirmPassword").trigger("focus");
       return;
     }
+    goToStep(3);
+    $("#securityQuestion").trigger("focus");
+  });
 
+  // Submit
+  $("#backBtn3").on("click", function () {
+    goToStep(2);
+  });
+
+  $("#signupForm").on("submit", function (e) {
+    e.preventDefault();
+    const securityQuestion = $("#securityQuestion").val().trim();
+    const securityAnswer = $("#securityAnswer").val().trim();
     if (!securityQuestion) {
       showAlert("Please enter a security question.", "danger");
       $("#securityQuestion").trigger("focus");
       return;
     }
-    if (securityQuestion.length > 256) {
+    if (securityQuestion.length > 200) {
       showAlert(
-        "Security question must be less than 256 characters.",
+        "Security question must be less than 200 characters.",
         "danger",
       );
       $("#securityQuestion").trigger("focus");
       return;
     }
     if (!securityAnswer) {
-      showAlert("Please enter a security answer.", "danger");
+      showAlert("Please enter your security answer.", "danger");
       $("#securityAnswer").trigger("focus");
       return;
     }
@@ -181,37 +238,46 @@ $(function () {
       method: "POST",
       contentType: "application/json",
       data: JSON.stringify({
-        username: username,
-        email: email,
-        password: password,
+        username: $("#username").val().trim(),
+        email: $("#email").val().trim(),
+        password: $("#password").val(),
         securityQuestion: securityQuestion,
         securityAnswer: securityAnswer,
       }),
       success: function (response) {
         showAlert("Account created! Redirecting…", "success");
         setTimeout(function () {
-          window.location.href = response.redirect || "/login";
+          window.location.href = response.redirect || "/";
         }, 900);
       },
       error: function (xhr) {
         let msg = "Something went wrong. Please try again.";
         if (xhr.responseJSON && xhr.responseJSON.errors) {
           const errors = xhr.responseJSON.errors;
-          msg = errors.username || errors.email || errors.password || msg;
+          msg =
+            errors.username ||
+            errors.email ||
+            errors.password ||
+            errors.securityQuestion ||
+            errors.securityAnswer ||
+            msg;
+          if (errors.username || errors.email) goToStep(1);
+          else if (errors.password) goToStep(2);
         }
-        if (xhr.status === 409) msg = "Email or username already taken";
+        if (xhr.status === 409) msg = "Email or username already taken.";
         showAlert(msg, "danger");
       },
       complete: function () {
         $btn.removeClass("loading").prop("disabled", false);
-        $btn.find(".btn-label").text("Create account");
+        $btn.find(".btn-label").text("Start playing");
       },
     });
   });
 
+  // Guest button
   $("#guestBtn").on("click", function () {
     sessionStorage.setItem("guest", "true");
-    window.location.href = "/";
+    window.location.href = "/game";
   });
 
   $("#username").trigger("focus");
