@@ -44,15 +44,17 @@ $(function () {
         url: '/api/friends',
         method: 'GET',
         success: function (friends) {
-            if (friends.length === 0) return;
+            // Add current user to the list
+            const everyone = [...friends, CURRENT_USER];
+            const sorted = everyone.sort((a, b) => (b.total_score || 0) - (a.total_score || 0));
 
-            const sorted = friends.sort((a, b) => (b.total_score || 0) - (a.total_score || 0));
             let html = '';
             sorted.forEach(function (f, i) {
+                const isMe = f.username === CURRENT_USER.username;
                 html += `
-                    <tr>
+                    <tr ${isMe ? 'style="color: var(--golden);"' : ''}>
                         <td><span class="fw-bold">#${i + 1}</span></td>
-                        <td>${f.username}</td>
+                        <td>${f.username}${isMe ? ' (you)' : ''}</td>
                         <td class="text-end">${f.total_score ? f.total_score.toLocaleString() : '0'} pts</td>
                     </tr>
                 `;
