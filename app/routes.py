@@ -347,6 +347,38 @@ def api_search_users():
     
     return jsonify(result)
 
+@app.route("/api/friends/add", methods=["POST"])
+@login_required
+def api_add_friend():
+    from app.models import Friendship
+    data = request.get_json()
+    receiver_id = data.get('uid')
+
+    if not receiver_id:
+        return jsonify({'error': 'Missing user ID'}), 400
+
+    receiver = User.query.get(receiver_id)
+    if not receiver:
+        return jsonify({'error': 'User not found'}), 404
+
+    if receiver.uid == current_user.uid:
+        return jsonify({'error': 'Cannot add yourself'}), 400
+
+    existing = Friendship.query.filter(
+        ((Friendship.requester_id == current_user.uid) & (Friendship.receiver_id == receiver.uid)) |
+        ((Friendship.requester_id == receiver.uid) & (Friendship.receiver_id == current_user.uid))
+    ).first()
+
+    if existing:
+        return jsonify({'error': 'Friend request already exists'}), 409
+    
+    friendship = Friendship(requester_id=current_user.uid, receiver_id=receiver.uid)
+    from app import db
+    db.session.add(friendship)
+    db.session.commit()
+
+    return jsonify({'message': f'Friend request sent to {receiver.username}'}), 201
+
 
 if __name__ == "__main__":
     app.run(debug=True)
