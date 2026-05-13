@@ -6,6 +6,7 @@ from werkzeug.utils import secure_filename
 from flask_login import login_user, login_required, logout_user, current_user
 
 from app import app
+from app.models import User
 from app.image_upload import extract_gps, convert_to_webp, add_photo_record
 from app.controllers import login_user_service, register_user
 
@@ -84,6 +85,15 @@ def how_to_play():
 @app.route("/leaderboard")
 def leaderboard():
     return render_template("leaderboard.html")
+
+@app.route("/api/leaderboard")
+def api_leaderboard():
+    users = User.query.filter(User.total_score > 0).order_by(User.total_score.desc()).limit(10).all()
+    return jsonify([{
+        'rank': i + 1,
+        'username': u.username,
+        'score': u.total_score
+    } for i, u in enumerate(users)])
 
 @app.route("/dashboard")
 @login_required
