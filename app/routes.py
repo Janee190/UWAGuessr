@@ -49,6 +49,18 @@ def game():
 def forgot_password():
     return render_template("forgot_password.html")
 
+@app.route("/api/get-security-question", methods=["POST"])
+def get_security_question():
+    data = request.get_json()
+    email = data.get("email", "").strip().lower()
+
+    user = User.query.filter_by(email=email).first()
+
+    if not user:
+        return jsonify({"error": "No account found with that email."}), 404
+
+    return jsonify({"securityQuestion": user.security_question})
+
 @app.route("/api/forgot-password", methods=["POST"])
 def api_forgot_password():
     errors = change_user_password(request.get_json())
