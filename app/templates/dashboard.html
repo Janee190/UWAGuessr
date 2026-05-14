@@ -32,9 +32,18 @@
                             {% endif %}
                         </div>
                         <div class="ms-auto">
+                            {% if profile_user is defined %}
+                                {% if current_user.is_authenticated and current_user.uid != viewed_user.uid %}
+                                <button id="add-friend-btn" class="btn btn-warning bangers-font"
+                                    data-uid="{{ viewed_user.uid }}">
+                                    Add Friend
+                                </button>
+                                {% endif %}
+                            {% else %}
                             <a href="{{ url_for('game') }}" class="btn btn-warning btn-lg bangers-font">
                                 Play Now
                             </a>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
