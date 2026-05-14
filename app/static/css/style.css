@@ -1072,5 +1072,32 @@ img {
     }
 }
 
+/* --- Friends notification badge --- */
+.friends-badge {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    background: #e53935;
+    color: white;
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-main);
+    border: 2px solid var(--navy-900);
+}
+
+.friends-toggle {
+    position: relative; /* needed for badge positioning */
+}
+
+.friends-sidebar__nav-button {
+    position: relative; /* needed for badge positioning */
+}
+
 
 
