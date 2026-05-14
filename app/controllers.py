@@ -2,6 +2,7 @@ from app import db
 from app.models import User, GameResult
 import re
 from sqlalchemy import desc, func
+from datetime import datetime
 
 def validate_username(username):
     if not username:

@@ -37,6 +37,7 @@ $(function () {
             url: '/api/friends/requests',
             method: 'GET',
             success: function (requests) {
+                updateBadges(requests.length);
                 const section = $('#pending-invites-section');
                 section.find('.pending-card').remove();
                 const heading = section.find('.section-heading');
@@ -65,6 +66,19 @@ $(function () {
                 });
             }
         });
+    }
+    
+    function updateBadges(count) {
+        const toggleBadge = $('#friends-toggle-badge');
+        const navBadge = $('#invites-nav-badge');
+        
+        if (count > 0) {
+            toggleBadge.text(count > 9 ? '9+' : count).show();
+            navBadge.text(count > 9 ? '9+' : count).show();
+        } else {
+            toggleBadge.hide();
+            navBadge.hide();
+        }
     }
 
     // ── Search users ──────────────────────────────────────────────────
