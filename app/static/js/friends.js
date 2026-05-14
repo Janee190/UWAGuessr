@@ -21,7 +21,9 @@ $(function () {
                         <div class="friend-card">
                             <div class="friend-card__avatar">${initials}</div>
                             <div class="friend-card__meta">
-                                <div class="friend-card__name">${f.username}</div>
+                                <a href="/user/${f.username}" class="friend-card__name" style="color:var(--text-light);text-decoration:none;">
+                                    ${f.username}
+                                </a>
                                 <div class="friend-card__label">${f.total_score ? f.total_score.toLocaleString() + ' pts' : 'No score yet'}</div>
                             </div>
                         </div>
@@ -118,7 +120,7 @@ $(function () {
                             <div class="friend-card mt-2">
                                 <div class="friend-card__avatar">${initials}</div>
                                 <div class="friend-card__meta">
-                                    <div class="friend-card__name">${u.username}</div>
+                                    <a href="/user/${u.username}" class="friend-card__name" style="color:var(--text-light);text-decoration:none;">${u.username}</a>
                                     <div>${btnHtml}</div>
                                 </div>
                             </div>
