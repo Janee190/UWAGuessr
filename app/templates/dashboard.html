@@ -23,8 +23,13 @@
                             <span>{{ viewed_user.username[0].upper() }}</span>
                         </div>
                         <div>
+                            {% if profile_user is defined %}
+                            <h1 class="orbitron-font mb-1">{{ viewed_user.username }}'s Profile</h1>
+                            <p class="text-muted-light mb-0">UWA Campus Explorer</p>
+                            {% else %}
                             <h1 class="orbitron-font mb-1">Welcome back, {{ viewed_user.username }}!</h1>
                             <p class="text-muted-light mb-0">Ready to explore UWA?</p>
+                            {% endif %}
                         </div>
                         <div class="ms-auto">
                             <a href="{{ url_for('game') }}" class="btn btn-warning btn-lg bangers-font">
