@@ -118,6 +118,16 @@
 </section>
 
 {% endblock %}
+{% block scripts %}
+<script>
+    const CURRENT_USER = {
+        username: "{{ current_user.username }}",
+        total_score: {{ current_user.total_score or 0 }}
+    };
+</script>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}
 
 
 
