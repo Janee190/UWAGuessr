@@ -2,6 +2,7 @@ from app import db
 from app.models import User, GameResult
 import re
 from sqlalchemy import desc, func
+from datetime import datetime
 
 def validate_username(username):
     if not username:
@@ -32,6 +33,20 @@ def validate_password(password):
         return 'Password must be less than 128 characters'
     return None
 
+def validate_security_question(question):
+    if not question:
+        return 'Please enter a security question'
+    if len(question) > 256:
+        return 'Security question must be less than 256 characters'
+    return None
+
+def validate_security_answer(answer):
+    if not answer:
+        return 'Please enter a security answer'
+    if len(answer) > 256:
+        return 'Security answer must be less than 256 characters'
+    return None
+
 def validate_registration(data):
     errors = {}
     
@@ -47,6 +62,13 @@ def validate_registration(data):
     if password_error:
         errors['password'] = password_error
 
+    security_question_error = validate_security_question(data.get('securityQuestion', ''))
+    if security_question_error:
+        errors['securityQuestion'] = security_question_error
+
+    security_answer_error = validate_security_answer(data.get('securityAnswer', ''))
+    if security_answer_error:
+        errors['securityAnswer'] = security_answer_error
     return errors
 
 def validate_login(data):
@@ -74,11 +96,11 @@ def register_user(data):
     user = User(
     username=data['username'],
     email=data['email'],
-    security_question=data.get('securityQuestion')
+    security_question=data['securityQuestion']
     )
     
     user.set_password(data['password'])
-    user.set_security_answer(data.get('securityAnswer', ''))
+    user.set_security_answer(data['securityAnswer'])
 
     db.session.add(user)
     db.session.commit()
@@ -94,7 +116,31 @@ def login_user_service(data):
         return None, {'credentials': 'Invalid email or password'}
     return user, None
 
-from datetime import datetime
+def validate_password_change(data):
+    errors = {}
+
+    email_error = validate_email(data.get('email', ''))
+    if email_error:
+        errors['email'] = email_error
+    password_error = validate_password(data.get('newPassword', ''))
+    if password_error:
+        errors['newPassword'] = password_error
+    security_answer_error = validate_security_answer(data.get('securityAnswer', ''))
+    if security_answer_error:
+        errors['securityAnswer'] = security_answer_error
+
+    return errors
+
+def change_user_password(data):
+    errors = validate_password_change(data)
+    if errors:
+        return errors
+    user = User.query.filter_by(email=data['email']).first()
+    if not user or not user.check_security_answer(data['securityAnswer']):
+        return {'credentials': 'Invalid email or security answer'}
+    user.set_password(data['newPassword'])
+    db.session.commit()
+    return None
 
 def get_leaderboard_data():
     # Get top 10 scores with usernames for today
