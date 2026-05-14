@@ -1,4 +1,44 @@
 $(function () {
+    $.ajax({
+        url: '/api/dashboard-stats',
+        method: 'GET',
+        success: function (data) {
+            $('#totalGames').text(data.total_games || '0');
+            $('#bestScore').text(
+                data.best_score !== null
+                    ? data.best_score.toLocaleString() + ' pts'
+                    : '—'
+            );
+            
+            const container = $('#recentScores');
+            if (data.recent_games.length === 0) {
+                container.html(`
+                    <div class="empty-state">
+                        <p class="text-muted-light">No games played yet.</p>
+                        <a href="/game" class="btn btn-outline-warning btn-sm bangers-font">
+                            Play your first game!
+                        </a>
+                    </div>
+                `);
+                return;
+            }
+
+            let html = '';
+            data.recent_games.forEach(function (g) {
+                html += `
+                    <div class="profile-stat mb-2">
+                        <span class="stat-label">${g.timestamp}</span>
+                        <span class="stat-value">${g.score.toLocaleString()} pts</span>
+                    </div>
+                `;
+            });
+            container.html(html);
+        },
+        error: function () {
+            $('#totalGames').text('—');
+            $('#bestScore').text('—');
+        }
+    });
     // Load friends list
     $.ajax({
         url: '/api/friends',
