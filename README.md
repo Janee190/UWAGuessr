@@ -1,4 +1,8 @@
 # UWAGuessr
+*NOTICE!! Please run the following command when running for the first time to import the latest photos:*
+```bash
+flask --app run load-photos
+```
 
 ## Description
 UWAGuessr is a web-based discovery game inspired by GeoGuessr, focussed specifically on the University of Western Australia (UWA) campus. Players are presented with photos of various locations around UWA and must pinpoint their location on an interactive map.
@@ -27,5 +31,6 @@ UWAGuessr is a web-based discovery game inspired by GeoGuessr, focussed specific
 
 ## Tech Stack
 * **Frontend:** Bootstrap (HTML/CSS)
-* **Backend:** [To be determined]
+* **Backend:** Flask (Python)
+* **Database:** SQLite (via SQLAlchemy)
 * **Map API:** MazeMap (Mapbox GL-based)

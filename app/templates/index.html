@@ -84,6 +84,7 @@
         <path d="M21 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2" />
         <path d="M17 8a3 3 0 1 0-3-3 3 3 0 0 0 3 3z" />
     </svg>
+    <span id="friends-toggle-badge" class="friends-badge" style="display:none;"></span>
 </button>
 
 <div id="friends-backdrop" class="friends-backdrop"></div>
@@ -103,9 +104,10 @@
                     <path d="M3 7v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V7" />
                     <path d="M3 7l9 6 9-6" />
                 </svg>
+                <span id="invites-nav-badge" class="friends-badge" style="display:none;"></span>
             </button>
         </div>
-
+                    
         <div class="friends-sidebar__panel">
             <div class="friends-sidebar__header">
                 <h2>FRIENDS</h2>
@@ -121,56 +123,18 @@
                 <button id="friends-add" type="button" class="btn btn-warning">Add Friend</button>
             </div>
 
-            <section id="friends-list-section">
+           <section id="friends-list-section">
                 <div class="section-heading">
                     <h3>Friends List</h3>
                 </div>
-                <div class="friend-card">
-                    <div class="friend-card__avatar">JA</div>
-                        <div class="friend-card__meta">
-                        <div class="friend-card__name">JayGamer</div>
-                        <div class="friend-card__label">UWA player</div>
-                    </div>
-                </div>
-                <div class="friend-card">
-                    <div class="friend-card__avatar">RK</div>
-                    <div class="friend-card__meta">
-                        <div class="friend-card__name">RogueKnight</div>
-                        <div class="friend-card__label">Campus challenger</div>
-                    </div>
-                </div>
-                <div class="friend-card">
-                    <div class="friend-card__avatar">LM</div>
-                    <div class="friend-card__meta">
-                        <div class="friend-card__name">LucidMaps</div>
-                        <div class="friend-card__label">Campus challenger</div>
-                    </div>
-                </div>
-            </section>
+           </section>
 
             <section id="pending-invites-section" class="section-hidden">
                 <div class="section-heading">
                     <h3>Pending Invites</h3>
                 </div>
-                <div class="pending-card">
-                    <div class="pending-card__avatar">TV</div>
-                    <div class="pending-card__meta">
-                        <div class="pending-card__title">TideVault</div>
-                        <div class="pending-card__info">Sent 18m ago</div>
-                    </div>
-                </div>
-                <div class="pending-card">
-                    <div class="pending-card__avatar">NY</div>
-                    <div class="pending-card__meta">
-                        <div class="pending-card__title">NightYard</div>
-                        <div class="pending-card__info">Sent 42m ago</div>
-                    </div>
-                </div>
             </section>
 
-            <footer>
-                Placeholder preview only. No backend calls are performed.
-            </footer>
         </div>
     </div>
 </div>
@@ -178,7 +142,11 @@
 {% endblock %}
 
 {% block scripts %}
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="{{ url_for('static', filename='js/index.js') }}"></script>
+{% if current_user.is_authenticated %}
+<script src="{{ url_for('static', filename='js/friends.js') }}"></script>
+{% endif %}
 
 {% endblock %}
 

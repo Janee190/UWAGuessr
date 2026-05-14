@@ -6,8 +6,10 @@ from werkzeug.utils import secure_filename
 from flask_login import login_user, login_required, logout_user, current_user
 
 from app import app
+from app.models import User
 from app.image_upload import extract_gps, convert_to_webp, add_photo_record
-from app.controllers import login_user_service, register_user
+
+from app.controllers import login_user_service, register_user, change_user_password, get_leaderboard_data, get_all_time_leaderboard_data, add_score, get_user_daily_stat, get_user_all_time_stat
 
 
 @app.route("/")
@@ -24,7 +26,7 @@ def api_register():
     if errors:
         return jsonify({'errors': errors}), 400
     login_user(user)
-    return jsonify({'redirect': url_for('index')}), 201
+    return jsonify({'message': 'Signup successful'}), 201
 
 
 @app.route("/login")
@@ -37,7 +39,7 @@ def api_login():
     if errors:
         return jsonify({'errors': errors}), 401
     login_user(user)
-    return jsonify({'redirect': url_for('dashboard')}), 200
+    return jsonify({'redirect': url_for('index')}), 200
 
 @app.route("/game")
 def game():
@@ -46,6 +48,13 @@ def game():
 @app.route("/forgot-password")
 def forgot_password():
     return render_template("forgot_password.html")
+
+@app.route("/api/forgot-password", methods=["POST"])
+def api_forgot_password():
+    errors = change_user_password(request.get_json())
+    if errors:
+        return jsonify({'errors': errors}), 401
+    return jsonify({'redirect': url_for('login')}), 200
 
 @app.route("/api/game-images")
 def api_game_images():
@@ -83,12 +92,57 @@ def how_to_play():
 
 @app.route("/leaderboard")
 def leaderboard():
-    return render_template("leaderboard.html")
+    daily_scores = get_leaderboard_data()
+    all_time_scores = get_all_time_leaderboard_data()
+    
+    user_daily = None
+    user_all_time = None
+    if current_user.is_authenticated:
+        user_daily = get_user_daily_stat(current_user.uid)
+        user_all_time = get_user_all_time_stat(current_user.uid)
+        
+    return render_template("leaderboard.html", 
+                           daily_scores=daily_scores, 
+                           all_time_scores=all_time_scores,
+                           user_daily=user_daily,
+                           user_all_time=user_all_time)
+
+@app.route("/api/leaderboard")
+def api_leaderboard():
+    users = User.query.filter(User.total_score > 0).order_by(User.total_score.desc()).limit(10).all()
+    return jsonify([{
+        'rank': i + 1,
+        'username': u.username,
+        'score': u.total_score
+    } for i, u in enumerate(users)])
 
 @app.route("/dashboard")
 @login_required
 def dashboard():
     return render_template("dashboard.html")
+
+@app.route("/api/dashboard-stats")
+@login_required
+def api_dashboard_stats():
+    from app.models import GameResult
+    
+    recent_games = GameResult.query.filter_by(user_id=current_user.uid)\
+        .order_by(GameResult.timestamp.desc())\
+        .limit(5).all()
+    
+    total_games = GameResult.query.filter_by(user_id=current_user.uid).count()
+    
+    best = GameResult.query.filter_by(user_id=current_user.uid)\
+        .order_by(GameResult.score.desc()).first()
+    
+    return jsonify({
+        'total_games': total_games,
+        'best_score': best.score if best else None,
+        'recent_games': [{
+            'score': g.score,
+            'timestamp': g.timestamp.strftime('%d %b %Y')
+        } for g in recent_games]
+    })
 
 @app.route("/logout")
 def logout():
@@ -260,10 +314,140 @@ def api_game_complete():
     if total_score < 0:
         return jsonify({'error': 'Invalid field values'}), 400
 
-    current_user.add_total_score(total_score)
+    # Save the score to the GameResults table and update user's total_score
+    add_score(current_user.uid, total_score)
 
     return jsonify({'success': True, 'totalScore': current_user.total_score})
 
+@app.route("/api/friends", methods=["GET"])
+@login_required
+def api_get_friends():
+    from app.models import Friendship
+    friends = Friendship.query.filter(
+        ((Friendship.requester_id == current_user.uid) | 
+         (Friendship.receiver_id == current_user.uid)),
+        Friendship.status == 'accepted'
+    ).all()
+    
+    result = []
+    for f in friends:
+        friend = f.receiver if f.requester_id == current_user.uid else f.requester
+        result.append({
+            'uid': friend.uid,
+            'username': friend.username,
+            'total_score': friend.total_score
+        })
+    return jsonify(result)
+
+@app.route("/api/friends/requests", methods=["GET"])
+@login_required
+def api_get_friend_requests():
+    from app.models import Friendship
+    requests = Friendship.query.filter_by(
+        receiver_id=current_user.uid,
+        status='pending'
+    ).all()
+    
+    return jsonify([{
+        'id': r.id,
+        'username': r.requester.username,
+        'uid': r.requester.uid
+    } for r in requests])
+
+@app.route("/api/friends/search", methods=["GET"])
+@login_required
+def api_search_users():
+    from app.models import Friendship
+    query = request.args.get('q', '').strip()
+    if not query or len(query) < 2:
+        return jsonify([])
+    
+    users = User.query.filter(
+        User.username.ilike(f'%{query}%'),
+        User.uid != current_user.uid
+    ).limit(10).all()
+
+    # Check friendship status for each user
+    result = []
+    for u in users:
+        friendship = Friendship.query.filter(
+            ((Friendship.requester_id == current_user.uid) & (Friendship.receiver_id == u.uid)) |
+            ((Friendship.requester_id == u.uid) & (Friendship.receiver_id == current_user.uid))
+        ).first()
+
+        status = None
+        if friendship:
+            if friendship.status == 'accepted':
+                status = 'friends'
+            elif friendship.requester_id == current_user.uid:
+                status = 'sent'
+            else:
+                status = 'received'
+
+        result.append({
+            'uid': u.uid,
+            'username': u.username,
+            'friendship_status': status
+        })
+    
+    return jsonify(result)
+
+@app.route("/api/friends/add", methods=["POST"])
+@login_required
+def api_add_friend():
+    from app.models import Friendship
+    data = request.get_json()
+    receiver_id = data.get('uid')
+
+    if not receiver_id:
+        return jsonify({'error': 'Missing user ID'}), 400
+
+    receiver = User.query.get(receiver_id)
+    if not receiver:
+        return jsonify({'error': 'User not found'}), 404
+
+    if receiver.uid == current_user.uid:
+        return jsonify({'error': 'Cannot add yourself'}), 400
+
+    existing = Friendship.query.filter(
+        ((Friendship.requester_id == current_user.uid) & (Friendship.receiver_id == receiver.uid)) |
+        ((Friendship.requester_id == receiver.uid) & (Friendship.receiver_id == current_user.uid))
+    ).first()
+
+    if existing:
+        return jsonify({'error': 'Friend request already exists'}), 409
+    
+    friendship = Friendship(requester_id=current_user.uid, receiver_id=receiver.uid)
+    from app import db
+    db.session.add(friendship)
+    db.session.commit()
+
+    return jsonify({'message': f'Friend request sent to {receiver.username}'}), 201
+
+@app.route("/api/friends/respond", methods=["POST"])
+@login_required
+def api_respond_friend_request():
+    from app.models import Friendship
+    from app import db
+    data = request.get_json()
+    friendship_id = data.get('id')
+    action = data.get('action')  # 'accept' or 'reject'
+
+    if not friendship_id or action not in ['accept', 'reject']:
+        return jsonify({'error': 'Invalid request'}), 400
+
+    friendship = Friendship.query.get(friendship_id)
+    if not friendship or friendship.receiver_id != current_user.uid:
+        return jsonify({'error': 'Friend request not found'}), 404
+
+    if action == 'accept':
+        friendship.status = 'accepted'
+        db.session.commit()
+        return jsonify({'message': 'Friend request accepted'})
+    else:
+        db.session.delete(friendship)
+        db.session.commit()
+        return jsonify({'message': 'Friend request rejected'})
 
 if __name__ == "__main__":
     app.run(debug=True)
