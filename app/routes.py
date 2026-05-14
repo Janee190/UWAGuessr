@@ -144,6 +144,25 @@ def api_dashboard_stats():
         } for g in recent_games]
     })
 
+@app.route("/user/<username>")
+def user_profile(username):
+    from app.models import GameResult
+    user = User.query.filter_by(username=username).first_or_404()
+    
+    total_games = GameResult.query.filter_by(user_id=user.uid).count()
+    best = GameResult.query.filter_by(user_id=user.uid)\
+        .order_by(GameResult.score.desc()).first()
+    recent_games = GameResult.query.filter_by(user_id=user.uid)\
+        .order_by(GameResult.timestamp.desc()).limit(5).all()
+
+    return render_template("dashboard.html",
+        profile_user=user,
+        total_games=total_games,
+        best_score=best.score if best else None,
+        recent_games=recent_games
+    )
+
+
 @app.route("/logout")
 def logout():
     logout_user()
