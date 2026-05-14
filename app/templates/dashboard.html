@@ -60,10 +60,12 @@
                         <span class="stat-label">Username</span>
                         <span class="stat-value">{{ viewed_user.username }}</span>
                     </div>
+                    {% if profile_user is not defined %}
                     <div class="profile-stat mb-3">
                         <span class="stat-label">Email</span>
                         <span class="stat-value">{{ viewed_user.email }}</span>
                     </div>
+                    {% endif %}
                     <div class="profile-stat mb-3">
                         <span class="stat-label">Total Games</span>
                         <span class="stat-value" id="totalGames">—</span>
