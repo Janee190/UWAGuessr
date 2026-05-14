@@ -189,6 +189,36 @@
 </script>
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% if profile_user is defined and current_user.is_authenticated and current_user.uid != viewed_user.uid %}
+<script>
+$(function () {
+    $('#add-friend-btn').on('click', function () {
+        const uid = $(this).data('uid');
+        const $btn = $(this);
+        $btn.prop('disabled', true).text('Sending...');
+
+        $.ajax({
+            url: '/api/friends/add',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({ uid: uid }),
+            success: function () {
+                $btn.text('Request Sent!').removeClass('btn-warning').addClass('btn-outline-warning');
+            },
+            error: function (xhr) {
+                const msg = xhr.responseJSON?.error || 'Something went wrong';
+                if (msg.includes('already exists')) {
+                    $btn.text('Already Friends').prop('disabled', true);
+                } else {
+                    $btn.prop('disabled', false).text('Add Friend');
+                    alert(msg);
+                }
+            }
+        });
+    });
+});
+</script>
+{% endif %}
 {% endblock %}
 
 
