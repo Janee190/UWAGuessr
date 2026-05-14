@@ -265,6 +265,10 @@ $(function () {
             contentType: 'application/json',
             data: JSON.stringify({ uid: uid }),
             success: function (data) {
+                if (data.redirect) {
+                    window.location.href = data.redirect;
+                    return;
+                }
                 $btn.text('Sent!').addClass('btn-success').removeClass('btn-warning');
                 loadPendingRequests(); // Refresh Active Challenges list
             },
@@ -287,6 +291,11 @@ $(function () {
             data: JSON.stringify({ id: id, action: 'accept' }),
             success: function (data) {
                 window.location.href = `/game?challengeId=${id}`;
+            },
+            error: function (xhr) {
+                $btn.prop('disabled', false);
+                alert(xhr.responseJSON?.error || 'This challenge is no longer available');
+                loadPendingRequests(); // Refresh to remove expired challenges
             }
         });
     });

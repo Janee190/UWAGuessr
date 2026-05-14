@@ -47,4 +47,7 @@ Thumbs.db
 # Logs
 *.log
 logs/
+
+# Bots
 copilot-instructions.md
+./claude

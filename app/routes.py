@@ -309,15 +309,34 @@ def api_create_challenge():
     
     if not friendship:
         return jsonify({'error': 'You can only challenge friends'}), 403
-        
+
+    # Check for an existing active challenge between these two users
+    existing = Challenge.query.filter(
+        ((Challenge.challenger_id == current_user.uid) & (Challenge.challenged_id == challenged_id)) |
+        ((Challenge.challenger_id == challenged_id) & (Challenge.challenged_id == current_user.uid)),
+        Challenge.status.in_(['pending', 'ready_waiting', 'in_progress'])
+    ).first()
+
+    if existing:
+        if existing.challenged_id == current_user.uid and existing.status == 'pending':
+            # Auto-accept the incoming challenge instead of creating a duplicate
+            existing.status = 'ready_waiting'
+            db.session.commit()
+            return jsonify({'challenge_id': existing.id, 'redirect': url_for('game', challenge_id=existing.id)})
+        elif existing.challenger_id == current_user.uid and existing.status == 'pending':
+            return jsonify({'error': 'Challenge already sent. Waiting for response.'}), 409
+        else:
+            # Challenge is in ready_waiting or in_progress — just enter it
+            return jsonify({'challenge_id': existing.id, 'redirect': url_for('game', challenge_id=existing.id)})
+
     # Get 5 random photo IDs
     all_photos = Photos.query.all()
     if len(all_photos) < 5:
         return jsonify({'error': 'Not enough photos in database to start a game'}), 400
-        
+
     selected_photos = random.sample(all_photos, 5)
     photo_ids = ",".join([str(p.pid) for p in selected_photos])
-    
+
     challenge = Challenge(
         challenger_id=current_user.uid,
         challenged_id=challenged_id,
@@ -326,7 +345,7 @@ def api_create_challenge():
     )
     db.session.add(challenge)
     db.session.commit()
-    
+
     return jsonify({'challenge_id': challenge.id}), 201
 
 @app.route("/api/challenges/active", methods=["GET"])

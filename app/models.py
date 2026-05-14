@@ -99,7 +99,7 @@ class Challenge(db.Model):
         winner_id = None
         result = None
 
-        if self.challenger_score is not None and self.challenged_score is not None:
+        if self.status == 'completed' and self.challenger_score is not None and self.challenged_score is not None:
             if self.challenger_score > self.challenged_score:
                 winner_id = self.challenger_id
                 result = 'win'
