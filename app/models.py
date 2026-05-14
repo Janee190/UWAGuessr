@@ -96,6 +96,19 @@ class Challenge(db.Model):
     challenged = db.relationship('User', foreign_keys=[challenged_id], backref='received_challenges')
 
     def to_dict(self):
+        winner_id = None
+        result = None
+
+        if self.challenger_score is not None and self.challenged_score is not None:
+            if self.challenger_score > self.challenged_score:
+                winner_id = self.challenger_id
+                result = 'win'
+            elif self.challenger_score < self.challenged_score:
+                winner_id = self.challenged_id
+                result = 'lose'
+            else:
+                result = 'tie'
+
         return {
             'id': self.id,
             'challenger_id': self.challenger_id,
@@ -110,6 +123,8 @@ class Challenge(db.Model):
             'challenged_score': self.challenged_score,
             'challenger_round': self.challenger_round,
             'challenged_round': self.challenged_round,
+            'winner_id': winner_id,
+            'result': result,
             'created_at': self.created_at.isoformat()
         }
     

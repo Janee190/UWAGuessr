@@ -43,8 +43,8 @@ $(function () {
                 const section = $('#pending-invites-section');
                 section.find('.pending-card').remove();
                 
-                // Track total invitations for badge
-                let totalInvites = requests.length;
+                // Track invites and challenge notifications separately for badges
+                let friendRequestsCount = requests.length;
 
                 if (requests.length === 0) {
                     section.find('p.no-requests').remove();
@@ -79,9 +79,10 @@ $(function () {
 
                         const pendingIncoming = challenges.filter(c => c.status === 'pending' && c.challenged_id === current_user_id);
                         const myActive = challenges.filter(c => c.status !== 'pending' || c.challenger_id === current_user_id);
-                        
-                        totalInvites += pendingIncoming.length;
-                        updateBadges(totalInvites);
+
+                        // Update badges: friends toggle shows total (invites + incoming challenges),
+                        // invites nav shows friend request count, challenges nav shows incoming challenges
+                        updateBadges(friendRequestsCount, pendingIncoming.length);
 
                         if (challenges.length === 0) {
                             challengeSection.append('<p class="text-muted-light small mt-2 no-challenges">No active challenges.</p>');
@@ -131,16 +132,29 @@ $(function () {
         });
     }
     
-    function updateBadges(count) {
+    function updateBadges(inviteCount, challengeCount) {
         const toggleBadge = $('#friends-toggle-badge');
-        const navBadge = $('#invites-nav-badge');
-        
-        if (count > 0) {
-            toggleBadge.text(count > 9 ? '9+' : count).show();
-            navBadge.text(count > 9 ? '9+' : count).show();
+        const invitesBadge = $('#invites-nav-badge');
+        const challengesBadge = $('#challenges-nav-badge');
+
+        const total = (inviteCount || 0) + (challengeCount || 0);
+
+        if (total > 0) {
+            toggleBadge.text(total > 9 ? '9+' : total).show();
         } else {
             toggleBadge.hide();
-            navBadge.hide();
+        }
+
+        if ((inviteCount || 0) > 0) {
+            invitesBadge.text(inviteCount > 9 ? '9+' : inviteCount).show();
+        } else {
+            invitesBadge.hide();
+        }
+
+        if ((challengeCount || 0) > 0) {
+            challengesBadge.text(challengeCount > 9 ? '9+' : challengeCount).show();
+        } else {
+            challengesBadge.hide();
         }
     }
 

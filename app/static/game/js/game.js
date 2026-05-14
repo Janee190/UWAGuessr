@@ -509,6 +509,67 @@ function handleAction() {
     }
 }
 
+    function updateChallengeGameOverDisplay(challengeState) {
+        const finalOutcomeEl = document.getElementById('final-outcome');
+        const finalStatusEl = document.getElementById('final-status');
+        const playerScoreEl = document.getElementById('final-player-score');
+        const opponentScoreEl = document.getElementById('final-opponent-score');
+        const opponentLabelEl = document.getElementById('final-opponent-label');
+
+        if (!challengeState) {
+            // If there's no challenge state yet, show a waiting message so the player
+            // knows the opponent hasn't finished.
+            if (finalStatusEl) {
+                finalStatusEl.innerText = 'WAITING ON OPPONENT...';
+                finalStatusEl.classList.add('is-waiting');
+            }
+            console.debug('updateChallengeGameOverDisplay: no challengeState — showing waiting');
+            return;
+        }
+
+        console.debug('updateChallengeGameOverDisplay:', challengeState);
+
+        const isChallenger = challengeState.challenger_id === window.current_user_id;
+        const opponentName = isChallenger ? challengeState.challenged_username : challengeState.challenger_username;
+        const opponentScore = isChallenger ? challengeState.challenged_score : challengeState.challenger_score;
+        const hasResolvedResult = Boolean(challengeState.result);
+
+        if (playerScoreEl) playerScoreEl.innerText = totalScore;
+        if (opponentScoreEl) opponentScoreEl.innerText = typeof opponentScore === 'number' ? opponentScore : 'Pending';
+        if (opponentLabelEl) {
+            opponentLabelEl.innerText = opponentName ? `${opponentName}'s Score` : 'Opponent Score';
+        }
+
+        if (finalOutcomeEl) {
+            let outcomeText = 'FINAL SCORE';
+            let outcomeClass = 'outcome-final';
+
+            if (hasResolvedResult) {
+                if (challengeState.result === 'tie') {
+                    outcomeText = 'IT\'S A TIE!';
+                    outcomeClass = 'outcome-tie';
+                } else {
+                    const amIWinner = challengeState.winner_id === window.current_user_id;
+                    outcomeText = amIWinner ? 'YOU WIN!' : 'YOU LOSE!';
+                    outcomeClass = amIWinner ? 'outcome-win' : 'outcome-lose';
+                }
+            }
+
+            finalOutcomeEl.className = `game-over-outcome text-uppercase font-heading ${outcomeClass}`;
+            finalOutcomeEl.innerText = outcomeText;
+        }
+
+        if (finalStatusEl) {
+            if (hasResolvedResult) {
+                finalStatusEl.innerText = '';
+                finalStatusEl.classList.remove('is-waiting');
+            } else {
+                finalStatusEl.innerText = 'WAITING ON OPPONENT...';
+                finalStatusEl.classList.add('is-waiting');
+            }
+        }
+    }
+
 // Displays the game-over overlay with the final score.
 function showGameOver(shouldSubmitCompletion = true) {
     stopTimer();
@@ -531,56 +592,7 @@ function showGameOver(shouldSubmitCompletion = true) {
     }
     
     if (challengeId) {
-        var finalOutcomeEl = document.getElementById('final-outcome');
-        var playerScoreEl = document.getElementById('final-player-score');
-        var opponentScoreEl = document.getElementById('final-opponent-score');
-        var opponentLabelEl = document.getElementById('final-opponent-label');
-
-        const isChallenger = challengeData && challengeData.challenger_id === window.current_user_id;
-        const opponentName = challengeData
-            ? (isChallenger ? challengeData.challenged_username : challengeData.challenger_username)
-            : 'Opponent';
-        const opponentScore = challengeData
-            ? (isChallenger ? challengeData.challenged_score : challengeData.challenger_score)
-            : null;
-
-        if (opponentLabelEl) {
-            opponentLabelEl.innerText = opponentName ? `${opponentName}'s Score` : 'Opponent Score';
-        }
-
-        if (playerScoreEl) playerScoreEl.innerText = totalScore;
-        if (opponentScoreEl) opponentScoreEl.innerText = typeof opponentScore === 'number' ? opponentScore : 'Pending';
-
-        if (finalOutcomeEl) {
-            let outcomeText = 'FINAL SCORE';
-            let outcomeClass = 'outcome-final';
-
-            if (typeof opponentScore === 'number') {
-                if (totalScore > opponentScore) {
-                    outcomeText = 'YOU WIN!';
-                    outcomeClass = 'outcome-win';
-                } else if (totalScore < opponentScore) {
-                    outcomeText = 'YOU LOSE!';
-                    outcomeClass = 'outcome-lose';
-                } else {
-                    outcomeText = 'IT\'S A TIE!';
-                    outcomeClass = 'outcome-tie';
-                }
-            } else {
-                outcomeText = 'FINAL SCORE';
-            }
-
-            finalOutcomeEl.className = `game-over-outcome text-uppercase font-heading ${outcomeClass}`;
-            finalOutcomeEl.innerText = outcomeText;
-        }
-
-        // Show the player's final score immediately and indicate we're waiting for opponent
-        try {
-            const finalEl = document.getElementById('final-player-score');
-            if (finalEl) finalEl.innerText = totalScore;
-        } catch (e) {
-            console.error('Failed to set immediate final score text', e);
-        }
+            updateChallengeGameOverDisplay(challengeData);
 
         // Ensure we don't create multiple pollers
         if (pollInterval) clearInterval(pollInterval);
@@ -594,38 +606,10 @@ function showGameOver(shouldSubmitCompletion = true) {
                 const opponentRound = isChallenger ? challengeData.challenged_round : challengeData.challenger_round;
                 
                 if (opponentRound >= 6 || challengeData.status === 'completed') {
-                    const opponentName = isChallenger ? challengeData.challenged_username : challengeData.challenger_username;
-                    const finalOutcomeEl = document.getElementById('final-outcome');
-                    const playerScoreEl = document.getElementById('final-player-score');
-                    const opponentScoreEl = document.getElementById('final-opponent-score');
-                    const opponentLabelEl = document.getElementById('final-opponent-label');
-
-                    if (playerScoreEl) playerScoreEl.innerText = totalScore;
-                    if (opponentScoreEl) opponentScoreEl.innerText = typeof opponentScore === 'number' ? opponentScore : 'N/A';
-                    if (opponentLabelEl) {
-                        opponentLabelEl.innerText = opponentName ? `${opponentName}'s Score` : 'Opponent Score';
-                    }
-
-                    if (finalOutcomeEl && typeof opponentScore === 'number') {
-                        let outcomeText = 'FINAL SCORE';
-                        let outcomeClass = 'outcome-final';
-
-                        if (totalScore > opponentScore) {
-                            outcomeText = 'YOU WIN!';
-                            outcomeClass = 'outcome-win';
-                        } else if (totalScore < opponentScore) {
-                            outcomeText = 'YOU LOSE!';
-                            outcomeClass = 'outcome-lose';
-                        } else {
-                            outcomeText = 'IT\'S A TIE!';
-                            outcomeClass = 'outcome-tie';
-                        }
-
-                        finalOutcomeEl.className = `game-over-outcome text-uppercase font-heading ${outcomeClass}`;
-                        finalOutcomeEl.innerText = outcomeText;
-                    }
+                        updateChallengeGameOverDisplay(challengeData);
                     clearInterval(pollInterval);
                 } else {
+                        updateChallengeGameOverDisplay(challengeData);
                 }
             } catch (e) {
                 console.error("GameOver polling failed", e);
@@ -633,6 +617,7 @@ function showGameOver(shouldSubmitCompletion = true) {
         }, 3000);
     } else {
         const finalOutcomeEl = document.getElementById('final-outcome');
+            const finalStatusEl = document.getElementById('final-status');
         const playerScoreEl = document.getElementById('final-player-score');
         const opponentScoreEl = document.getElementById('final-opponent-score');
         const opponentLabelEl = document.getElementById('final-opponent-label');
@@ -641,6 +626,10 @@ function showGameOver(shouldSubmitCompletion = true) {
             finalOutcomeEl.className = 'game-over-outcome text-uppercase font-heading outcome-final';
             finalOutcomeEl.innerText = 'FINAL SCORE';
         }
+            if (finalStatusEl) {
+                finalStatusEl.innerText = '';
+                finalStatusEl.classList.remove('is-waiting');
+            }
         if (playerScoreEl) playerScoreEl.innerText = totalScore;
         if (opponentScoreEl) opponentScoreEl.innerText = '-';
         if (opponentLabelEl) opponentLabelEl.innerText = 'Opponent';
