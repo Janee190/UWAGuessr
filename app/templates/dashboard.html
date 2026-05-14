@@ -14,10 +14,10 @@
                 <div class="dashboard-welcome p-4">
                     <div class="d-flex align-items-center gap-4">
                         <div class="avatar-circle">
-                            <span>{{ current_user.username[0].upper() }}</span>
+                            <span>{{ viewed_user.username[0].upper() }}</span>
                         </div>
                         <div>
-                            <h1 class="orbitron-font mb-1">Welcome back, {{ current_user.username }}!</h1>
+                            <h1 class="orbitron-font mb-1">Welcome back, {{ viewed_user.username }}!</h1>
                             <p class="text-muted-light mb-0">Ready to explore UWA?</p>
                         </div>
                         <div class="ms-auto">
@@ -38,11 +38,11 @@
                     <h2 class="orbitron-font h5 mb-4 card-title-gold">Profile</h2>
                     <div class="profile-stat mb-3">
                         <span class="stat-label">Username</span>
-                        <span class="stat-value">{{ current_user.username }}</span>
+                        <span class="stat-value">{{ viewed_user.username }}</span>
                     </div>
                     <div class="profile-stat mb-3">
                         <span class="stat-label">Email</span>
-                        <span class="stat-value">{{ current_user.email }}</span>
+                        <span class="stat-value">{{ viewed_user.email }}</span>
                     </div>
                     <div class="profile-stat mb-3">
                         <span class="stat-label">Total Games</span>
@@ -123,8 +123,8 @@
 {% block scripts %}
 <script>
     const CURRENT_USER = {
-        username: "{{ current_user.username }}",
-        total_score: {{ current_user.total_score or 0 }}
+        username: "{{ viewed_user.username }}",
+        total_score: {{ viewed_user.total_score or 0 }}
     };
 </script>
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
