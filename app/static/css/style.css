@@ -775,6 +775,7 @@ img {
     transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
 }
 
+
 .friends-toggle:hover {
     transform: scale(1.08);
     box-shadow: 0 24px 62px rgba(0, 0, 0, 0.3), 0 0 22px rgba(241, 202, 24, 0.28);
@@ -811,7 +812,27 @@ img {
     align-items: center;
     justify-content: center;
     transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, color 0.2s ease;
+    position:relative;
 }
+
+.friends-badge {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    background: #e53935;
+    color: white;
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-main);
+    border: 2px solid var(--navy-900);
+}
+
 
 .friends-sidebar__nav-button:hover {
     transform: translateY(-1px) scale(1.05);
@@ -1072,32 +1093,9 @@ img {
     }
 }
 
-/* --- Friends notification badge --- */
-.friends-badge {
-    position: absolute;
-    top: -6px;
-    right: -6px;
-    background: #e53935;
-    color: white;
-    border-radius: 50%;
-    width: 18px;
-    height: 18px;
-    font-size: 0.65rem;
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: var(--font-main);
-    border: 2px solid var(--navy-900);
-}
 
-.friends-toggle {
-    position: relative; /* needed for badge positioning */
-}
 
-.friends-sidebar__nav-button {
-    position: relative; /* needed for badge positioning */
-}
+    
 
 
 
