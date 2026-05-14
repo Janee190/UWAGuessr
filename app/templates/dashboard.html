@@ -68,13 +68,7 @@
                     {% endif %}
                     <div class="profile-stat mb-3">
                         <span class="stat-label">Total Games</span>
-                        <span class="stat-value" id="totalGames">
-                            {% if profile_user is defined %}
-                                {% if best_score %}{{ "{:,}".format(best_score) }} pts{% else %}—{% endif %}
-                            {% else %}
-                                —   
-                            {% endif %}
-                        </span>
+                        <span class="stat-value" id="totalGames">—</span>
                     </div>
                     <div class="profile-stat">
                         <span class="stat-label">Best Score</span>
@@ -90,12 +84,12 @@
                     <div id="recentScores">
                         {% if profile_user is defined %}
                             {% if recent_scores %}
-                                    {% for score in recent_scores %}
+                                    {% for game in recent_games %}
                                         <div class="profile-stat mb-2">
                                             <span class="stat-label">{{ game.timestamp.strftime('%d %b %Y') }}</span>
                                             <span class="stat-value">{{ "{:,}".format(game.score) }} pts</span>
                                         </div>
-                                        {% endfor %}
+                                    {% endfor %}
                                 
                             {% else %}
                                 <div class="empty-state">
@@ -122,9 +116,6 @@
                     <div id="friendsList">
                         <div class="empty-state">
                             <p class="text-muted-light">No friends added yet.</p>
-                            <button class="btn btn-outline-warning btn-sm bangers-font" disabled>
-                                Coming Soon
-                            </button>
                         </div>
                     </div>
                 </div>
@@ -186,38 +177,12 @@
         username: "{{ current_user.username if current_user.is_authenticated else '' }}",
         total_score: {{ current_user.total_score if current_user.is_authenticated else 0 }}
     };
+    const VIEWED_UID = {{ viewed_user.uid }};
+    const IS_OWN_PROFILE = {{ 'true' if profile_user is not defined else 'false' }};
 </script>
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
 {% if profile_user is defined and current_user.is_authenticated and current_user.uid != viewed_user.uid %}
-<script>
-$(function () {
-    $('#add-friend-btn').on('click', function () {
-        const uid = $(this).data('uid');
-        const $btn = $(this);
-        $btn.prop('disabled', true).text('Sending...');
-
-        $.ajax({
-            url: '/api/friends/add',
-            method: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify({ uid: uid }),
-            success: function () {
-                $btn.text('Request Sent!').removeClass('btn-warning').addClass('btn-outline-warning');
-            },
-            error: function (xhr) {
-                const msg = xhr.responseJSON?.error || 'Something went wrong';
-                if (msg.includes('already exists')) {
-                    $btn.text('Already Friends').prop('disabled', true);
-                } else {
-                    $btn.prop('disabled', false).text('Add Friend');
-                    alert(msg);
-                }
-            }
-        });
-    });
-});
-</script>
 {% endif %}
 {% endblock %}
 
