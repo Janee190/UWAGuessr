@@ -115,6 +115,7 @@
             </div>
             
             <!-- friends list -->
+            {% if profile_user is not defined %}
             <div class="col-lg-4">  
                 <div class="dashboard-card h-100 p-4">
                     <h2 class="orbitron-font h5 mb-4 card-title-gold">Friends</h2>
@@ -128,8 +129,10 @@
                     </div>
                 </div>
             </div>
+            {% endif %}
             
         <!-- Leaderboard Preview -->
+            {% if profile_user is not defined %}
             <div class="col-12">
                 <div class="dashboard-card p-4">
                 <h2 class="orbitron-font h5 mb-4 card-title-gold">🏆 Friends Leaderboard</h2>
@@ -159,7 +162,20 @@
                     </div>
                 </div>
             </div>
+            {% endif %}
         </div>
+
+        {% if profile_user is defined %}
+        <div class="mt-4">
+            <a href="{{ url_for('leaderboard') }}" class="btn btn-outline-warning bangers-font">
+                View Leaderboard
+            </a>
+            <a href="{{ url_for('index') }}" class="btn btn-outline-light bangers-font ms-2">
+                Back to Home
+            </a>
+        </div>
+        {% endif %}
+
     </div>
 </section>
 
@@ -167,8 +183,8 @@
 {% block scripts %}
 <script>
     const CURRENT_USER = {
-        username: "{{ viewed_user.username }}",
-        total_score: {{ viewed_user.total_score or 0 }}
+        username: "{{ current_user.username if current_user.is_authenticated else '' }}",
+        total_score: {{ current_user.total_score if current_user.is_authenticated else 0 }}
     };
 </script>
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
