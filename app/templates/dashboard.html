@@ -1,11 +1,17 @@
 {% extends "base.html" %}
 
-{% block title %}Dashboard - UWAGuessr{% endblock %}
+{% block title %}
+    {% if profile_user is defined %}
+        {{ profile_user.username }} - UWAGuessr
+    {% else %}
+        Dashboard - UWAGuessr
+    {% endif %}
+{% endblock %}
 {% block body_class %}page-dashboard{% endblock %}
 
-{% block content %}
-
 {% set viewed_user = profile_user if profile_user is defined else current_user %}
+
+{% block content %}
 
 <section class="dashboard-hero-section d-flex align-items-center">
     <div class="container py-5">
