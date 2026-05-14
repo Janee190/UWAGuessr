@@ -26,6 +26,8 @@ document.addEventListener('DOMContentLoaded', function () {
         backdrop.classList.add('active');
         sidebar.setAttribute('aria-hidden', 'false');
         toggle.classList.add('hidden');
+        if(typeof loadFriends === 'function') loadFriends();
+        if(typeof loadPendingRequests === 'function') loadPendingRequests();
     }
 
     function closeSidebar() {

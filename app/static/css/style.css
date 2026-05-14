@@ -1,39 +1,43 @@
 /* --- Variables --- */
 :root {
-  --border-light: rgba(255, 255, 255, 0.1);
-  --color-danger: #ff3b30;
-  --color-warning: #ffc107;
-  --font-accent: "Bangers", cursive;
-  --font-heading: "Orbitron", sans-serif;
-  --font-main: "DM Sans", sans-serif;
-  --game-bg: #212529;
-  --game-wrapper-bg: #0f1d33;
-  --golden: #ffca2c;
-  --golden-hover: #d9aa1f;
-  --map-bg: #b8d9c2;
-  --map-bg-game: #e4edf6;
-  --navy-nav: rgba(10, 16, 40, 0.95);
-  --navy-overlay: rgba(22, 18, 70, 0.92);
-  --radius-lg: 1.125rem;
-  --radius-md: 0.5rem;
-  --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 8px 40px rgba(0, 0, 0, 0.13);
-  --text-dark: #0f172a;
-  --text-light: #ffffff;
-  --text-muted: rgba(255, 255, 255, 0.6);
-  --uwa-green-dark: #0f6e56;
-  --uwa-green-pale: #e1f5ee;
-  --z-danger: 999;
-  --z-game-ui: 1000;
-  --z-modal: 2000;
+/* Colors */
+    --golden: #ffca2c;
+    --golden-hover: #d9aa1f;
+    --uwa-green-dark: #0f6e56;
+    --uwa-green-pale: #e1f5ee;
+    --map-bg: #b8d9c2;
+    --navy-900: #161246;
+    --navy-800: #201a5f;
+    --navy-overlay: rgba(22, 18, 70, 0.92);
+    --navy-nav: rgba(10, 16, 40, 0.95);
+    
+    --text-dark: #0f172a;
+    --text-light: #ffffff;
+    --text-muted: rgba(255, 255, 255, 0.6);
+    --border-light: rgba(255, 255, 255, 0.1);
 
-  --navy-900: #161246;
-  --navy-800: #201a5f;
-  /* Colors */
-  /* Game Specific Colors */
-  /* Game Page Z-Indexes */
-  /* Typography */
-  /* Borders & Shadows */
+    /* Game Specific Colors */
+    --game-bg: #212529;
+    --game-wrapper-bg: #0f1d33;
+    --map-bg-game: #e4edf6;
+    --color-warning: #ffc107;
+    --color-danger: #ff3b30;
+    
+    /* Game Page Z-Indexes */
+    --z-danger: 999;
+    --z-game-ui: 1000;
+    --z-modal: 2000;
+    
+    /* Typography */
+    --font-main: "DM Sans", sans-serif;
+    --font-heading: "Orbitron", sans-serif;
+    --font-accent: "Bangers", cursive;
+
+    /* Borders & Shadows */
+    --radius-md: 0.5rem;
+    --radius-lg: 1.125rem;
+    --shadow-md: 0 8px 40px rgba(0, 0, 0, 0.13);
+    --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.3);
 }
 
 /* --- Base --- */
@@ -551,44 +555,81 @@ img {
 }
 
 .top-three {
-  align-items: flex-end;
-  display: flex;
-  gap: 20px;
-  justify-content: center;
-  margin-bottom: 50px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 15px;
 }
 
 .rank-card {
-  background: var(--navy-overlay);
-  border: 2px solid var(--border-light);
-  border-radius: var(--radius-lg);
-  padding: 20px;
-  text-align: center;
-  transition: transform 0.3s ease;
+    background: var(--navy-overlay);
+    border: 2px solid var(--border-light);
+    border-radius: var(--radius-lg);
+    position: relative;
+    text-align: center;
+    padding: 20px;
+    transition: transform 0.3s ease, background-color 0.3s ease;
+    box-shadow: var(--shadow-lg);
+    cursor: pointer;
+}
+
+.rank-card:hover {
+    transform: translateY(-4px) scale(1.02);
+    background-color: rgba(255, 255, 255, 0.08);
 }
 
 .rank-1 {
-  border-color: #ffd700;
-  box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
-  transform: scale(1.1);
+    border-color: #ffd700;
+    padding: 30px 20px;
 }
+
+.rank-1 .rank-number {
+    font-size: 3.5rem;
+}
+
+.rank-1 .rank-name {
+    font-size: 2rem;
+}
+
+.rank-1 .rank-score {
+    font-size: 1.5rem;
+}
+
 .rank-2 {
-  border-color: #c0c0c0;
+    border-color: #c0c0c0;
 }
+
 .rank-3 {
-  border-color: #cd7f32;
+    border-color: #cd7f32;
+}
+
+.rank-number {
+    position: absolute;
+    left: 25px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 3rem;
+    margin: 0;
+}
+
+.rank-name {
+    font-size: 1.75rem;
+}
+
+.rank-score {
+    font-size: 1.35rem;
 }
 
 /* Combined and cleaned up table styles */
 .leaderboard-table {
-  -webkit-backdrop-filter: blur(15px);
-  backdrop-filter: blur(15px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: var(--radius-lg);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
-  overflow: hidden;
-  background: rgba(22, 28, 60, 0.6) !important;
-  /* Dark navy with transparency */
+    background: rgba(22, 28, 60, 0.6) !important;
+    /* Dark navy with transparency */
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
 }
 
 .leaderboard-table .table {
@@ -596,13 +637,12 @@ img {
   margin-bottom: 0;
 }
 
-.leaderboard-table .table > :not(caption) > * > * {
-  background-color: transparent !important;
-  border-bottom-color: rgba(255, 255, 255, 0.05);
-  color: #f8f9fa;
-  padding: 18px 15px;
-
-  /* Added some breathing room */
+.leaderboard-table .table> :not(caption)>*>* {
+    background-color: transparent !important;
+    border-bottom-color: rgba(255, 255, 255, 0.05);
+    color: #f8f9fa;
+    padding: 18px 15px;
+    /* Added some breathing room */
 }
 
 .leaderboard-table thead {
@@ -612,23 +652,60 @@ img {
 }
 
 .leaderboard-table tr {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-  transition: background 0.2s ease;
+    transition: background-color 0.2s ease;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    cursor: pointer;
 }
 
 .leaderboard-table tr:hover {
-  background-color: rgba(255, 255, 255, 0.05) !important;
+    background-color: rgba(255, 255, 255, 0.08) !important;
 }
 
 .leaderboard-table td {
-  color: #f8f9fa;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+    color: #f8f9fa;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+    font-size: 1.15rem;
 }
 
 .rank-card .text-muted {
-  color: rgba(255, 255, 255, 0.8) !important;
-  font: 500 1rem/1 var(--font-main);
-  letter-spacing: 1px;
+    color: rgba(255, 255, 255, 0.8) !important;
+    font: 500 1.15rem/1 var(--font-main);
+    letter-spacing: 1px;
+}
+
+/* --- Leaderboard Toggle Buttons --- */
+.btn-toggle {
+    background: transparent;
+    border: 2px solid rgba(255, 255, 255, 0.8);
+    color: #ffffff;
+    font-size: 1.5rem;
+    font-weight: 200;
+    transition: all 0.2s ease;
+    padding: 8px 32px;
+}
+
+.btn-toggle:hover:not(.active) {
+    background: #ffffff;
+    color: #000000;
+}
+
+.btn-toggle.active {
+    background: var(--golden);
+    color: var(--navy-900);
+    border-color: var(--golden);
+}
+
+/* --- Sticky Current Player Row --- */
+.sticky-user-row {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: var(--golden);
+    color: var(--navy-900);
+    padding: 15px 0;
+    box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
 }
 
 /* --- Dashboard --- */
@@ -644,7 +721,7 @@ img {
 }
 
 .dashboard-hero {
-  min-height: 100vh;
+    min-height: 100vh;
 }
 
 .dashboard-welcome {
@@ -855,7 +932,7 @@ img {
 }
 
 .text-muted-light {
-  color: var(--text-muted);
+    color: var(--text-muted);
 }
 
 .empty-state {
