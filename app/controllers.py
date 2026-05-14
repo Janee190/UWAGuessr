@@ -141,6 +141,7 @@ def change_user_password(data):
     user.set_password(data['newPassword'])
     db.session.commit()
     return None
+from datetime import datetime
 
 def get_leaderboard_data():
     # Get top 10 scores with usernames for today
