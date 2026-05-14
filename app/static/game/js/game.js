@@ -1,10 +1,11 @@
 // game.js - Game State, Math, and Logic
 
+window.DEBUG = false;
+
 let currentRoundIndex = 0;
 let totalScore = 0;
 let currentRoundData = null;
 let activeRounds = [];
-let allRoundsData = [];
 
 let photoViewerInitialized = false;
 let panoViewer = null;
@@ -16,6 +17,7 @@ const TIME_LIMIT = 20;
 let timerInterval = null;
 let timeRemaining = TIME_LIMIT;
 let isTimerExpired = false;
+let isSubmitting = false;
 
 // ── Timer Functions ────────────────────────────────────────────────────────
 
@@ -36,7 +38,7 @@ function startTimer() {
         if (timeRemaining <= 0) {
             handleTimerExpiry();
         }
-    }, 10);
+    }, 50);
 }
 
 function stopTimer() {
@@ -128,7 +130,7 @@ async function autoSubmitMiss() {
 
         var result = await response.json();
         if (result.error) {
-            console.error(result.error);
+            if (window.DEBUG) console.error(result.error);
             actionBtn.disabled = false;
             return;
         }
@@ -137,7 +139,6 @@ async function autoSubmitMiss() {
         var actualLng = result.actual_lng;
 
         totalScore += result.score;
-        localStorage.setItem('uwa_totalScore', totalScore);
 
         drawResultOnMap(0, 0, actualLat, actualLng);
 
@@ -167,7 +168,7 @@ async function autoSubmitMiss() {
             loadPanorama(activeRounds[currentRoundIndex].imagePath);
         }
     } catch (e) {
-        console.error('Auto-submit failed:', e);
+        if (window.DEBUG) console.error('Auto-submit failed:', e);
         actionBtn.disabled = false;
     }
 }
@@ -207,7 +208,7 @@ async function initChallenge() {
             return 'completed';
         }
     } catch (e) {
-        console.error("Failed to check initial challenge status:", e);
+        if (window.DEBUG) console.error("Failed to check initial challenge status:", e);
     }
 
     document.getElementById('challenge-info').style.display = 'block';
@@ -264,7 +265,7 @@ function startPolling() {
                 window.location.href = '/dashboard';
             }
         } catch (e) {
-            console.error("Polling failed", e);
+            if (window.DEBUG) console.error("Polling failed", e);
         }
     }, 3000);
 }
@@ -303,6 +304,8 @@ async function handleStartClick() {
             body: JSON.stringify({ id: challengeId })
         });
     } else {
+        var startBtn = document.getElementById('btn-start-game');
+        if (startBtn) startBtn.disabled = true;
         beginGame();
     }
 }
@@ -317,14 +320,13 @@ async function startGame() {
         const response = await fetch(url);
         images = await response.json();
     } catch (e) {
-        console.error("Failed to load images:", e);
+        if (window.DEBUG) console.error("Failed to load images:", e);
         return;
     }
 
     currentRoundIndex = 0;
     totalScore = 0;
     activeRounds = images;
-    localStorage.setItem('uwa_totalScore', totalScore);
 
     if (challengeId) {
         var overlay = document.getElementById('game-start-overlay');
@@ -354,6 +356,9 @@ async function startGame() {
 }
 
 function beginGame() {
+    if (!activeRounds || activeRounds.length === 0) {
+        return;
+    }
     document.getElementById('game-start-overlay').style.display = 'none';
     if (challengeId) {
         document.getElementById('game-board').style.display = 'block';
@@ -362,23 +367,6 @@ function beginGame() {
         loadNextRound(false);
     }
     startTimer();
-}
-
-// Chooses a unique random subset of rounds for one game session.
-function buildRandomRounds() {
-    const totalRounds = allRoundsData.length;
-    const roundsToPlay = Math.min(ROUNDS_PER_GAME, totalRounds);
-    const indices = Array.from({ length: totalRounds }, (_, index) => index);
-
-    for (let i = indices.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [indices[i], indices[j]] = [indices[j], indices[i]];
-    }
-
-    return indices
-        .slice(0, roundsToPlay)
-        .map((index) => allRoundsData[index])
-        .filter(Boolean);
 }
 
 // Loads the next round photo and resets round-specific UI.
@@ -422,7 +410,13 @@ function loadNextRound(startTimerImmediately = true) {
 
 // Submits the current map guess, scores it, and unlocks the next round button.
 async function submitGuess() {
-    if (!guessMarker) return;
+    if (isSubmitting) return;
+    isSubmitting = true;
+
+    if (!guessMarker) {
+        isSubmitting = false;
+        return;
+    }
 
     const markerPosition = guessMarker.getLngLat ? guessMarker.getLngLat() : guessMarker.getLatLng();
     const guessLat = markerPosition.lat;
@@ -450,8 +444,9 @@ async function submitGuess() {
 
         const result = await response.json();
         if (result.error) {
-            console.error(result.error);
+            if (window.DEBUG) console.error(result.error);
             actionBtn.disabled = false;
+            isSubmitting = false;
             return;
         }
 
@@ -462,7 +457,6 @@ async function submitGuess() {
 
         // Update State
         totalScore += roundScore;
-        localStorage.setItem('uwa_totalScore', totalScore);
 
         // Show Map Results
         drawResultOnMap(guessLat, guessLng, actualLat, actualLng);
@@ -506,9 +500,10 @@ async function submitGuess() {
             loadPanorama(activeRounds[currentRoundIndex].imagePath);
         }
     } catch (e) {
-        console.error("Failed to submit guess:", e);
+        if (window.DEBUG) console.error("Failed to submit guess:", e);
         actionBtn.disabled = false;
     }
+    isSubmitting = false;
 }
 
 function handleAction() {
@@ -623,7 +618,7 @@ function showGameOver(shouldSubmitCompletion = true) {
                     clearInterval(pollInterval);
                 }
             } catch (e) {
-                console.error("GameOver polling failed", e);
+                if (window.DEBUG) console.error("GameOver polling failed", e);
             }
         };
 
@@ -665,7 +660,7 @@ function sendGameComplete(finalScore) {
             return response.json();
         })
         .catch((e) => {
-            console.warn('Score save failed:', e.message || e);
+            if (window.DEBUG) console.warn('Score save failed:', e.message || e);
         });
 }
 
@@ -715,7 +710,7 @@ async function updateProgress(roundNum, score) {
             body: JSON.stringify({ id: challengeId, round: roundNum, score: score })
         });
     } catch (e) {
-        console.error("Progress update failed", e);
+        if (window.DEBUG) console.error("Progress update failed", e);
     }
 }
 
@@ -729,4 +724,9 @@ function resetPhotoTransform() {
 }
 
 // Initialize on page load
-window.onload = startGame;
+window.addEventListener('load', startGame);
+
+window.addEventListener('beforeunload', function () {
+    if (pollInterval) clearInterval(pollInterval);
+    if (challengeTimerInterval) clearInterval(challengeTimerInterval);
+});

@@ -186,11 +186,11 @@ def get_user_all_time_stat(user_id):
 def add_score(user_id, score_value):
     new_score = GameResult(user_id=user_id, score=score_value)
     db.session.add(new_score)
-    
-    # Also update the user's total_score if we want to keep that up to date
-    user = User.query.get(user_id)
-    if user:
-        user.total_score = (user.total_score or 0) + score_value
-        
+
+    db.session.query(User).filter_by(uid=user_id).update(
+        {'total_score': User.total_score + score_value},
+        synchronize_session='fetch'
+    )
+
     db.session.commit()
     return new_score

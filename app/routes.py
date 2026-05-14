@@ -69,7 +69,10 @@ def api_game_images():
         if challenge:
             photo_ids = challenge.photo_ids.split(',')
             # Convert to ints for query
-            photo_ids = [int(pid) for pid in photo_ids]
+            try:
+                photo_ids = [int(pid) for pid in photo_ids]
+            except (TypeError, ValueError):
+                return jsonify({'error': 'Invalid photo IDs in challenge'}), 400
 
     return jsonify(get_game_images(photo_ids))
 
@@ -383,8 +386,10 @@ def api_poll_challenge(challenge_id):
     from app.models import Challenge
     from datetime import datetime, timedelta
     from app import db
-    
-    challenge = Challenge.query.get_or_404(challenge_id)
+
+    challenge = Challenge.query.get(challenge_id)
+    if not challenge:
+        return jsonify({'error': 'Challenge not found'}), 404
     
     # Check expiration
     if challenge.status in ['pending', 'ready_waiting']:
@@ -459,7 +464,17 @@ def api_challenge_progress():
         challenge.challenged_score = score
     else:
         return jsonify({'error': 'Unauthorized'}), 403
-        
+
+    try:
+        rnd = int(round_num)
+        scr = int(score)
+    except (TypeError, ValueError):
+        return jsonify({'error': 'Invalid round or score'}), 400
+    if rnd < 1 or rnd > 5:
+        return jsonify({'error': 'Round must be 1-5'}), 400
+    if scr < 0 or scr > rnd * 5000:
+        return jsonify({'error': 'Score out of valid range'}), 400
+
     db.session.commit()
     return jsonify({'success': True})
 
@@ -483,6 +498,10 @@ def api_game_complete():
     if total_score < 0:
         return jsonify({'error': 'Invalid field values'}), 400
 
+    MAX_GAME_SCORE = 25000  # 5 rounds × 5000 max per round
+    if total_score > MAX_GAME_SCORE:
+        return jsonify({'error': 'Score exceeds maximum possible'}), 400
+
     # Save the score to the GameResults table and update user's total_score
     add_score(current_user.uid, total_score)
     
@@ -490,6 +509,15 @@ def api_game_complete():
     if challenge_id:
         challenge = Challenge.query.get(challenge_id)
         if challenge:
+            # Guard: if this player already completed, skip duplicate submission
+            player_round = (
+                challenge.challenger_round
+                if current_user.uid == challenge.challenger_id
+                else challenge.challenged_round
+            )
+            if player_round is not None and player_round >= 6:
+                return jsonify({'success': True, 'totalScore': current_user.total_score})
+
             if current_user.uid == challenge.challenger_id:
                 challenge.challenger_score = total_score
                 challenge.challenger_round = 6

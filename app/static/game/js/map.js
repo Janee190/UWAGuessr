@@ -168,13 +168,13 @@ function initMap() {
     map.on('idle', hideMapLabelsAndIcons);
     scheduleLabelHideRetry(5);
 
-    map.on('load', function () {
+    map.once('load', function () {
         recenterMapView();
         hideMapLabelsAndIcons();
+    });
 
-        map.on('click', function (e) {
-            placeGuessMarker(e.lngLat.lat, e.lngLat.lng);
-        });
+    map.on('click', function (e) {
+        placeGuessMarker(e.lngLat.lat, e.lngLat.lng);
     });
 
     attachResizeHandlers();
