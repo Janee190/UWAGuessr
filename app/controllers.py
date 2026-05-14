@@ -1,6 +1,7 @@
 from app import db
-from app.models import User
+from app.models import User, GameResult
 import re
+from sqlalchemy import desc, func
 
 def validate_username(username):
     if not username:
@@ -139,3 +140,56 @@ def change_user_password(data):
     user.set_password(data['newPassword'])
     db.session.commit()
     return None
+from datetime import datetime
+
+def get_leaderboard_data():
+    # Get top 10 scores with usernames for today
+    today_start = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
+    
+    # Joining User and GameResult, grouping by user to get their max score for today
+    leaderboard = db.session.query(
+        User.username, 
+        func.max(GameResult.score).label('high_score')
+    ).join(GameResult).filter(GameResult.timestamp >= today_start).group_by(User.uid).order_by(desc('high_score')).limit(10).all()
+    
+    return leaderboard
+
+def get_all_time_leaderboard_data():
+    # Get top 10 players based on their all-time total_score
+    leaderboard = db.session.query(
+        User.username, 
+        func.coalesce(User.total_score, 0).label('high_score')
+    ).order_by(desc('high_score')).limit(10).all()
+    
+    return leaderboard
+
+def get_user_daily_stat(user_id):
+    today_start = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
+    all_scores = db.session.query(
+        User.uid, 
+        func.max(GameResult.score).label('high_score')
+    ).join(GameResult).filter(GameResult.timestamp >= today_start).group_by(User.uid).order_by(desc('high_score')).all()
+    
+    for idx, row in enumerate(all_scores):
+        if row.uid == user_id:
+            return {'rank': idx + 1, 'score': row.high_score}
+    return {'rank': '-', 'score': 0}
+
+def get_user_all_time_stat(user_id):
+    all_users = db.session.query(User.uid, User.total_score).order_by(desc(User.total_score)).all()
+    for idx, row in enumerate(all_users):
+        if row.uid == user_id:
+            return {'rank': idx + 1, 'score': row.total_score or 0}
+    return {'rank': '-', 'score': 0}
+
+def add_score(user_id, score_value):
+    new_score = GameResult(user_id=user_id, score=score_value)
+    db.session.add(new_score)
+    
+    # Also update the user's total_score if we want to keep that up to date
+    user = User.query.get(user_id)
+    if user:
+        user.total_score = (user.total_score or 0) + score_value
+        
+    db.session.commit()
+    return new_score
