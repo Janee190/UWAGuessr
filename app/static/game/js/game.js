@@ -155,6 +155,10 @@ async function autoSubmitMiss() {
         document.getElementById('next-btn-text').innerText = isLastRound ? "FINISH GAME" : "CONTINUE";
         document.getElementById('next-round-btn').disabled = false;
 
+        if (challengeId) {
+            updateProgress(currentRoundIndex + 1, totalScore);
+        }
+
         actionBtn.innerText = "NEXT ROUND";
         actionBtn.disabled = true; // keep hidden actionBtn disabled
 
@@ -168,10 +172,114 @@ async function autoSubmitMiss() {
     }
 }
 
+let challengeId = null;
+let challengeData = null;
+let pollInterval = null;
+let challengeTimerInterval = null;
+let challengeTimeLeft = 180; // 3 minutes
+
+// ── Challenge Logic ────────────────────────────────────────────────────────
+
+function getChallengeIdFromUrl() {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get('challengeId');
+}
+
+async function initChallenge() {
+    challengeId = getChallengeIdFromUrl();
+    if (!challengeId) return;
+
+    document.getElementById('challenge-info').style.display = 'block';
+    document.getElementById('challenge-waiting-room').style.display = 'block';
+    document.getElementById('game-status-text').innerText = 'Starting challenge...';
+
+    startChallengeTimer();
+    startPolling();
+}
+
+function startChallengeTimer() {
+    const display = document.getElementById('challenge-timer');
+    challengeTimerInterval = setInterval(() => {
+        challengeTimeLeft--;
+        if (challengeTimeLeft <= 0) {
+            clearInterval(challengeTimerInterval);
+            alert("Challenge expired!");
+            window.location.href = '/dashboard';
+            return;
+        }
+        const mins = Math.floor(challengeTimeLeft / 60);
+        const secs = challengeTimeLeft % 60;
+        display.textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }, 1000);
+}
+
+function startPolling() {
+    pollInterval = setInterval(async () => {
+        try {
+            const resp = await fetch(`/api/challenges/poll/${challengeId}`);
+            challengeData = await resp.json();
+            updateChallengeUI();
+
+            if (challengeData.status === 'in_progress') {
+                clearInterval(pollInterval);
+                clearInterval(challengeTimerInterval);
+                beginGame();
+            } else if (challengeData.status === 'expired') {
+                clearInterval(pollInterval);
+                alert("This challenge has expired.");
+                window.location.href = '/dashboard';
+            }
+        } catch (e) {
+            console.error("Polling failed", e);
+        }
+    }, 3000);
+}
+
+function updateChallengeUI() {
+    if (!challengeData) return;
+    
+    const isChallenger = challengeData.challenger_id === window.current_user_id;
+    const opponentName = isChallenger ? challengeData.challenged_username : challengeData.challenger_username;
+    const opponentReady = isChallenger ? challengeData.challenged_ready : challengeData.challenger_ready;
+    const myReady = isChallenger ? challengeData.challenger_ready : challengeData.challenged_ready;
+
+    document.getElementById('opponent-name').innerText = opponentName;
+    
+    const statusEl = document.getElementById('opponent-status');
+    if (!myReady) {
+        statusEl.innerText = "Click 'READY' when you are prepared.";
+    } else if (opponentReady) {
+        statusEl.innerText = "Both players ready! Starting...";
+    } else {
+        statusEl.innerText = `Waiting for ${opponentName} to click Ready...`;
+    }
+}
+
+async function handleStartClick() {
+    if (challengeId) {
+        const startBtn = document.getElementById('btn-start-game');
+        const startBtnText = document.getElementById('start-btn-text');
+        
+        startBtn.disabled = true;
+        startBtnText.innerText = "WAITING...";
+
+        await fetch('/api/challenges/ready', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: challengeId })
+        });
+    } else {
+        beginGame();
+    }
+}
+
 // Resets game state and starts the first round.
 async function startGame() {
+    initChallenge();
+
     try {
-        const response = await fetch('/api/game-images');
+        const url = challengeId ? `/api/game-images?challengeId=${challengeId}` : '/api/game-images';
+        const response = await fetch(url);
         images = await response.json();
     } catch (e) {
         console.error("Failed to load images:", e);
@@ -233,6 +341,10 @@ function loadNextRound(startTimerImmediately = true) {
 
     // Update UI
     document.getElementById('round-counter').innerText = `Round ${currentRoundIndex + 1} / ${activeRounds.length}`;
+
+    if (challengeId) {
+        updateProgress(currentRoundIndex + 1, totalScore);
+    }
 
     const actionBtn = document.getElementById('action-btn');
     actionBtn.innerText = "SUBMIT GUESS";
@@ -330,6 +442,10 @@ async function submitGuess() {
         document.getElementById('next-btn-text').innerText = isLastRound ? "FINISH GAME" : "CONTINUE";
         document.getElementById('next-round-btn').disabled = false;
 
+        if (challengeId) {
+            updateProgress(currentRoundIndex + 1, totalScore);
+        }
+
         actionBtn.innerText = "NEXT ROUND";
         actionBtn.disabled = true; // keep hidden actionBtn disabled
 
@@ -359,17 +475,47 @@ function showGameOver() {
 
     document.getElementById('game-board').style.display = 'none';
     document.getElementById('game-over').style.display = 'block';
-    document.getElementById('final-score').innerText = `Final Score: ${totalScore}`;
+    
+    if (challengeId) {
+        pollInterval = setInterval(async () => {
+            try {
+                const resp = await fetch(`/api/challenges/poll/${challengeId}`);
+                challengeData = await resp.json();
+                
+                const isChallenger = challengeData.challenger_id === window.current_user_id;
+                const opponentScore = isChallenger ? challengeData.challenged_score : challengeData.challenger_score;
+                
+                let resultText = `Your Score: ${totalScore}`;
+                if (opponentScore !== null) {
+                    if (totalScore > opponentScore) resultText += ` vs Opponent: ${opponentScore} - YOU WIN!`;
+                    else if (totalScore < opponentScore) resultText += ` vs Opponent: ${opponentScore} - YOU LOST!`;
+                    else resultText += ` vs Opponent: ${opponentScore} - IT'S A TIE!`;
+                    clearInterval(pollInterval);
+                } else {
+                    resultText += " - Waiting for opponent to finish...";
+                }
+                document.getElementById('final-score').innerText = resultText;
+            } catch (e) {
+                console.error("GameOver polling failed", e);
+            }
+        }, 3000);
+    } else {
+        document.getElementById('final-score').innerText = `Final Score: ${totalScore}`;
+    }
+    
     sendGameComplete(totalScore);
 }
 
 function sendGameComplete(finalScore) {
+    const body = { totalScore: finalScore };
+    if (challengeId) body.challengeId = challengeId;
+
     fetch('/api/game-complete', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ totalScore: finalScore })
+        body: JSON.stringify(body)
     })
         .then((response) => {
             if (!response.ok) {
@@ -419,6 +565,19 @@ function zoomPhoto(scaleFactor) {
     const currentFov = panoViewer.getHfov();
     const nextFov = Math.max(MIN_HFOV, Math.min(MAX_HFOV, currentFov / scaleFactor));
     panoViewer.setHfov(nextFov);
+}
+
+async function updateProgress(roundNum, score) {
+    if (!challengeId) return;
+    try {
+        await fetch('/api/challenges/update-progress', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: challengeId, round: roundNum, score: score })
+        });
+    } catch (e) {
+        console.error("Progress update failed", e);
+    }
 }
 
 // Resets pitch, yaw, and zoom to the default view.

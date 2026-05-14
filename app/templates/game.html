@@ -22,8 +22,19 @@
 	<div id="game-start-overlay">
 		<div class="start-panel game-panel shadow-lg rounded-3">
 			<h2 class="display-6 mb-3 text-uppercase font-heading game-over-title">Ready to Play?</h2>
-			<p class="mb-4 text-center fs-5">Find the locations on the map!</p>
-			<button id="btn-start-game" class="btn-game-action px-4 py-3 mt-2 text-dark w-100" disabled onclick="beginGame()">
+			<div id="challenge-info" class="mb-3 text-warning bangers-font" style="display:none;">
+				CHALLENGE MODE: <span id="opponent-name">...</span>
+			</div>
+			<p class="mb-4 text-center fs-5" id="game-status-text">Find the locations on the map!</p>
+			
+			<div id="challenge-waiting-room" style="display:none;" class="mb-4">
+				<div class="d-flex flex-column align-items-center gap-3">
+					<div id="opponent-status" class="small opacity-75">Waiting for opponent to join...</div>
+					<div id="challenge-timer" class="text-danger fw-bold fs-4">03:00</div>
+				</div>
+			</div>
+
+			<button id="btn-start-game" class="btn-game-action px-4 py-3 mt-2 text-dark w-100" disabled onclick="handleStartClick()">
 				<span id="start-btn-text">LOADING MAP...</span>
 			</button>
 		</div>

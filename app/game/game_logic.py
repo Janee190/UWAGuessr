@@ -45,7 +45,19 @@ def calculate_score(guess_lat, guess_lng, img_id):
     return max(0, round(score)), distance, actual_lat, actual_lng
 
 
-def get_game_images():
+def get_game_images(photo_id_list=None):
+    if photo_id_list:
+        # Fetch specific photos by their IDs
+        photos = Photos.query.filter(Photos.pid.in_(photo_id_list)).all()
+        # Sort them to match the provided ID order if necessary, 
+        # but for simplicity we'll just return the 5 photos.
+        data = [
+            {"id": photo.pid, "imagePath": photo.image_path}
+            for photo in photos
+        ]
+        # Ensure we return 5 (or however many were provided)
+        return data
+
     photos = Photos.query.with_entities(Photos.pid, Photos.image_path).all()
     data = [
         {"id": photo.pid, "imagePath": photo.image_path}
