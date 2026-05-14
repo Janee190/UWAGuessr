@@ -326,8 +326,7 @@ def api_create_challenge():
         elif existing.challenger_id == current_user.uid and existing.status == 'pending':
             return jsonify({'error': 'Challenge already sent. Waiting for response.'}), 409
         else:
-            # Challenge is in ready_waiting or in_progress — just enter it
-            return jsonify({'challenge_id': existing.id, 'redirect': url_for('game', challenge_id=existing.id)})
+            return jsonify({'error': 'An active challenge already exists with this user.'}), 409
 
     # Get 5 random photo IDs
     all_photos = Photos.query.all()
@@ -367,11 +366,13 @@ def api_get_active_challenges():
             c.status = 'expired'
         db.session.commit()
 
-    # Get challenges where user is involved
+    # Get challenges where user is involved and hasn't already finished
     challenges = Challenge.query.filter(
-        ((Challenge.challenger_id == current_user.uid) | 
+        ((Challenge.challenger_id == current_user.uid) |
          (Challenge.challenged_id == current_user.uid)),
-        Challenge.status.in_(['pending', 'ready_waiting', 'in_progress'])
+        Challenge.status.in_(['pending', 'ready_waiting', 'in_progress']),
+        ~((Challenge.challenger_id == current_user.uid) & (Challenge.challenger_round >= 6)),
+        ~((Challenge.challenged_id == current_user.uid) & (Challenge.challenged_round >= 6))
     ).all()
     
     return jsonify([c.to_dict() for c in challenges])

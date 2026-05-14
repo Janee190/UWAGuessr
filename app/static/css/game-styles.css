@@ -29,7 +29,7 @@ all general purpose css should be in style.css
     right: 0;
     bottom: 0;
     z-index: var(--z-modal);
-    background: rgba(15, 29, 51, 1);
+    background: var(--navy-900);
     backdrop-filter: blur(0px);
     display: none; /* Initially hidden, managed by js */
     align-items: center;
@@ -38,13 +38,51 @@ all general purpose css should be in style.css
 }
 
 .page-game #game-start-overlay.ready {
-    background: rgba(15, 29, 51, 0.7);
+    background: var(--navy-overlay);
     backdrop-filter: blur(5px);
 }
 
 .page-game .start-panel {
-    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 48px 40px;
     min-width: 400px;
+    min-height: 420px;
+}
+
+.page-game .start-header {
+    text-align: center;
+    padding-bottom: 32px;
+}
+
+.page-game .start-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.page-game .start-body p {
+    margin: 0;
+    font-size: 1.1rem;
+    opacity: 0.8;
+}
+
+.page-game #challenge-waiting-room {
+    margin-top: 8px;
+}
+
+.page-game #opponent-status {
+    font-size: 0.95rem;
+    opacity: 0.75;
+}
+
+.page-game #btn-start-game {
+    padding: 16px 32px;
+    margin-top: auto;
 }
 
 /* Full Screen Photo Viewer */
@@ -192,7 +230,6 @@ all general purpose css should be in style.css
 .page-game .top-left-logo img {
     height: 60px;
     width: auto;
-    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.6));
 }
 
 /* Top Right Stats */
@@ -244,7 +281,6 @@ all general purpose css should be in style.css
     font-size: 2.5rem;
     font-weight: 700;
     transition: color 0.3s;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
     font-variant-numeric: tabular-nums;
     min-width: 85px;
     display: inline-block;
@@ -403,14 +439,13 @@ all general purpose css should be in style.css
     width: min(760px, 92vw);
     padding: 44px 52px;
     border-radius: var(--radius-lg);
-    background: rgba(15, 29, 51, 0.88);
+    background: var(--navy-overlay);
     border: 1px solid rgba(255, 255, 255, 0.10);
-    box-shadow: 0 28px 70px rgba(0, 0, 0, 0.45);
+    box-shadow: var(--shadow-lg);
 }
 
 .page-game .game-over-title {
     color: var(--golden);
-    text-shadow: 0 2px 10px rgba(255, 202, 44, 0.3);
     letter-spacing: 0.16em;
     font-size: clamp(1.4rem, 3vw, 2rem);
     opacity: 0.76;
@@ -421,7 +456,6 @@ all general purpose css should be in style.css
     font-size: clamp(3rem, 8vw, 5.8rem);
     line-height: 0.95;
     letter-spacing: 0.08em;
-    text-shadow: 0 8px 22px rgba(0, 0, 0, 0.55);
     margin-bottom: 26px;
 }
 
@@ -486,7 +520,6 @@ all general purpose css should be in style.css
     line-height: 1;
     font-weight: 700;
     color: #fff;
-    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
     font-variant-numeric: tabular-nums;
 }
 

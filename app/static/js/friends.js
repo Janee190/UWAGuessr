@@ -113,6 +113,9 @@ $(function () {
                             } else if (c.status === 'ready_waiting' || c.status === 'in_progress') {
                                 statusText = 'Game in progress!';
                                 actionHtml = `<button class="btn btn-warning btn-sm challenge-play-btn" data-id="${c.id}" style="padding: 2px 8px; font-size: 0.8rem;">Enter Game</button>`;
+                            } else {
+                                // completed, expired, or unknown status — skip
+                                return;
                             }
 
                             challengeSection.append(`

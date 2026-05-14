@@ -212,25 +212,20 @@ async function initChallenge() {
 
     document.getElementById('challenge-info').style.display = 'block';
     document.getElementById('challenge-waiting-room').style.display = 'block';
-    document.getElementById('game-status-text').innerText = 'Starting challenge...';
+    document.getElementById('game-status-text').innerText = '';
 
     startChallengeTimer();
     startPolling();
 }
 
 function startChallengeTimer() {
-    const display = document.getElementById('challenge-timer');
     challengeTimerInterval = setInterval(() => {
         challengeTimeLeft--;
         if (challengeTimeLeft <= 0) {
             clearInterval(challengeTimerInterval);
             alert("Challenge expired!");
             window.location.href = '/dashboard';
-            return;
         }
-        const mins = Math.floor(challengeTimeLeft / 60);
-        const secs = challengeTimeLeft % 60;
-        display.textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
     }, 1000);
 }
 
@@ -283,14 +278,14 @@ function updateChallengeUI() {
     const myReady = isChallenger ? challengeData.challenger_ready : challengeData.challenged_ready;
 
     document.getElementById('opponent-name').innerText = opponentName;
-    
+
     const statusEl = document.getElementById('opponent-status');
     if (!myReady) {
-        statusEl.innerText = "Click 'READY' when you are prepared.";
+        statusEl.innerText = 'Click READY when you are prepared.';
     } else if (opponentReady) {
-        statusEl.innerText = "Both players ready! Starting...";
+        statusEl.innerText = 'Both players ready! Starting...';
     } else {
-        statusEl.innerText = `Waiting for ${opponentName} to click Ready...`;
+        statusEl.innerText = `Waiting for ${opponentName} to ready up...`;
     }
 }
 
@@ -329,7 +324,18 @@ async function startGame() {
     currentRoundIndex = 0;
     totalScore = 0;
     activeRounds = images;
-    localStorage.setItem('uwa_totalScore', totalScore); // Reset local storage
+    localStorage.setItem('uwa_totalScore', totalScore);
+
+    if (challengeId) {
+        var overlay = document.getElementById('game-start-overlay');
+        overlay.style.display = 'flex';
+        setupPhotoViewer();
+        var spinner = document.getElementById('map-spinner');
+        if (spinner) spinner.style.display = '';
+        initMap();
+        return;
+    }
+
     document.getElementById('game-board').style.display = 'block';
     document.getElementById('game-over').style.display = 'none';
 
@@ -339,7 +345,6 @@ async function startGame() {
 
     setupPhotoViewer();
 
-    // Show map loading spinner
     var spinner = document.getElementById('map-spinner');
     if (spinner) spinner.style.display = '';
 
@@ -350,6 +355,12 @@ async function startGame() {
 
 function beginGame() {
     document.getElementById('game-start-overlay').style.display = 'none';
+    if (challengeId) {
+        document.getElementById('game-board').style.display = 'block';
+        document.getElementById('game-over').style.display = 'none';
+        loadPanorama(activeRounds[0].imagePath);
+        loadNextRound(false);
+    }
     startTimer();
 }
 
@@ -510,6 +521,10 @@ function handleAction() {
 }
 
     function updateChallengeGameOverDisplay(challengeState) {
+        // Ensure score box + opponent card are visible (may be hidden from solo mode)
+        document.getElementById('final-score-box').style.display = '';
+        document.getElementById('opponent-score-card').style.display = '';
+
         const finalOutcomeEl = document.getElementById('final-outcome');
         const finalStatusEl = document.getElementById('final-status');
         const playerScoreEl = document.getElementById('final-player-score');
@@ -517,34 +532,29 @@ function handleAction() {
         const opponentLabelEl = document.getElementById('final-opponent-label');
 
         if (!challengeState) {
-            // If there's no challenge state yet, show a waiting message so the player
-            // knows the opponent hasn't finished.
+            if (finalOutcomeEl) finalOutcomeEl.innerText = '';
             if (finalStatusEl) {
-                finalStatusEl.innerText = 'WAITING ON OPPONENT...';
+                finalStatusEl.innerText = 'Waiting for opponent...';
                 finalStatusEl.classList.add('is-waiting');
             }
-            console.debug('updateChallengeGameOverDisplay: no challengeState — showing waiting');
             return;
         }
-
-        console.debug('updateChallengeGameOverDisplay:', challengeState);
 
         const isChallenger = challengeState.challenger_id === window.current_user_id;
         const opponentName = isChallenger ? challengeState.challenged_username : challengeState.challenger_username;
         const opponentScore = isChallenger ? challengeState.challenged_score : challengeState.challenger_score;
+        const opponentRound = isChallenger ? challengeState.challenged_round : challengeState.challenger_round;
         const hasResolvedResult = Boolean(challengeState.result);
 
         if (playerScoreEl) playerScoreEl.innerText = totalScore;
-        if (opponentScoreEl) opponentScoreEl.innerText = typeof opponentScore === 'number' ? opponentScore : 'Pending';
+        if (opponentScoreEl) opponentScoreEl.innerText = typeof opponentScore === 'number' ? opponentScore : '—';
         if (opponentLabelEl) {
-            opponentLabelEl.innerText = opponentName ? `${opponentName}'s Score` : 'Opponent Score';
+            opponentLabelEl.innerText = opponentName ? `${opponentName}` : 'Opponent';
         }
 
         if (finalOutcomeEl) {
-            let outcomeText = 'FINAL SCORE';
-            let outcomeClass = 'outcome-final';
-
             if (hasResolvedResult) {
+                let outcomeText, outcomeClass;
                 if (challengeState.result === 'tie') {
                     outcomeText = 'IT\'S A TIE!';
                     outcomeClass = 'outcome-tie';
@@ -553,10 +563,11 @@ function handleAction() {
                     outcomeText = amIWinner ? 'YOU WIN!' : 'YOU LOSE!';
                     outcomeClass = amIWinner ? 'outcome-win' : 'outcome-lose';
                 }
+                finalOutcomeEl.className = `game-over-outcome text-uppercase font-heading ${outcomeClass}`;
+                finalOutcomeEl.innerText = outcomeText;
+            } else {
+                finalOutcomeEl.innerText = '';
             }
-
-            finalOutcomeEl.className = `game-over-outcome text-uppercase font-heading ${outcomeClass}`;
-            finalOutcomeEl.innerText = outcomeText;
         }
 
         if (finalStatusEl) {
@@ -564,7 +575,14 @@ function handleAction() {
                 finalStatusEl.innerText = '';
                 finalStatusEl.classList.remove('is-waiting');
             } else {
-                finalStatusEl.innerText = 'WAITING ON OPPONENT...';
+                const round = opponentRound || 0;
+                if (round >= 6) {
+                    finalStatusEl.innerText = 'Waiting for opponent...';
+                } else if (round > 0) {
+                    finalStatusEl.innerText = `Opponent on Round ${round}/5`;
+                } else {
+                    finalStatusEl.innerText = 'Waiting for opponent...';
+                }
                 finalStatusEl.classList.add('is-waiting');
             }
         }
@@ -592,47 +610,31 @@ function showGameOver(shouldSubmitCompletion = true) {
     }
     
     if (challengeId) {
-            updateChallengeGameOverDisplay(challengeData);
-
-        // Ensure we don't create multiple pollers
+        // Fetch fresh data before initial display (challengeData is stale from game start)
         if (pollInterval) clearInterval(pollInterval);
-        pollInterval = setInterval(async () => {
+
+        const pollNow = async () => {
             try {
                 const resp = await fetch(`/api/challenges/poll/${challengeId}`);
                 challengeData = await resp.json();
-                
-                const isChallenger = challengeData.challenger_id === window.current_user_id;
-                const opponentScore = isChallenger ? challengeData.challenged_score : challengeData.challenger_score;
-                const opponentRound = isChallenger ? challengeData.challenged_round : challengeData.challenger_round;
-                
-                if (opponentRound >= 6 || challengeData.status === 'completed') {
-                        updateChallengeGameOverDisplay(challengeData);
+                updateChallengeGameOverDisplay(challengeData);
+
+                if (challengeData.result) {
                     clearInterval(pollInterval);
-                } else {
-                        updateChallengeGameOverDisplay(challengeData);
                 }
             } catch (e) {
                 console.error("GameOver polling failed", e);
             }
-        }, 3000);
-    } else {
-        const finalOutcomeEl = document.getElementById('final-outcome');
-            const finalStatusEl = document.getElementById('final-status');
-        const playerScoreEl = document.getElementById('final-player-score');
-        const opponentScoreEl = document.getElementById('final-opponent-score');
-        const opponentLabelEl = document.getElementById('final-opponent-label');
+        };
 
-        if (finalOutcomeEl) {
-            finalOutcomeEl.className = 'game-over-outcome text-uppercase font-heading outcome-final';
-            finalOutcomeEl.innerText = 'FINAL SCORE';
-        }
-            if (finalStatusEl) {
-                finalStatusEl.innerText = '';
-                finalStatusEl.classList.remove('is-waiting');
-            }
-        if (playerScoreEl) playerScoreEl.innerText = totalScore;
-        if (opponentScoreEl) opponentScoreEl.innerText = '-';
-        if (opponentLabelEl) opponentLabelEl.innerText = 'Opponent';
+        pollNow();
+        pollInterval = setInterval(pollNow, 3000);
+    } else {
+        // Solo mode: centred score, no labels — the score IS the title
+        document.getElementById('final-score-box').style.display = 'none';
+        document.getElementById('final-outcome').className = 'game-over-outcome text-uppercase font-heading outcome-final';
+        document.getElementById('final-outcome').innerText = totalScore;
+        document.getElementById('final-status').innerText = 'FINAL SCORE';
     }
     
     if (shouldSubmitCompletion) {

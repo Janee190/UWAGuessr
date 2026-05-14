@@ -21,20 +21,21 @@
 
 	<div id="game-start-overlay">
 		<div class="start-panel game-panel shadow-lg rounded-3">
-			<h2 class="display-6 mb-3 text-uppercase font-heading game-over-title">Ready to Play?</h2>
-			<div id="challenge-info" class="mb-3 text-warning bangers-font" style="display:none;">
-				CHALLENGE MODE: <span id="opponent-name">...</span>
-			</div>
-			<p class="mb-4 text-center fs-5" id="game-status-text">Find the locations on the map!</p>
-			
-			<div id="challenge-waiting-room" style="display:none;" class="mb-4">
-				<div class="d-flex flex-column align-items-center gap-3">
-					<div id="opponent-status" class="small opacity-75">Waiting for opponent to join...</div>
-					<div id="challenge-timer" class="text-danger fw-bold fs-4">03:00</div>
+			<div class="start-header">
+				<h2 class="text-uppercase font-heading game-over-title">Ready to Play?</h2>
+				<div id="challenge-info" class="text-warning bangers-font" style="display:none;">
+					CHALLENGE MODE: <span id="opponent-name">...</span>
 				</div>
 			</div>
 
-			<button id="btn-start-game" class="btn-game-action px-4 py-3 mt-2 text-dark w-100" disabled onclick="handleStartClick()">
+			<div class="start-body">
+				<p id="game-status-text">Find the locations on the map!</p>
+				<div id="challenge-waiting-room" style="display:none;">
+					<div id="opponent-status">Waiting for opponent to join...</div>
+				</div>
+			</div>
+
+			<button id="btn-start-game" class="btn-game-action text-dark w-100" disabled onclick="handleStartClick()">
 				<span id="start-btn-text">LOADING MAP...</span>
 			</button>
 		</div>
@@ -107,15 +108,15 @@
 	<section id="game-over" class="game-panel shadow-lg rounded-3">
 		<div class="game-over-modal">
 			<h2 class="game-over-title text-uppercase font-heading">Game Over</h2>
-			<div id="final-outcome" class="game-over-outcome text-uppercase font-heading">FINAL SCORE</div>
+			<div id="final-outcome" class="game-over-outcome text-uppercase font-heading"></div>
 			<div id="final-status" class="game-over-status text-uppercase font-heading"></div>
-			<div class="final-score-box">
+			<div class="final-score-box" id="final-score-box">
 				<div class="score-compare-grid">
 					<div class="score-card">
 						<span class="score-label">Your Score</span>
 						<span id="final-player-score" class="score-value">0</span>
 					</div>
-					<div class="score-card">
+					<div class="score-card" id="opponent-score-card">
 						<span id="final-opponent-label" class="score-label">Opponent</span>
 						<span id="final-opponent-score" class="score-value">0</span>
 					</div>
