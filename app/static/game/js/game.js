@@ -177,6 +177,7 @@ let challengeData = null;
 let pollInterval = null;
 let challengeTimerInterval = null;
 let challengeTimeLeft = 180; // 3 minutes
+let gameCompleteSent = false;  // guards against double-posting on refresh
 
 // ── Challenge Logic ────────────────────────────────────────────────────────
 
@@ -188,6 +189,25 @@ function getChallengeIdFromUrl() {
 async function initChallenge() {
     challengeId = getChallengeIdFromUrl();
     if (!challengeId) return;
+
+    // ── Check if this challenge has already been played or finished ──
+    try {
+        const resp = await fetch(`/api/challenges/poll/${challengeId}`);
+        const challenge = await resp.json();
+        challengeData = challenge;
+
+        const isChallenger = challenge.challenger_id === window.current_user_id;
+        const myScore = isChallenger ? challenge.challenger_score : challenge.challenged_score;
+
+        if (challenge.status === 'completed' || myScore !== null) {
+            // Player already finished — restore the game-over screen
+            totalScore = myScore || 0;
+            showGameOver();
+            return 'completed';
+        }
+    } catch (e) {
+        console.error("Failed to check initial challenge status:", e);
+    }
 
     document.getElementById('challenge-info').style.display = 'block';
     document.getElementById('challenge-waiting-room').style.display = 'block';
@@ -218,12 +238,41 @@ function startPolling() {
         try {
             const resp = await fetch(`/api/challenges/poll/${challengeId}`);
             challengeData = await resp.json();
+
+            // Safety: if this player finished while polling (e.g. page refresh
+            // mid-game but after scoring), jump straight to the completion screen.
+            const isChallenger = challengeData.challenger_id === window.current_user_id;
+            const myScore = isChallenger ? challengeData.challenger_score : challengeData.challenged_score;
+            if (challengeData.status === 'completed' || myScore !== null) {
+                clearInterval(pollInterval);
+                clearInterval(challengeTimerInterval);
+                totalScore = myScore || 0;
+                showGameOver();
+                return;
+            }
+
             updateChallengeUI();
 
             if (challengeData.status === 'in_progress') {
                 clearInterval(pollInterval);
                 clearInterval(challengeTimerInterval);
-                beginGame();
+
+                // ── Synchronised 3‑2‑1 countdown ─────────────────────
+                var startBtnText = document.getElementById('start-btn-text');
+                var startBtn = document.getElementById('btn-start-game');
+                if (startBtn) startBtn.disabled = true;
+
+                var count = 3;
+                startBtnText.innerText = 'Starting in ' + count + '...';
+                var countInterval = setInterval(function () {
+                    count--;
+                    if (count > 0) {
+                        startBtnText.innerText = 'Starting in ' + count + '...';
+                    } else {
+                        clearInterval(countInterval);
+                        beginGame();
+                    }
+                }, 1000);
             } else if (challengeData.status === 'expired') {
                 clearInterval(pollInterval);
                 alert("This challenge has expired.");
@@ -261,7 +310,7 @@ async function handleStartClick() {
         const startBtnText = document.getElementById('start-btn-text');
         
         startBtn.disabled = true;
-        startBtnText.innerText = "WAITING...";
+        startBtnText.innerText = "Waiting on other player...";
 
         await fetch('/api/challenges/ready', {
             method: 'POST',
@@ -275,7 +324,8 @@ async function handleStartClick() {
 
 // Resets game state and starts the first round.
 async function startGame() {
-    initChallenge();
+    var challengeResult = await initChallenge();
+    if (challengeResult === 'completed') return; // already finished — don't reinitialise
 
     try {
         const url = challengeId ? `/api/game-images?challengeId=${challengeId}` : '/api/game-images';
@@ -507,6 +557,9 @@ function showGameOver() {
 }
 
 function sendGameComplete(finalScore) {
+    if (gameCompleteSent) return;
+    gameCompleteSent = true;
+
     const body = { totalScore: finalScore };
     if (challengeId) body.challengeId = challengeId;
 

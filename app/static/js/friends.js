@@ -104,14 +104,14 @@ $(function () {
                                     statusText = 'Challenged you!';
                                     actionHtml = `
                                         <div class="d-flex gap-2 mt-1">
-                                            <button class="btn btn-warning btn-sm challenge-accept-btn" data-id="${c.id}">Accept</button>
-                                            <button class="btn btn-outline-light btn-sm challenge-reject-btn" data-id="${c.id}">Decline</button>
+                                            <button class="btn btn-warning btn-sm challenge-accept-btn" data-id="${c.id}" style="padding: 2px 8px; font-size: 0.8rem;">Accept</button>
+                                            <button class="btn btn-outline-light btn-sm challenge-reject-btn" data-id="${c.id}" style="padding: 2px 8px; font-size: 0.8rem;">Decline</button>
                                         </div>
                                     `;
                                 }
                             } else if (c.status === 'ready_waiting' || c.status === 'in_progress') {
                                 statusText = 'Game in progress!';
-                                actionHtml = `<button class="btn btn-warning btn-sm challenge-play-btn" data-id="${c.id}">Enter Game</button>`;
+                                actionHtml = `<button class="btn btn-warning btn-sm challenge-play-btn" data-id="${c.id}" style="padding: 2px 8px; font-size: 0.8rem;">Enter Game</button>`;
                             }
 
                             challengeSection.append(`
@@ -297,13 +297,19 @@ $(function () {
         window.location.href = `/game?challengeId=${id}`;
     });
 
+    // ── Refresh button ─────────────────────────────────────────────
+    $('#friends-refresh').on('click', function () {
+        loadFriends();
+        loadPendingRequests();
+    });
+
     // ── Initial load if sidebar is already open ───────────────────────
     loadFriends();
     loadPendingRequests();
 
     // Auto-refresh challenges every 10 seconds while sidebar is open
     setInterval(function() {
-        if ($('#friends-sidebar').hasClass('friends-sidebar--open')) {
+        if ($('#friends-sidebar').hasClass('open')) {
             loadPendingRequests();
         }
     }, 10000);
