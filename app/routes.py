@@ -162,6 +162,26 @@ def user_profile(username):
         recent_games=recent_games
     )
 
+@app.route("/api/user-stats/<int:uid>")
+def api_user_stats(uid):
+    from app.models import GameResult
+    user = User.query.get_or_404(uid)
+    
+    recent_games = GameResult.query.filter_by(user_id=uid)\
+        .order_by(GameResult.timestamp.desc()).limit(5).all()
+    total_games = GameResult.query.filter_by(user_id=uid).count()
+    best = GameResult.query.filter_by(user_id=uid)\
+        .order_by(GameResult.score.desc()).first()
+    
+    return jsonify({
+        'total_games': total_games,
+        'best_score': best.score if best else None,
+        'recent_games': [{
+            'score': g.score,
+            'timestamp': g.timestamp.strftime('%d %b %Y')
+        } for g in recent_games]
+    })
+
 
 @app.route("/logout")
 def logout():
