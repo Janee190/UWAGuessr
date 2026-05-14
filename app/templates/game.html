@@ -105,13 +105,25 @@
 	</div>
 
 	<section id="game-over" class="game-panel shadow-lg rounded-3">
-		<h2 class="display-6 mb-3 text-uppercase font-heading game-over-title">Game Over</h2>
-		<div class="final-score-box mb-4">
-			<p id="final-score" class="mb-0">Final Score: 0</p>
-		</div>
-		<div class="d-flex justify-content-center gap-3 mt-4">
-			<a class="btn-game-action px-4 py-2 text-decoration-none text-dark" href="{{ url_for('game') }}">Play Again</a>
-			<a class="btn-game-secondary px-4 py-2 text-decoration-none" href="{{ url_for('index') }}">Back to Home</a>
+		<div class="game-over-modal">
+			<h2 class="game-over-title text-uppercase font-heading">Game Over</h2>
+			<div id="final-outcome" class="game-over-outcome text-uppercase font-heading">FINAL SCORE</div>
+			<div class="final-score-box">
+				<div class="score-compare-grid">
+					<div class="score-card">
+						<span class="score-label">Your Score</span>
+						<span id="final-player-score" class="score-value">0</span>
+					</div>
+					<div class="score-card">
+						<span id="final-opponent-label" class="score-label">Opponent</span>
+						<span id="final-opponent-score" class="score-value">0</span>
+					</div>
+				</div>
+			</div>
+			<div class="d-flex justify-content-center gap-3 mt-4 flex-wrap">
+				<a id="play-again-btn" class="btn-game-action px-4 py-2 text-decoration-none text-dark" href="{{ url_for('game') }}">Play Again</a>
+				<a class="btn-game-secondary px-4 py-2 text-decoration-none" href="{{ url_for('index') }}">Back to Home</a>
+			</div>
 		</div>
 	</section>
 

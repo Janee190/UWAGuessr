@@ -472,13 +472,13 @@ def api_game_complete():
         if challenge:
             if current_user.uid == challenge.challenger_id:
                 challenge.challenger_score = total_score
-                challenge.challenger_round = 5
+                challenge.challenger_round = 6
             elif current_user.uid == challenge.challenged_id:
                 challenge.challenged_score = total_score
-                challenge.challenged_round = 5
+                challenge.challenged_round = 6
             
-            # If both have finished, mark as completed
-            if challenge.challenger_score is not None and challenge.challenged_score is not None:
+            # Mark completed only when both players explicitly finished.
+            if (challenge.challenger_round or 0) >= 6 and (challenge.challenged_round or 0) >= 6:
                 challenge.status = 'completed'
             db.session.commit()
 

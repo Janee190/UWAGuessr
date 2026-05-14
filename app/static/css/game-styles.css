@@ -387,36 +387,93 @@ all general purpose css should be in style.css
 /* Game Over Overlay */
 .page-game #game-over {
     display: none;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    position: fixed;
+    inset: 0;
     z-index: var(--z-modal);
-    padding: 40px;
+    padding: 24px;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(180deg, rgba(6, 11, 24, 0.42), rgba(6, 11, 24, 0.74));
+    backdrop-filter: blur(10px) saturate(115%);
+    -webkit-backdrop-filter: blur(10px) saturate(115%);
     text-align: center;
-    min-width: 420px;
+}
+
+.page-game .game-over-modal {
+    width: min(760px, 92vw);
+    padding: 44px 52px;
+    border-radius: var(--radius-lg);
+    background: rgba(15, 29, 51, 0.88);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    box-shadow: 0 28px 70px rgba(0, 0, 0, 0.45);
 }
 
 .page-game .game-over-title {
     color: var(--golden);
     text-shadow: 0 2px 10px rgba(255, 202, 44, 0.3);
-    letter-spacing: 0.05em;
+    letter-spacing: 0.16em;
+    font-size: clamp(1.4rem, 3vw, 2rem);
+    opacity: 0.76;
+    margin-bottom: 14px;
+}
+
+.page-game .game-over-outcome {
+    font-size: clamp(3rem, 8vw, 5.8rem);
+    line-height: 0.95;
+    letter-spacing: 0.08em;
+    text-shadow: 0 8px 22px rgba(0, 0, 0, 0.55);
+    margin-bottom: 26px;
+}
+
+.page-game .game-over-outcome.outcome-win {
+    color: #fff;
+    transform: scale(1.03);
+}
+
+.page-game .game-over-outcome.outcome-lose,
+.page-game .game-over-outcome.outcome-tie,
+.page-game .game-over-outcome.outcome-final {
+    color: var(--golden);
 }
 
 .page-game .final-score-box {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: var(--radius-md);
-    padding: 20px;
-    margin-top: 20px;
+    padding: 30px 28px;
+    margin-top: 10px;
+    backdrop-filter: blur(4px);
 }
 
-.page-game #final-score {
+.page-game .score-compare-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+}
+
+.page-game .score-card {
+    padding: 10px 6px;
+}
+
+.page-game .score-label {
+    display: block;
     font-family: var(--font-heading);
-    font-size: 1.8rem;
+    font-size: 0.95rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.72);
+    margin-bottom: 12px;
+}
+
+.page-game .score-value {
+    display: block;
+    font-family: var(--font-heading);
+    font-size: clamp(3rem, 6vw, 4.8rem);
+    line-height: 1;
     font-weight: 700;
     color: #fff;
-    text-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+    font-variant-numeric: tabular-nums;
 }
 
 .page-game #map canvas {
@@ -469,6 +526,15 @@ all general purpose css should be in style.css
 
     .page-game .top-right-stats {
         padding: 12px 20px;
+    }
+
+    .page-game .game-over-modal {
+        width: min(560px, 94vw);
+        padding: 32px 22px;
+    }
+
+    .page-game .score-compare-grid {
+        grid-template-columns: 1fr;
     }
 
     .page-game #timer-display {
