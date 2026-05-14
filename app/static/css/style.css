@@ -27,12 +27,12 @@
     --text-light: #ffffff;
     --text-muted: rgba(255, 255, 255, 0.6);
     --border-light: rgba(255, 255, 255, 0.1);
-    
+
     /* Typography */
     --font-main: "DM Sans", sans-serif;
     --font-heading: "Orbitron", sans-serif;
     --font-accent: "Bangers", cursive;
-    
+
     /* Borders & Shadows */
     --radius-md: 0.5rem;
     --radius-lg: 1.125rem;
@@ -56,7 +56,8 @@ body {
     margin: 0;
     font-family: var(--font-main);
     color: var(--text-light);
-    background-color: var(--text-light); /* Kept for legacy, though most pages override it */
+    background-color: var(--text-light);
+    /* Kept for legacy, though most pages override it */
 }
 
 img {
@@ -218,10 +219,12 @@ img {
 }
 
 @keyframes bob {
+
     0%,
     100% {
         transform: translateY(0);
     }
+
     50% {
         transform: translateY(-7px);
     }
@@ -438,22 +441,22 @@ img {
 
 
 .how-to-container {
-    
+
     background: linear-gradient(rgba(15, 12, 41, 0.8), rgba(15, 12, 41, 0.9)),
-                url("../images/uwaimage.jpg"); 
+        url("../images/uwaimage.jpg");
     background-size: cover;
     background-position: center;
-    background-attachment: fixed; 
+    background-attachment: fixed;
     min-height: 100vh;
     padding: 60px 0;
-} 
-
-.how-to-play-title{
-    color: #ffc107;
-    font-size: 64px;
 }
 
-.how-to-play-subtitle{
+.how-to-play-title {
+    color: #ffc107;
+    font-size: clamp(2.5rem, 8vw, 64px);
+}
+
+.how-to-play-subtitle {
     color: #ffc107;
 }
 
@@ -466,31 +469,36 @@ img {
     min-height: 100vh;
     /* Using your previous gradient and image combo */
     background-image: linear-gradient(rgba(8, 12, 30, 0.55), rgba(8, 12, 30, 0.75)),
-                      url("../images/uwaimage.jpg");
+        url("../images/uwaimage.jpg");
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-    background-attachment: fixed; /* This creates the scrolling effect */
+    background-attachment: fixed;
+    /* This creates the scrolling effect */
     display: flex;
     align-items: center;
 }
 
 /* --- ICON POP-UP EFFECT --- */
 .feature-box {
-    background-color: rgba(44, 41, 102, 0.9); /* Slightly translucent */
+    background-color: rgba(44, 41, 102, 0.9);
+    /* Slightly translucent */
     color: #ffffff;
     border-radius: 20px;
     padding: 30px;
     height: 100%;
-    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Bouncy pop effect */
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    /* Bouncy pop effect */
     border: 1px solid rgba(91, 91, 255, 0.3);
 }
 
 .feature-box:hover {
-    transform: translateY(-15px) scale(1.05); /* Lifts and grows */
+    transform: translateY(-15px) scale(1.05);
+    /* Lifts and grows */
     background-color: rgba(60, 56, 140, 1);
     box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
-    border-color: #ffc107; /* Highlight border on hover */
+    border-color: #ffc107;
+    /* Highlight border on hover */
 }
 
 /* Optional: Make the image inside the box pop even more */
@@ -508,29 +516,75 @@ img {
 
 .top-three {
     display: flex;
-    justify-content: center;
-    align-items: flex-end;
-    gap: 20px;
-    margin-bottom: 50px;
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 15px;
 }
 
 .rank-card {
     background: var(--navy-overlay);
     border: 2px solid var(--border-light);
     border-radius: var(--radius-lg);
+    position: relative;
     text-align: center;
     padding: 20px;
-    transition: transform 0.3s ease;
+    transition: transform 0.3s ease, background-color 0.3s ease;
+    box-shadow: var(--shadow-lg);
+    cursor: pointer;
 }
 
-.rank-1 { border-color: #ffd700; transform: scale(1.1); box-shadow: 0 0 20px rgba(255, 215, 0, 0.3); }
-.rank-2 { border-color: #c0c0c0; }
-.rank-3 { border-color: #cd7f32; }
+.rank-card:hover {
+    transform: translateY(-4px) scale(1.02);
+    background-color: rgba(255, 255, 255, 0.08);
+}
+
+.rank-1 {
+    border-color: #ffd700;
+    padding: 30px 20px;
+}
+
+.rank-1 .rank-number {
+    font-size: 3.5rem;
+}
+
+.rank-1 .rank-name {
+    font-size: 2rem;
+}
+
+.rank-1 .rank-score {
+    font-size: 1.5rem;
+}
+
+.rank-2 {
+    border-color: #c0c0c0;
+}
+
+.rank-3 {
+    border-color: #cd7f32;
+}
+
+.rank-number {
+    position: absolute;
+    left: 25px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 3rem;
+    margin: 0;
+}
+
+.rank-name {
+    font-size: 1.75rem;
+}
+
+.rank-score {
+    font-size: 1.35rem;
+}
 
 /* Combined and cleaned up table styles */
 .leaderboard-table {
-    background: rgba(22, 28, 60, 0.6) !important; /* Dark navy with transparency */
-    backdrop-filter: blur(15px); 
+    background: rgba(22, 28, 60, 0.6) !important;
+    /* Dark navy with transparency */
+    backdrop-filter: blur(15px);
     -webkit-backdrop-filter: blur(15px);
     border: 1px solid rgba(255, 255, 255, 0.15);
     border-radius: var(--radius-lg);
@@ -543,11 +597,12 @@ img {
     margin-bottom: 0;
 }
 
-.leaderboard-table .table > :not(caption) > * > * {
+.leaderboard-table .table> :not(caption)>*>* {
     background-color: transparent !important;
     border-bottom-color: rgba(255, 255, 255, 0.05);
     color: #f8f9fa;
-    padding: 18px 15px; /* Added some breathing room */
+    padding: 18px 15px;
+    /* Added some breathing room */
 }
 
 .leaderboard-table thead {
@@ -557,110 +612,147 @@ img {
 }
 
 .leaderboard-table tr {
-    transition: background 0.2s ease;
+    transition: background-color 0.2s ease;
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    cursor: pointer;
 }
 
 .leaderboard-table tr:hover {
-    background-color: rgba(255, 255, 255, 0.05) !important;
+    background-color: rgba(255, 255, 255, 0.08) !important;
 }
 
 .leaderboard-table td {
     color: #f8f9fa;
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+    font-size: 1.15rem;
 }
 
 .rank-card .text-muted {
     color: rgba(255, 255, 255, 0.8) !important;
-    font: 500 1rem/1 var(--font-main);
+    font: 500 1.15rem/1 var(--font-main);
     letter-spacing: 1px;
+}
+
+/* --- Leaderboard Toggle Buttons --- */
+.btn-toggle {
+    background: transparent;
+    border: 2px solid rgba(255, 255, 255, 0.8);
+    color: #ffffff;
+    font-size: 1.5rem;
+    font-weight: 200;
+    transition: all 0.2s ease;
+    padding: 8px 32px;
+}
+
+.btn-toggle:hover:not(.active) {
+    background: #ffffff;
+    color: #000000;
+}
+
+.btn-toggle.active {
+    background: var(--golden);
+    color: var(--navy-900);
+    border-color: var(--golden);
+}
+
+/* --- Sticky Current Player Row --- */
+.sticky-user-row {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: var(--golden);
+    color: var(--navy-900);
+    padding: 15px 0;
+    box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
 }
 
 /* --- Dashboard --- */
 .page-dashboard {
-  background-image: linear-gradient(rgba(8, 12, 30, 0.85), rgba(8, 12, 30, 0.95)),
-    url("../images/uwaimage.jpg");
-  background-size: cover;
-  background-position: center;
-  background-attachment: fixed;
-  min-height: 100vh;
-  color: var(--text-light);
+    background-image: linear-gradient(rgba(8, 12, 30, 0.85), rgba(8, 12, 30, 0.95)),
+        url("../images/uwaimage.jpg");
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    min-height: 100vh;
+    color: var(--text-light);
 }
 
 .dashboard-hero {
-  min-height: 100vh;
+    min-height: 100vh;
 }
 
 .dashboard-welcome {
-  background: var(--navy-overlay);
-  border: 1px solid var(--border-light);
-  border-radius: var(--radius-lg);
-  border-left: 4px solid var(--golden);
+    background: var(--navy-overlay);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-lg);
+    border-left: 4px solid var(--golden);
 }
 
 .dashboard-card {
-  background: rgba(22, 18, 70, 0.85);
-  border: 1px solid var(--border-light);
-  border-radius: var(--radius-lg);
-  backdrop-filter: blur(10px);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+    background: rgba(22, 18, 70, 0.85);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-lg);
+    backdrop-filter: blur(10px);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .dashboard-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
 }
 
 .card-title-gold {
-  color: var(--golden);
-  border-bottom: 1px solid var(--border-light);
-  padding-bottom: 0.75rem;
+    color: var(--golden);
+    border-bottom: 1px solid var(--border-light);
+    padding-bottom: 0.75rem;
 }
 
 .avatar-circle {
-  width: 4rem;
-  height: 4rem;
-  background: var(--golden);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--font-heading);
-  font-size: 1.75rem;
-  color: #000;
-  font-weight: 700;
-  flex-shrink: 0;
+    width: 4rem;
+    height: 4rem;
+    background: var(--golden);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-heading);
+    font-size: 1.75rem;
+    color: #000;
+    font-weight: 700;
+    flex-shrink: 0;
 }
 
 .profile-stat {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.5rem 0;
-  border-bottom: 1px solid var(--border-light);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--border-light);
 }
 
 .stat-label {
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--text-muted);
-  font-family: var(--font-heading);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    font-family: var(--font-heading);
 }
 
 .stat-value {
-  font-family: var(--font-main);
-  font-weight: 600;
-  color: var(--text-light);
+    font-family: var(--font-main);
+    font-weight: 600;
+    color: var(--text-light);
 }
 
 .text-muted-light {
-  color: var(--text-muted);
+    color: var(--text-muted);
 }
 
 .empty-state {
-  text-align: center;
-  padding: 1.5rem 0;
+    text-align: center;
+    padding: 1.5rem 0;
 }
 
 .friends-toggle {
