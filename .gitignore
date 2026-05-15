@@ -50,4 +50,7 @@ logs/
 
 # Bots
 copilot-instructions.md
-./claude
+.claude/
+bash.exe.stackdump
+CLAUDE.md
+
