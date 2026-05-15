@@ -83,6 +83,12 @@ img {
 /* Navbar */
 .custom-navbar {
   background-color: var(--navy-nav);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  z-index: 1030;
 }
 
 .custom-navbar .nav-link {
@@ -168,6 +174,10 @@ img {
   padding: 0.5rem 1rem;
 }
 
+main {
+  padding-top: 56px;
+}
+
 /* --- Pages: Login View --- */
 .page-login {
   background-position: center;
@@ -183,6 +193,7 @@ img {
 
 .page-login main {
   min-height: 100vh;
+  padding-top: 0;
 }
 
 /* --- Pages: Signup View --- */
@@ -200,6 +211,7 @@ img {
 
 .page-signup main {
   min-height: 100vh;
+  padding-top: 0;
 }
 
 .page-wrap {
@@ -252,6 +264,14 @@ img {
 }
 
 .form-panel {
+  background: var(--navy-overlay);
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  padding: 3.25rem 2.75rem;
+}
+
+.form-panel-signup {
   background: var(--navy-overlay);
   display: flex;
   flex: 1;
