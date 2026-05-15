@@ -108,7 +108,7 @@ $(function () {
                         if (u.friendship_status === 'friends') {
                             btnHtml = '<span class="text-muted small">Friends</span>';
                         } else if (u.friendship_status === 'sent') {
-                            btnHtml = '<span class="text-muted small">Requested</span>';
+                            btnHtml = '<span class="badge" style="background:rgba(255,202,44,0.2);color:var(--golden);border:1px solid var(--golden);border-radius:0.5rem;padding:0.25rem 0.5rem;font-size:0.75rem;">⏳ Invite Sent</span>';
                         } else if (u.friendship_status === 'received') {
                             btnHtml = '<span class="text-muted small">Wants to add you</span>';
                         } else {
