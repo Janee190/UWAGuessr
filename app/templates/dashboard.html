@@ -34,10 +34,25 @@
                         <div class="ms-auto">
                             {% if profile_user is defined %}
                                 {% if current_user.is_authenticated and current_user.uid != viewed_user.uid %}
-                                <button id="add-friend-btn" class="btn btn-warning bangers-font"
-                                    data-uid="{{ viewed_user.uid }}">
-                                    Add Friend
-                                </button>
+                                    {% if friendship_status == 'friends' %}
+                                    <button class="btn btn-outline-warning bangers-font" disabled>
+                                        Already Friends
+                                    </button>
+                                    {% elif friendship_status == 'sent' %}
+                                    <button class="btn btn-outline-warning bangers-font" disabled>
+                                        ⏳ Invite Sent
+                                    </button>
+                                    {% elif friendship_status == 'received' %}
+                                    <button id="add-friend-btn" class="btn btn-warning bangers-font"
+                                        data-uid="{{ viewed_user.uid }}">
+                                        Accept Friend Request
+                                    </button>
+                                    {% else %}
+                                    <button id="add-friend-btn" class="btn btn-warning bangers-font"
+                                        data-uid="{{ viewed_user.uid }}">
+                                        Add Friend
+                                    </button>
+                                    {% endif %}
                                 {% endif %}
                             {% else %}
                             <a href="{{ url_for('game') }}" class="btn btn-warning btn-lg bangers-font">
