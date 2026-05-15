@@ -2,6 +2,9 @@ import unittest
 import threading
 import time
 
+import pytest
+pytest.importorskip("selenium", reason="selenium not installed — only needed for browser tests")
+
 from selenium import webdriver
 
 from app import app, db

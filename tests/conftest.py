@@ -1,6 +1,11 @@
 import sys, os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+# Set test env vars BEFORE importing app — Config reads them at class-definition
+# time, and Flask-SQLAlchemy creates the engine immediately in init_app().
+os.environ['DATABASE_URL'] = 'sqlite:///:memory:'
+os.environ['UWAGUESSR_SECRET_KEY'] = 'test-secret-key'
+
 import pytest
 
 from app import app as flask_app, db
