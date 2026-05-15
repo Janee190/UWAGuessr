@@ -8,15 +8,19 @@ document.addEventListener('DOMContentLoaded', function () {
     var backdrop = document.getElementById('friends-backdrop');
     var navFriends = document.getElementById('sidebar-nav-friends');
     var navInvites = document.getElementById('sidebar-nav-invites');
+    var navChallenges = document.getElementById('sidebar-nav-challenges');
     var friendsSection = document.getElementById('friends-list-section');
     var invitesSection = document.getElementById('pending-invites-section');
+    var challengesSection = document.getElementById('challenges-section');
 
-    if (!sidebar || !toggle || !closeButton || !backdrop || !navFriends || !navInvites || !friendsSection || !invitesSection) {
+    if (!sidebar || !toggle || !closeButton || !backdrop ||
+        !navFriends || !navInvites || !navChallenges ||
+        !friendsSection || !invitesSection || !challengesSection) {
         return;
     }
 
     function setActiveNav(activeButton) {
-        [navFriends, navInvites].forEach(function (button) {
+        [navFriends, navInvites, navChallenges].forEach(function (button) {
             button.classList.toggle('active', button === activeButton);
         });
     }
@@ -37,25 +41,26 @@ document.addEventListener('DOMContentLoaded', function () {
         toggle.classList.remove('hidden');
     }
 
-    function scrollToSection(section, button) {
-        section.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        setActiveNav(button);
-    }
-
-    function showSection(activeSection, inactiveSection, activeButton) {
-        activeSection.classList.remove('section-hidden');
-        inactiveSection.classList.add('section-hidden');
-        setActiveNav(activeButton);
-    }
-
     toggle.addEventListener('click', openSidebar);
     closeButton.addEventListener('click', closeSidebar);
     backdrop.addEventListener('click', closeSidebar);
     navFriends.addEventListener('click', function () {
-        showSection(friendsSection, invitesSection, navFriends);
+        friendsSection.classList.remove('section-hidden');
+        invitesSection.classList.add('section-hidden');
+        challengesSection.classList.add('section-hidden');
+        setActiveNav(navFriends);
     });
     navInvites.addEventListener('click', function () {
-        showSection(invitesSection, friendsSection, navInvites);
+        invitesSection.classList.remove('section-hidden');
+        friendsSection.classList.add('section-hidden');
+        challengesSection.classList.add('section-hidden');
+        setActiveNav(navInvites);
+    });
+    navChallenges.addEventListener('click', function () {
+        challengesSection.classList.remove('section-hidden');
+        friendsSection.classList.add('section-hidden');
+        invitesSection.classList.add('section-hidden');
+        setActiveNav(navChallenges);
     });
 
     document.addEventListener('keydown', function (event) {

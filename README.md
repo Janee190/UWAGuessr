@@ -34,3 +34,9 @@ UWAGuessr is a web-based discovery game inspired by GeoGuessr, focussed specific
 * **Backend:** Flask (Python)
 * **Database:** SQLite (via SQLAlchemy)
 * **Map API:** MazeMap (Mapbox GL-based)
+
+## Networking
+All real-time features use HTTP polling — no WebSockets or SSE. Clients call REST endpoints and poll `/api/challenges/poll/<id>` every 3 seconds for state updates. The server is the single source of truth; each client pulls the latest challenge state rather than receiving pushed events. This keeps the architecture simple and works well for the turn-based game loop without overloading the SQLite backend.
+
+## Challenges
+A `Challenge` row links two players with a shared set of 5 photo IDs and progresses through statuses: `pending` → `ready_waiting` → `in_progress` → `completed`. Both players must click READY before the game begins. During play, scores and round progress sync each round via `/api/challenges/update-progress`. When a player finishes all 5 rounds, `/api/game-complete` marks their round as 6. Once both players reach round 6, the winner is determined by comparing scores, and the game-over screen polls until the result is available.

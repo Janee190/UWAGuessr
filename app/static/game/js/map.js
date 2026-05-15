@@ -149,7 +149,12 @@ function initMap() {
         var startBtnText = document.getElementById('start-btn-text');
         if (startBtn && startBtnText) {
             startBtn.disabled = false;
-            startBtnText.innerText = "START GAME";
+            var urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('challengeId')) {
+                startBtnText.innerText = "READY";
+            } else {
+                startBtnText.innerText = "START GAME";
+            }
         }
 
         var overlay = document.getElementById('game-start-overlay');
@@ -163,13 +168,13 @@ function initMap() {
     map.on('idle', hideMapLabelsAndIcons);
     scheduleLabelHideRetry(5);
 
-    map.on('load', function () {
+    map.once('load', function () {
         recenterMapView();
         hideMapLabelsAndIcons();
+    });
 
-        map.on('click', function (e) {
-            placeGuessMarker(e.lngLat.lat, e.lngLat.lng);
-        });
+    map.on('click', function (e) {
+        placeGuessMarker(e.lngLat.lat, e.lngLat.lng);
     });
 
     attachResizeHandlers();

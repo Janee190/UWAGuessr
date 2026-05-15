@@ -29,8 +29,21 @@ def calculate_score(guess_lat, guess_lng, img_id):
     if not photo:
         return None, None, None, None
 
-    actual_lat = float(photo.latitude)
-    actual_lng = float(photo.longitude)
+    try:
+        guess_lat = float(guess_lat)
+        guess_lng = float(guess_lng)
+        actual_lat = float(photo.latitude)
+        actual_lng = float(photo.longitude)
+    except (TypeError, ValueError):
+        return None, None, None, None
+
+    if not (math.isfinite(guess_lat) and math.isfinite(guess_lng) and
+            math.isfinite(actual_lat) and math.isfinite(actual_lng)):
+        return None, None, None, None
+    if not (-90 <= guess_lat <= 90 and -180 <= guess_lng <= 180):
+        return None, None, None, None
+    if not (-90 <= actual_lat <= 90 and -180 <= actual_lng <= 180):
+        return None, None, None, None
 
     distance = calculate_haversine(guess_lat, guess_lng, actual_lat, actual_lng)
 
@@ -45,7 +58,16 @@ def calculate_score(guess_lat, guess_lng, img_id):
     return max(0, round(score)), distance, actual_lat, actual_lng
 
 
-def get_game_images():
+def get_game_images(photo_id_list=None):
+    if photo_id_list:
+        photos = Photos.query.filter(Photos.pid.in_(photo_id_list)).all()
+        photo_map = {photo.pid: photo for photo in photos}
+        data = [
+            {"id": pid, "imagePath": photo_map[pid].image_path}
+            for pid in photo_id_list if pid in photo_map
+        ]
+        return data
+
     photos = Photos.query.with_entities(Photos.pid, Photos.image_path).all()
     data = [
         {"id": photo.pid, "imagePath": photo.image_path}

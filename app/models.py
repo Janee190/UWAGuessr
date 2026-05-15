@@ -67,6 +67,66 @@ class GameResult(db.Model):
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
     user = db.relationship('User', backref=db.backref('game_results', lazy=True))
+
+class Challenge(db.Model):
+    __tablename__ = 'challenges'
+    id = db.Column(db.Integer, primary_key=True)
+    challenger_id = db.Column(db.Integer, db.ForeignKey('user.uid'), nullable=False)
+    challenged_id = db.Column(db.Integer, db.ForeignKey('user.uid'), nullable=False)
+    
+    # Comma-separated photo IDs
+    photo_ids = db.Column(db.String(256), nullable=False)
+    
+    # Status: pending, accepted, in_progress, completed, expired
+    status = db.Column(db.String(20), default='pending')
+    
+    challenger_ready = db.Column(db.Boolean, default=False)
+    challenged_ready = db.Column(db.Boolean, default=False)
+    
+    challenger_score = db.Column(db.Integer, nullable=True)
+    challenged_score = db.Column(db.Integer, nullable=True)
+    
+    # For progress tracking (Round 1-5)
+    challenger_round = db.Column(db.Integer, default=0)
+    challenged_round = db.Column(db.Integer, default=0)
+    
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    challenger = db.relationship('User', foreign_keys=[challenger_id], backref='sent_challenges')
+    challenged = db.relationship('User', foreign_keys=[challenged_id], backref='received_challenges')
+
+    def to_dict(self):
+        winner_id = None
+        result = None
+
+        if (self.challenger_round or 0) >= 6 and (self.challenged_round or 0) >= 6:
+            if self.challenger_score > self.challenged_score:
+                winner_id = self.challenger_id
+                result = 'win'
+            elif self.challenger_score < self.challenged_score:
+                winner_id = self.challenged_id
+                result = 'lose'
+            else:
+                result = 'tie'
+
+        return {
+            'id': self.id,
+            'challenger_id': self.challenger_id,
+            'challenged_id': self.challenged_id,
+            'challenger_username': self.challenger.username,
+            'challenged_username': self.challenged.username,
+            'photo_ids': self.photo_ids.split(','),
+            'status': self.status,
+            'challenger_ready': self.challenger_ready,
+            'challenged_ready': self.challenged_ready,
+            'challenger_score': self.challenger_score,
+            'challenged_score': self.challenged_score,
+            'challenger_round': self.challenger_round,
+            'challenged_round': self.challenged_round,
+            'winner_id': winner_id,
+            'result': result,
+            'created_at': self.created_at.isoformat()
+        }
     
 @login.user_loader
 def load_user(id):
