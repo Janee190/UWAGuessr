@@ -1336,27 +1336,47 @@ main {
     top: auto;
     bottom: 1rem;
     transform: none;
-    width: auto;
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    min-width: 48px;
+  }
+  .friends-toggle__icon {
+    width: 20px;
+    height: 20px;
   }
   .friends-sidebar {
     width: min(100%, 100vw);
     max-width: 100%;
-    padding: 0.75rem 1rem;
+    padding: 0.65rem 0.85rem;
     overflow-x: hidden;
   }
   .friends-sidebar__inner {
     grid-template-columns: 1fr;
-    gap: 0.5rem;
+    gap: 0;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
   }
-  /* Put the nav icons in a single horizontal row at the top */
+  .friends-sidebar__panel {
+    order: 1;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    gap: 0.75rem;
+    padding-top: 0;
+    padding-right: 0.35rem;
+  }
   .friends-sidebar__nav {
+    order: 2;
+    flex: 0 0 auto;
     flex-direction: row;
     align-items: center;
-    justify-content: space-between;
+    justify-content: space-evenly;
     gap: 0.5rem;
-    padding-top: 0;
-    padding-bottom: 0.35rem;
+    padding: 0.4rem 0 0.15rem;
     width: 100%;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
   }
   .friends-sidebar__nav-button {
     width: 44px;
@@ -1370,11 +1390,34 @@ main {
     padding-top: 0;
     order: 3;
   }
-  /* Move panel content up and tighten spacing */
-  .friends-sidebar__panel {
-    padding-top: 0.25rem;
-  }
   .friends-sidebar__header {
     gap: 0.5rem;
+  }
+  .friends-sidebar__header h2 {
+    font-size: 1.25rem;
+  }
+  .friends-sidebar .form-control {
+    padding: 0.55rem 0.75rem;
+    font-size: 0.8rem;
+    border-radius: 0.7rem;
+  }
+  .friends-sidebar .form-label {
+    margin-bottom: 0.35rem;
+    font-size: 0.7rem;
+  }
+  .friend-card,
+  .pending-card {
+    padding: 0.65rem 0.75rem;
+    gap: 0.6rem;
+    border-radius: 0.85rem;
+  }
+  .friend-card__avatar,
+  .pending-card__avatar {
+    width: 40px;
+    height: 40px;
+    font-size: 0.9rem;
+  }
+  .section-heading h3 {
+    font-size: 0.7rem;
   }
 }
