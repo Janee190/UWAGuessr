@@ -92,6 +92,11 @@
 
 		<!-- Bottom Right Map & Actions -->
 		<aside class="bottom-right-container">
+			<button id="btn-map-toggle" class="btn-map-toggle" type="button" onclick="toggleMap()" title="Toggle map" aria-label="Toggle map">
+					<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" viewBox="0 0 16 16">
+						<path fill-rule="evenodd" d="M15.817.113A.5.5 0 0 1 16 .5v14a.5.5 0 0 1-.402.49l-5 1a.5.5 0 0 1-.196 0L5.5 15.01l-4.902.98A.5.5 0 0 1 0 15.5v-14a.5.5 0 0 1 .402-.49l5-1a.5.5 0 0 1 .196 0L10.5.99l4.902-.98a.5.5 0 0 1 .415.103M10 1.91l-4-.8v12.98l4 .8zm1 12.98 4-.8V1.11l-4 .8zm-6-.8V1.11l-4 .8v12.98z"/>
+					</svg>
+				</button>
 			<div class="map-wrapper game-panel shadow-lg rounded-3">
 				<div class="map-spinner" id="map-spinner"></div>
 				<div id="map" aria-label="Interactive UWA campus map"></div>
@@ -99,7 +104,7 @@
 			
 			<div class="action-btn-wrapper">
 				<button id="action-btn" class="btn-game-action w-100 h-100 shadow rounded-3" type="button" disabled
-					onclick="handleAction()">SUBMIT GUESS</button>
+					onclick="handleAction()"><span class="btn-action-text">SUBMIT GUESS</span></button>
 			</div>
 		</aside>
 

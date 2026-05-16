@@ -289,6 +289,25 @@ function focusResultOnMap(guessLat, guessLng, actualLat, actualLng) {
     }
 }
 
+// Mobile map toggle — show/hide the map panel and resize when revealed.
+function toggleMap() {
+    var mapWrapper = document.querySelector('.map-wrapper');
+    var toggleBtn = document.getElementById('btn-map-toggle');
+    if (!mapWrapper || !toggleBtn) return;
+
+    var isVisible = mapWrapper.classList.contains('map-visible');
+    if (isVisible) {
+        mapWrapper.classList.remove('map-visible');
+        toggleBtn.classList.remove('map-active');
+    } else {
+        mapWrapper.classList.add('map-visible');
+        toggleBtn.classList.add('map-active');
+        if (typeof map !== 'undefined' && map && typeof map.resize === 'function') {
+            setTimeout(function () { map.resize(); }, 100);
+        }
+    }
+}
+
 // Reset map for the next round
 function clearMapForNextRound() {
     if (guessMarker) {
@@ -305,4 +324,10 @@ function clearMapForNextRound() {
 
     recenterMapView();
     hideMapLabelsAndIcons();
+
+    // Reset mobile map toggle state
+    var mapWrapper = document.querySelector('.map-wrapper');
+    var toggleBtn = document.getElementById('btn-map-toggle');
+    if (mapWrapper) mapWrapper.classList.remove('map-visible');
+    if (toggleBtn) toggleBtn.classList.remove('map-active');
 }
