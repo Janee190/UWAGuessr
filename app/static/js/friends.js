@@ -21,7 +21,9 @@ $(function () {
                         <div class="friend-card">
                             <div class="friend-card__avatar">${initials}</div>
                             <div class="friend-card__meta">
-                                <div class="friend-card__name">${f.username}</div>
+                                <a href="/user/${f.username}" class="friend-card__name" style="color:var(--text-light);text-decoration:none;">
+                                    ${f.username}
+                                </a>
                                 <div class="friend-card__label">${f.total_score ? f.total_score.toLocaleString() + ' pts' : 'No score yet'}</div>
                             </div>
                             <button class="btn btn-warning btn-sm challenge-invite-btn ms-auto" data-uid="${f.uid}" style="padding: 2px 8px; font-size: 0.8rem;">
@@ -186,7 +188,7 @@ $(function () {
                         if (u.friendship_status === 'friends') {
                             btnHtml = '<span class="text-muted small">Friends</span>';
                         } else if (u.friendship_status === 'sent') {
-                            btnHtml = '<span class="text-muted small">Requested</span>';
+                            btnHtml = '<span class="badge" style="background:rgba(255,202,44,0.2);color:var(--golden);border:1px solid var(--golden);border-radius:0.5rem;padding:0.25rem 0.5rem;font-size:0.75rem;">⏳ Invite Sent</span>';
                         } else if (u.friendship_status === 'received') {
                             btnHtml = '<span class="text-muted small">Wants to add you</span>';
                         } else {
@@ -198,7 +200,7 @@ $(function () {
                             <div class="friend-card mt-2">
                                 <div class="friend-card__avatar">${initials}</div>
                                 <div class="friend-card__meta">
-                                    <div class="friend-card__name">${u.username}</div>
+                                    <a href="/user/${u.username}" class="friend-card__name" style="color:var(--text-light);text-decoration:none;">${u.username}</a>
                                     <div>${btnHtml}</div>
                                 </div>
                             </div>

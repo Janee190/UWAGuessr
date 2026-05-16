@@ -6,7 +6,7 @@ from werkzeug.utils import secure_filename
 from flask_login import login_user, login_required, logout_user, current_user
 
 from app import app
-from app.models import User
+from app.models import Friendship, User
 from app.image_upload import extract_gps, convert_to_webp, add_photo_record
 
 from app.controllers import login_user_service, register_user, change_user_password, get_leaderboard_data, get_all_time_leaderboard_data, add_score, get_user_daily_stat, get_user_all_time_stat
@@ -157,6 +157,60 @@ def api_dashboard_stats():
             'timestamp': g.timestamp.strftime('%d %b %Y')
         } for g in recent_games]
     })
+
+@app.route("/user/<username>")
+def user_profile(username):
+    from app.models import GameResult
+    user = User.query.filter_by(username=username).first_or_404()
+    
+    total_games = GameResult.query.filter_by(user_id=user.uid).count()
+    best = GameResult.query.filter_by(user_id=user.uid)\
+        .order_by(GameResult.score.desc()).first()
+    recent_games = GameResult.query.filter_by(user_id=user.uid)\
+        .order_by(GameResult.timestamp.desc()).limit(5).all()
+
+    friendship_status = None
+    if current_user.is_authenticated and current_user.uid != user.uid:
+        friendship = Friendship.query.filter(
+            ((Friendship.requester_id == current_user.uid) & (Friendship.receiver_id == user.uid)) |
+            ((Friendship.requester_id == user.uid) & (Friendship.receiver_id == current_user.uid))
+        ).first()
+        if friendship:
+            if friendship.status == 'accepted':
+                friendship_status = 'friends'
+            elif friendship.requester_id == current_user.uid:
+                friendship_status = 'sent'
+            else:
+                friendship_status = 'received'
+                
+    return render_template("dashboard.html",
+        profile_user=user,
+        total_games=total_games,
+        best_score=best.score if best else None,
+        recent_games=recent_games,
+        friendship_status=friendship_status
+    )
+
+@app.route("/api/user-stats/<int:uid>")
+def api_user_stats(uid):
+    from app.models import GameResult
+    user = User.query.get_or_404(uid)
+    
+    recent_games = GameResult.query.filter_by(user_id=uid)\
+        .order_by(GameResult.timestamp.desc()).limit(5).all()
+    total_games = GameResult.query.filter_by(user_id=uid).count()
+    best = GameResult.query.filter_by(user_id=uid)\
+        .order_by(GameResult.score.desc()).first()
+    
+    return jsonify({
+        'total_games': total_games,
+        'best_score': best.score if best else None,
+        'recent_games': [{
+            'score': g.score,
+            'timestamp': g.timestamp.strftime('%d %b %Y')
+        } for g in recent_games]
+    })
+
 
 @app.route("/logout")
 def logout():
