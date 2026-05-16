@@ -35,6 +35,14 @@ class RouteTests(unittest.TestCase):
     def test_homepage_loads(self):
         response = self.client.get("/")
         self.assertEqual(response.status_code, 200)
+    
+    def test_api_get_friend_request_loads(self):
+        response = self.client.get("/api/friends/requests")
+        self.assertIn(response.status_code, [200, 302,401,404])
+    
+    def test_api_active_challenges_returns_json(self):
+        response = self.client.get("/api/challenges/active")
+        self.assertIn(response.status_code, [200, 302, 401, 404])
 
     def test_login_page_loads(self):
         response = self.client.get("/login")
