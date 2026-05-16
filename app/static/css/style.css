@@ -1341,15 +1341,40 @@ main {
   .friends-sidebar {
     width: min(100%, 100vw);
     max-width: 100%;
-    padding: 1rem;
+    padding: 0.75rem 1rem;
     overflow-x: hidden;
   }
   .friends-sidebar__inner {
     grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+  /* Put the nav icons in a single horizontal row at the top */
+  .friends-sidebar__nav {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding-top: 0;
+    padding-bottom: 0.35rem;
+    width: 100%;
+  }
+  .friends-sidebar__nav-button {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    flex: 0 0 auto;
   }
   .friends-sidebar__edge {
     flex-direction: row;
     justify-content: center;
     padding-top: 0;
+    order: 3;
+  }
+  /* Move panel content up and tighten spacing */
+  .friends-sidebar__panel {
+    padding-top: 0.25rem;
+  }
+  .friends-sidebar__header {
+    gap: 0.5rem;
   }
 }
