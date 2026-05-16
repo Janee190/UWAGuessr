@@ -500,7 +500,7 @@ main {
   background-size: cover;
   min-height: 100vh;
   padding: 60px 0;
-  background:
+  background-image:
     linear-gradient(rgba(15, 12, 41, 0.8), rgba(15, 12, 41, 0.9)),
     url("../images/uwaimage.webp");
 }
