@@ -9,9 +9,10 @@ $(function () {
                 const section = $('#friends-list-section');
                 const heading = section.find('.section-heading');
                 section.find('.friend-card').remove();
+                section.find('.friends-empty-message').remove();
 
                 if (friends.length === 0) {
-                    section.append('<p class="text-muted-light small mt-2">No friends yet. Search for players to add!</p>');
+                    section.append('<p class="friends-empty-message text-muted-light small mt-2">No friends yet. Search for players to add!</p>');
                     return;
                 }
 
