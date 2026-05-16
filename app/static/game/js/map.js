@@ -5,6 +5,7 @@ let guessMarker = null;
 let actualMarker = null;
 let resultLine = null;
 let resizeListenersAttached = false;
+let mapExpanded = false;
 
 const UWA_CAMPUS_ID = 119;
 const UWA_CENTER = [115.818, -31.98]; // [lng, lat]
@@ -305,6 +306,35 @@ function toggleMap() {
         if (typeof map !== 'undefined' && map && typeof map.resize === 'function') {
             setTimeout(function () { map.resize(); }, 100);
         }
+    }
+}
+
+// Desktop map expand toggle — grows the map panel by ~30%.
+function toggleMapExpand() {
+    var container = document.querySelector('.bottom-right-container');
+    if (!container) return;
+
+    mapExpanded = !mapExpanded;
+
+    // Enable smooth transition only for this toggle (not fullscreen).
+    container.classList.add('map-expanding');
+
+    if (mapExpanded) {
+        container.classList.add('map-expanded');
+    } else {
+        container.classList.remove('map-expanded');
+    }
+
+    // Resize after transition completes, then drop the transition class.
+    if (typeof map !== 'undefined' && map && typeof map.resize === 'function') {
+        setTimeout(function () {
+            map.resize();
+            container.classList.remove('map-expanding');
+        }, 350);
+    } else {
+        setTimeout(function () {
+            container.classList.remove('map-expanding');
+        }, 350);
     }
 }
 

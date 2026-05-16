@@ -99,6 +99,12 @@
 				</button>
 			<div class="map-wrapper game-panel shadow-lg rounded-3">
 				<div class="map-spinner" id="map-spinner"></div>
+				<button id="btn-map-expand" class="btn-map-expand" type="button" onclick="toggleMapExpand()" title="Expand map" aria-label="Expand map">
+					<svg class="expand-arrow" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<line x1="3" y1="11" x2="11" y2="3"/>
+						<polyline points="7,3 11,3 11,7"/>
+					</svg>
+				</button>
 				<div id="map" aria-label="Interactive UWA campus map"></div>
 			</div>
 			

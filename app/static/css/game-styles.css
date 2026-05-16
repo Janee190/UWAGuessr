@@ -377,11 +377,13 @@ all general purpose css should be in style.css
     height: 100%;
     gap: 0;
     z-index: calc(var(--z-game-ui) + 10);
+    transition: none;
 }
 
 .page-game #game-board.show-results .map-wrapper {
     height: 100%;
     border-radius: 0;
+    transition: none;
 }
 
 .page-game #game-board.show-results .action-btn-wrapper {
@@ -417,6 +419,68 @@ all general purpose css should be in style.css
     to {
         transform: rotate(360deg);
     }
+}
+
+/* Map expand toggle button (desktop) */
+.page-game .btn-map-expand {
+    display: none;
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    z-index: 11;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    background: rgba(0, 0, 0, 0.55);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 6px;
+    color: rgba(255, 255, 255, 0.85);
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+    transform: rotate(270deg);
+
+}
+
+.page-game .btn-map-expand:hover {
+    background: rgba(0, 0, 0, 0.75);
+    border-color: var(--golden);
+    color: var(--golden);
+}
+
+.page-game .btn-map-expand .expand-arrow {
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Expanded state: arrow flips 180deg to point collapse direction */
+.page-game .bottom-right-container.map-expanded .btn-map-expand .expand-arrow {
+    transform: rotate(180deg);
+}
+
+/* Expanded dimensions (~30% larger) */
+.page-game .bottom-right-container.map-expanded {
+    width: 468px;
+}
+
+.page-game .bottom-right-container.map-expanded .map-wrapper {
+    height: 338px;
+}
+
+/* Smooth transition only during expand/collapse toggle (not fullscreen) */
+.page-game .bottom-right-container.map-expanding {
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.page-game .bottom-right-container.map-expanding .map-wrapper {
+    transition: height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Hide expand button in fullscreen result mode */
+.page-game #game-board.show-results .btn-map-expand {
+    display: none;
 }
 
 /* Action Button Container */
@@ -707,6 +771,7 @@ all general purpose css should be in style.css
         height: 100%;
         border-radius: 0;
         z-index: calc(var(--z-game-ui) + 10);
+        transition: none;
     }
 
     .page-game #game-board.show-results .bottom-right-container {
@@ -716,6 +781,7 @@ all general purpose css should be in style.css
         bottom: 0;
         width: 100%;
         height: 100%;
+        transition: none;
     }
 
     .page-game #game-board.show-results .action-btn-wrapper,
@@ -747,9 +813,12 @@ all general purpose css should be in style.css
 
 }
 
-/* Desktop: hide mobile map toggle button */
+/* Desktop: hide mobile map toggle, show expand button */
 @media (min-width: 769px) {
     .page-game .btn-map-toggle {
         display: none;
+    }
+    .page-game .btn-map-expand {
+        display: inline-flex;
     }
 }
