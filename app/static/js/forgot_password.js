@@ -58,52 +58,74 @@ $(function () {
   }
 
   function showAlert(message, type) {
-    const html =
+    $("#alertArea").html(
       '<div class="alert alert-' +
-      type +
-      ' alert-dismissible fade show py-2 px-3 mb-0" role="alert" style="font-size:13.5px;">' +
-      message +
-      '<button type="button" class="btn-close btn-sm" data-bs-dismiss="alert" aria-label="Close"></button>' +
-      "</div>";
-    $("#alertArea").html(html);
+        type +
+        ' alert-dismissible fade show py-2 px-3 mb-0" role="alert" style="font-size:13.5px;">' +
+        message +
+        '<button type="button" class="btn-close btn-sm" data-bs-dismiss="alert" aria-label="Close"></button></div>',
+    );
   }
 
-  function isValidEmail(email) {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-  }
+  // Find security question
+  $("#fpNextBtn").on("click", function () {
+    const email = $("#email").val().trim();
+    if (!email) {
+      showAlert("Email is required.", "danger");
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      showAlert("Please enter a valid email address.", "danger");
+      return;
+    }
+
+    const $btn = $("#fpNextBtn");
+    $btn.addClass("loading").prop("disabled", true);
+
+    $.ajax({
+      url: "/api/get-security-question",
+      method: "POST",
+      contentType: "application/json",
+      data: JSON.stringify({ email }),
+      success: function (response) {
+        $("#securityQuestionText").text(response.securityQuestion);
+        $("#fp-step-1").hide();
+        $("#fp-step-2").show();
+        $("#securityAnswer").trigger("focus");
+        $("#alertArea").html("");
+      },
+      error: function (xhr) {
+        const msg =
+          xhr.responseJSON?.error || "No account found with that email.";
+        showAlert(msg, "danger");
+      },
+      complete: function () {
+        $btn.removeClass("loading").prop("disabled", false);
+      },
+    });
+  });
+
+  $("#fpBackBtn").on("click", function () {
+    $("#fp-step-2").hide();
+    $("#fp-step-1").show();
+    $("#alertArea").html("");
+  });
 
   $("#forgotPasswordForm").on("submit", function (e) {
     e.preventDefault();
-
-    const email = $("#email").val().trim();
-    const securityAnswer = $("#securityAnswer").val().trim();
     const newPassword = $("#newPassword").val();
     const confirmPassword = $("#confirmPassword").val();
 
-    if (!email || !isValidEmail(email)) {
-      showAlert("Please enter a valid email address.", "danger");
-      $("#email").trigger("focus");
+    if (!$("#securityAnswer").val().trim()) {
+      showAlert("Security answer is required.", "danger");
       return;
     }
-    if (!securityAnswer) {
-      showAlert("Please enter your security answer.", "danger");
-      $("#securityAnswer").trigger("focus");
-      return;
-    }
-
     if (!newPassword) {
       showAlert("New password is required.", "danger");
-      $("#newPassword").trigger("focus");
       return;
     }
     if (newPassword.length < 8) {
       showAlert("Password must be at least 8 characters.", "danger");
-      $("#newPassword").trigger("focus");
-      return;
-    }
-    if (newPassword.length > 128) {
-      showAlert("Password must be less than 128 characters.", "danger");
-      $("#newPassword").trigger("focus");
       return;
     }
     if (!/[A-Z]/.test(newPassword)) {
@@ -111,24 +133,14 @@ $(function () {
         "Password must contain at least one uppercase letter.",
         "danger",
       );
-      $("#newPassword").trigger("focus");
       return;
     }
     if (!/[0-9]/.test(newPassword)) {
       showAlert("Password must contain at least one number.", "danger");
-      $("#newPassword").trigger("focus");
       return;
     }
-
     if (newPassword !== confirmPassword) {
       showAlert("Passwords do not match.", "danger");
-      $("#confirmPassword").trigger("focus");
-      return;
-    }
-
-    if (newPassword !== confirmPassword) {
-      showAlert("Passwords do not match.", "danger");
-      $("#newPassword").trigger("focus");
       return;
     }
 
@@ -141,25 +153,19 @@ $(function () {
       method: "POST",
       contentType: "application/json",
       data: JSON.stringify({
-        email: email,
-        securityAnswer: securityAnswer,
-        newPassword: newPassword,
+        email: $("#email").val().trim(),
+        securityAnswer: $("#securityAnswer").val().trim(),
+        newPassword,
       }),
-      success: function (response) {
-        showAlert(
-          "Password reset successfully! Redirecting to login…",
-          "success",
-        );
-        setTimeout(function () {
+      success: function () {
+        showAlert("Password reset! Redirecting…", "success");
+        setTimeout(() => {
           window.location.href = "/login";
-        }, 900);
+        }, 1200);
       },
       error: function (xhr) {
-        let msg = "Something went wrong. Please try again.";
-        if (xhr.status === 401) msg = "Email or security answer is incorrect.";
-        if (xhr.status === 404) msg = "Account not found.";
-        if (xhr.status === 429)
-          msg = "Too many attempts. Please wait a moment.";
+        const msg =
+          xhr.responseJSON?.error || "Something went wrong. Please try again.";
         showAlert(msg, "danger");
       },
       complete: function () {

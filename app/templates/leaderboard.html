@@ -1,8 +1,5 @@
-{% extends "base.html" %}
-
-{% block content %}
-
-{% macro render_leaderboard(scores, id, display_style, user_stat) %}
+{% extends "base.html" %} {% block content %} {% macro
+render_leaderboard(scores, id, display_style, user_stat) %}
 <div id="{{ id }}" style="display: {{ display_style }}; padding-bottom: 80px;">
     <div class="top-three">
         {% if scores|length >= 1 %}
@@ -52,13 +49,16 @@
             </tbody>
         </table>
     </div>
-    {% endif %}
-
-    {% if scores|length == 0 %}
-    <div class="text-center mt-5">
-        <p class="text-muted">No scores yet. Be the first to play!</p>
+    {% endif %} {% if scores|length >= 3 %}
+    <div class="rank-card rank-3">
+      <div class="bangers-font rank-number" style="color: #cd7f32">#3</div>
+      <div class="fw-bold rank-name">{{ scores[2].username }}</div>
+      <div class="text-muted rank-score">
+        {{ "{:,}".format(scores[2].high_score) }} pts
+      </div>
     </div>
     {% endif %}
+  </div>
 
     {% if current_user.is_authenticated and user_stat %}
     <div class="sticky-user-row">
@@ -70,43 +70,61 @@
             <div class="fw-bold fs-4">{{ "{:,}".format(user_stat.score) }} pts</div>
         </div>
     </div>
-    {% endif %}
+  </div>
+  {% endif %}
 </div>
 {% endmacro %}
 
 <main class="leaderboard-container">
-    <div class="container">
-        <section class="text-center mb-5">
-            <h1 class="display-4 fw-bold bangers-font hero-title how-to-play-title">Leaderboard</h1>
-        </section>
+  <div class="container">
+    <section class="text-center mb-5">
+      <h1 class="display-4 fw-bold bangers-font hero-title how-to-play-title">
+        Leaderboard
+      </h1>
+    </section>
 
-        <div class="d-flex justify-content-center mb-5">
-            <div class="d-flex gap-3" role="group">
-                <button type="button" class="btn btn-toggle bangers-font rounded-3 active" id="btn-daily"
-                    onclick="showLeaderboard('daily')">Daily</button>
-                <button type="button" class="btn btn-toggle bangers-font rounded-3" id="btn-all-time"
-                    onclick="showLeaderboard('all-time')">All-Time Total</button>
-            </div>
-        </div>
-
-        {{ render_leaderboard(daily_scores, 'board-daily', 'block', user_daily) }}
-        {{ render_leaderboard(all_time_scores, 'board-all-time', 'none', user_all_time) }}
+    <div class="d-flex justify-content-center mb-5">
+      <div class="d-flex gap-3" role="group">
+        <button
+          type="button"
+          class="btn btn-toggle bangers-font rounded-3 active"
+          id="btn-daily"
+          onclick="showLeaderboard('daily')"
+        >
+          Daily
+        </button>
+        <button
+          type="button"
+          class="btn btn-toggle bangers-font rounded-3"
+          id="btn-all-time"
+          onclick="showLeaderboard('all-time')"
+        >
+          All-Time Total
+        </button>
+      </div>
     </div>
+
+    {{ render_leaderboard(daily_scores, 'board-daily', 'block', user_daily) }}
+    {{ render_leaderboard(all_time_scores, 'board-all-time', 'none',
+    user_all_time) }}
+  </div>
 </main>
 
 <script>
-    function showLeaderboard(type) {
-        document.getElementById('board-daily').style.display = type === 'daily' ? 'block' : 'none';
-        document.getElementById('board-all-time').style.display = type === 'all-time' ? 'block' : 'none';
+  function showLeaderboard(type) {
+    document.getElementById("board-daily").style.display =
+      type === "daily" ? "block" : "none";
+    document.getElementById("board-all-time").style.display =
+      type === "all-time" ? "block" : "none";
 
-        if (type === 'daily') {
-            document.getElementById('btn-daily').classList.add('active');
-            document.getElementById('btn-all-time').classList.remove('active');
-        } else {
-            document.getElementById('btn-all-time').classList.add('active');
-            document.getElementById('btn-daily').classList.remove('active');
-        }
+    if (type === "daily") {
+      document.getElementById("btn-daily").classList.add("active");
+      document.getElementById("btn-all-time").classList.remove("active");
+    } else {
+      document.getElementById("btn-all-time").classList.add("active");
+      document.getElementById("btn-daily").classList.remove("active");
     }
+  }
 </script>
 
 {% endblock %}
