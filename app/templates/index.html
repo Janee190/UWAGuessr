@@ -106,12 +106,22 @@
                 </svg>
                 <span id="invites-nav-badge" class="friends-badge" style="display:none;"></span>
             </button>
+            <button id="sidebar-nav-challenges" class="friends-sidebar__nav-button" type="button" aria-label="Challenges">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="12" r="10" />
+                    <path d="M12 6v6l4 2" />
+                </svg>
+                <span id="challenges-nav-badge" class="friends-badge" style="display:none;"></span>
+            </button>
         </div>
                     
         <div class="friends-sidebar__panel">
             <div class="friends-sidebar__header">
                 <h2>FRIENDS</h2>
-                <button id="friends-close" type="button" class="btn btn-sm btn-outline-light">×</button>
+                <div class="ms-auto d-flex gap-2">
+                    <button id="friends-refresh" type="button" class="btn btn-sm btn-outline-light" aria-label="Refresh lists" title="Refresh">↻</button>
+                    <button id="friends-close" type="button" class="btn btn-sm btn-outline-light">×</button>
+                </div>
             </div>
 
             <div>
@@ -132,6 +142,12 @@
             <section id="pending-invites-section" class="section-hidden">
                 <div class="section-heading">
                     <h3>Pending Invites</h3>
+                </div>
+            </section>
+
+            <section id="challenges-section" class="section-hidden">
+                <div class="section-heading">
+                    <h3>Active Challenges</h3>
                 </div>
             </section>
 

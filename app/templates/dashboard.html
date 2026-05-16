@@ -1,7 +1,15 @@
 {% extends "base.html" %}
 
-{% block title %}Dashboard - UWAGuessr{% endblock %}
+{% block title %}
+    {% if profile_user is defined %}
+        {{ profile_user.username }} - UWAGuessr
+    {% else %}
+        Dashboard - UWAGuessr
+    {% endif %}
+{% endblock %}
 {% block body_class %}page-dashboard{% endblock %}
+
+{% set viewed_user = profile_user if profile_user is defined else current_user %}
 
 {% block content %}
 
@@ -12,16 +20,45 @@
                 <div class="dashboard-welcome p-4">
                     <div class="d-flex align-items-center gap-4">
                         <div class="avatar-circle">
-                            <span>{{ current_user.username[0].upper() }}</span>
+                            <span>{{ viewed_user.username[0].upper() }}</span>
                         </div>
                         <div>
-                            <h1 class="orbitron-font mb-1">Welcome back, {{ current_user.username }}!</h1>
+                            {% if profile_user is defined %}
+                            <h1 class="orbitron-font mb-1">{{ viewed_user.username }}'s Profile</h1>
+                            <p class="text-muted-light mb-0">UWA Campus Explorer</p>
+                            {% else %}
+                            <h1 class="orbitron-font mb-1">Welcome back, {{ viewed_user.username }}!</h1>
                             <p class="text-muted-light mb-0">Ready to explore UWA?</p>
+                            {% endif %}
                         </div>
                         <div class="ms-auto">
+                            {% if profile_user is defined %}
+                                {% if current_user.is_authenticated and current_user.uid != viewed_user.uid %}
+                                    {% if friendship_status == 'friends' %}
+                                    <button class="btn btn-outline-warning bangers-font" disabled>
+                                        Already Friends
+                                    </button>
+                                    {% elif friendship_status == 'sent' %}
+                                    <button class="btn btn-outline-warning bangers-font" disabled>
+                                        ⏳ Invite Sent
+                                    </button>
+                                    {% elif friendship_status == 'received' %}
+                                    <button id="add-friend-btn" class="btn btn-warning bangers-font"
+                                        data-uid="{{ viewed_user.uid }}">
+                                        Accept Friend Request
+                                    </button>
+                                    {% else %}
+                                    <button id="add-friend-btn" class="btn btn-warning bangers-font"
+                                        data-uid="{{ viewed_user.uid }}">
+                                        Add Friend
+                                    </button>
+                                    {% endif %}
+                                {% endif %}
+                            {% else %}
                             <a href="{{ url_for('game') }}" class="btn btn-warning btn-lg bangers-font">
                                 Play Now
                             </a>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
@@ -36,12 +73,14 @@
                     <h2 class="orbitron-font h5 mb-4 card-title-gold">Profile</h2>
                     <div class="profile-stat mb-3">
                         <span class="stat-label">Username</span>
-                        <span class="stat-value">{{ current_user.username }}</span>
+                        <span class="stat-value">{{ viewed_user.username }}</span>
                     </div>
+                    {% if profile_user is not defined %}
                     <div class="profile-stat mb-3">
                         <span class="stat-label">Email</span>
-                        <span class="stat-value">{{ current_user.email }}</span>
+                        <span class="stat-value">{{ viewed_user.email }}</span>
                     </div>
+                    {% endif %}
                     <div class="profile-stat mb-3">
                         <span class="stat-label">Total Games</span>
                         <span class="stat-value" id="totalGames">—</span>
@@ -58,32 +97,48 @@
                 <div class="dashboard-card h-100 p-4">
                     <h2 class="orbitron-font h5 mb-4 card-title-gold">Recent Scores</h2>
                     <div id="recentScores">
+                        {% if profile_user is defined %}
+                            {% if recent_scores %}
+                                    {% for game in recent_games %}
+                                        <div class="profile-stat mb-2">
+                                            <span class="stat-label">{{ game.timestamp.strftime('%d %b %Y') }}</span>
+                                            <span class="stat-value">{{ "{:,}".format(game.score) }} pts</span>
+                                        </div>
+                                    {% endfor %}
+                                
+                            {% else %}
+                                <div class="empty-state">
+                                    <p class="text-muted-light">No games played yet.</p>
+                                </div>
+                            {% endif %}
+                        {% else %}
                         <div class="empty-state">
                             <p class="text-muted-light">No games played yet.</p>
                             <a href="{{ url_for('game') }}" class="btn btn-outline-warning btn-sm bangers-font">
                             Play your first game!
                             </a>
                         </div>
+                        {% endif %}
                     </div>
                 </div>
             </div>
             
             <!-- friends list -->
+            {% if profile_user is not defined %}
             <div class="col-lg-4">  
                 <div class="dashboard-card h-100 p-4">
                     <h2 class="orbitron-font h5 mb-4 card-title-gold">Friends</h2>
                     <div id="friendsList">
                         <div class="empty-state">
                             <p class="text-muted-light">No friends added yet.</p>
-                            <button class="btn btn-outline-warning btn-sm bangers-font" disabled>
-                                Coming Soon
-                            </button>
                         </div>
                     </div>
                 </div>
             </div>
+            {% endif %}
             
         <!-- Leaderboard Preview -->
+            {% if profile_user is not defined %}
             <div class="col-12">
                 <div class="dashboard-card p-4">
                 <h2 class="orbitron-font h5 mb-4 card-title-gold">🏆 Friends Leaderboard</h2>
@@ -113,7 +168,20 @@
                     </div>
                 </div>
             </div>
+            {% endif %}
         </div>
+
+        {% if profile_user is defined %}
+        <div class="mt-4">
+            <a href="{{ url_for('leaderboard') }}" class="btn btn-outline-warning bangers-font">
+                View Leaderboard
+            </a>
+            <a href="{{ url_for('index') }}" class="btn btn-outline-light bangers-font ms-2">
+                Back to Home
+            </a>
+        </div>
+        {% endif %}
+
     </div>
 </section>
 
@@ -121,12 +189,16 @@
 {% block scripts %}
 <script>
     const CURRENT_USER = {
-        username: "{{ current_user.username }}",
-        total_score: {{ current_user.total_score or 0 }}
+        username: "{{ current_user.username if current_user.is_authenticated else '' }}",
+        total_score: {{ current_user.total_score if current_user.is_authenticated else 0 }}
     };
+    const VIEWED_UID = {{ viewed_user.uid }};
+    const IS_OWN_PROFILE = {{ 'true' if profile_user is not defined else 'false' }};
 </script>
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% if profile_user is defined and current_user.is_authenticated and current_user.uid != viewed_user.uid %}
+{% endif %}
 {% endblock %}
 
 

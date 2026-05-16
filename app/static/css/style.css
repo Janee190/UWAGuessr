@@ -1200,6 +1200,12 @@ main {
   color: var(--navy-900);
 }
 
+/* Compact button used for inline actions (Challenge, Accept, Enter Game, etc.) */
+.btn-compact {
+    padding: 2px 8px;
+    font-size: 0.8rem;
+}
+
 .friends-sidebar__button-wrap {
   display: grid;
 }

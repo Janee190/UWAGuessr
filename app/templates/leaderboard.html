@@ -1,22 +1,53 @@
 {% extends "base.html" %} {% block content %} {% macro
 render_leaderboard(scores, id, display_style, user_stat) %}
 <div id="{{ id }}" style="display: {{ display_style }}; padding-bottom: 80px;">
-  <div class="top-three">
-    {% if scores|length >= 1 %}
-    <div class="rank-card rank-1">
-      <div class="bangers-font rank-number" style="color: #ffd700">#1</div>
-      <div class="fw-bold rank-name">{{ scores[0].username }}</div>
-      <div class="text-muted rank-score">
-        {{ "{:,}".format(scores[0].high_score) }} pts
-      </div>
+    <div class="top-three">
+        {% if scores|length >= 1 %}
+        <div class="rank-card rank-1">
+            <div class="bangers-font rank-number" style="color: #ffd700;">#1</div>
+            <div class="fw-bold rank-name">
+                <a href="/user/{{ scores[0].username }}" style="color:inherit;text-decoration:none;">{{ scores[0].username }}</a>
+            </div>
+            <div class="text-muted rank-score">{{ "{:,}".format(scores[0].high_score) }} pts</div>
+        </div>
+        {% endif %}
+
+        {% if scores|length >= 2 %}
+        <div class="rank-card rank-2">
+            <div class="bangers-font rank-number" style="color: #c0c0c0;">#2</div>
+            <div class="fw-bold rank-name">
+                <a href="/user/{{ scores[1].username }}" style="color:inherit;text-decoration:none;">{{ scores[1].username }}</a>
+            </div>
+            <div class="text-muted rank-score">{{ "{:,}".format(scores[1].high_score) }} pts</div>
+        </div>
+        {% endif %}
+
+        {% if scores|length >= 3 %}
+        <div class="rank-card rank-3">
+            <div class="bangers-font rank-number" style="color: #cd7f32;">#3</div>
+            <div class="fw-bold rank-name">
+                <a href="/user/{{ scores[2].username }}" style="color:inherit;text-decoration:none;">{{ scores[2].username }}</a>
+            </div>
+            <div class="text-muted rank-score">{{ "{:,}".format(scores[2].high_score) }} pts</div>
+        </div>
+        {% endif %}
     </div>
-    {% endif %} {% if scores|length >= 2 %}
-    <div class="rank-card rank-2">
-      <div class="bangers-font rank-number" style="color: #c0c0c0">#2</div>
-      <div class="fw-bold rank-name">{{ scores[1].username }}</div>
-      <div class="text-muted rank-score">
-        {{ "{:,}".format(scores[1].high_score) }} pts
-      </div>
+
+    {% if scores|length > 3 %}
+    <div class="leaderboard-table">
+        <table class="table table-hover table-dark mb-0">
+            <tbody>
+                {% for score in scores[3:] %}
+                <tr>
+                    <td class="ps-4 fw-bold row-rank">#{{ loop.index + 3 }}</td>
+                    <td class="fw-bold row-name" style="color: var(--golden);">
+                        <a href="/user/{{ score.username }}" style="color:inherit;text-decoration:none;">{{ score.username }}</a>
+                    </td>
+                    <td class="text-end pe-4 row-score">{{ "{:,}".format(score.high_score) }} pts</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
     {% endif %} {% if scores|length >= 3 %}
     <div class="rank-card rank-3">
@@ -29,34 +60,15 @@ render_leaderboard(scores, id, display_style, user_stat) %}
     {% endif %}
   </div>
 
-  {% if scores|length > 3 %}
-  <div class="leaderboard-table">
-    <table class="table table-hover table-dark mb-0">
-      <tbody>
-        {% for score in scores[3:] %}
-        <tr>
-          <td class="ps-4 fw-bold row-rank">#{{ loop.index + 3 }}</td>
-          <td class="fw-bold row-name" style="color: var(--golden)">
-            {{ score.username }}
-          </td>
-          <td class="text-end pe-4 row-score">
-            {{ "{:,}".format(score.high_score) }} pts
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
-  {% endif %} {% if scores|length == 0 %}
-  <div class="text-center mt-5">
-    <p class="text-muted">No scores yet. Be the first to play!</p>
-  </div>
-  {% endif %} {% if current_user.is_authenticated and user_stat %}
-  <div class="sticky-user-row">
-    <div class="container d-flex justify-content-between align-items-center">
-      <div class="fw-bold fs-4">#{{ user_stat.rank }}</div>
-      <div class="fw-bold fs-4">{{ current_user.username }}</div>
-      <div class="fw-bold fs-4">{{ "{:,}".format(user_stat.score) }} pts</div>
+    {% if current_user.is_authenticated and user_stat %}
+    <div class="sticky-user-row">
+        <div class="container d-flex justify-content-between align-items-center">
+            <div class="fw-bold fs-4">#{{ user_stat.rank }}</div>
+            <div class="fw-bold fs-4">
+                <a href="/user/{{ current_user.username }}" style="color:inherit;text-decoration:none;">{{ current_user.username }}</a>
+            </div>
+            <div class="fw-bold fs-4">{{ "{:,}".format(user_stat.score) }} pts</div>
+        </div>
     </div>
   </div>
   {% endif %}
