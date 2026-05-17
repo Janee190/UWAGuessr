@@ -114,7 +114,7 @@ img {
 
   background-image:
     linear-gradient(rgba(8, 12, 30, 0.55), rgba(8, 12, 30, 0.75)),
-    url("../images/uwaimage.jpg");
+    url("../images/uwaimage.webp");
 }
 
 .hero-title {
@@ -206,7 +206,7 @@ main {
 
   background-image:
     linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
-    url("../images/uwa-ezone.jpg");
+    url("../images/uwa-ezone.webp");
 }
 
 .page-signup main {
@@ -234,7 +234,7 @@ main {
 
 .map-panel {
   align-items: center;
-  background: url("../images/uwamap.png") center/cover no-repeat;
+  background: url("../images/uwamap.webp") center/cover no-repeat;
   display: flex;
   flex: 1.1;
   justify-content: center;
@@ -500,9 +500,9 @@ main {
   background-size: cover;
   min-height: 100vh;
   padding: 60px 0;
-  background:
+  background-image:
     linear-gradient(rgba(15, 12, 41, 0.8), rgba(15, 12, 41, 0.9)),
-    url("../images/uwaimage.jpg");
+    url("../images/uwaimage.webp");
 }
 
 .how-to-play-title {
@@ -530,7 +530,7 @@ main {
 
   background-image:
     linear-gradient(rgba(8, 12, 30, 0.55), rgba(8, 12, 30, 0.75)),
-    url("../images/uwaimage.jpg");
+    url("../images/uwaimage.webp");
   /* Using your previous gradient and image combo */
   /* This creates the scrolling effect */
 }
@@ -571,7 +571,7 @@ main {
   padding: 80px 0;
   background:
     linear-gradient(rgba(10, 16, 40, 0.85), rgba(10, 16, 40, 0.95)),
-    url("../images/uwaimage.jpg") center/cover fixed;
+    url("../images/uwaimage.webp") center/cover fixed;
 }
 
 .top-three {
@@ -739,7 +739,7 @@ main {
   min-height: 100vh;
   background-image:
     linear-gradient(rgba(8, 12, 30, 0.85), rgba(8, 12, 30, 0.95)),
-    url("../images/uwaimage.jpg");
+    url("../images/uwaimage.webp");
 }
 
 .dashboard-hero {
