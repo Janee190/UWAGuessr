@@ -13,9 +13,10 @@ $(function () {
                 const section = $('#friends-list-section');
                 const heading = section.find('.section-heading');
                 section.find('.friend-card').remove();
+                section.find('.friends-empty-message').remove();
 
                 if (friends.length === 0) {
-                    section.append('<p class="text-muted-light small mt-2">No friends yet. Search for players to add!</p>');
+                    section.append('<p class="friends-empty-message text-muted-light small mt-2">No friends yet. Search for players to add!</p>');
                     return;
                 }
 
@@ -29,10 +30,10 @@ $(function () {
                                     ${f.username}
                                 </a>
                                 <div class="friend-card__label">${f.total_score ? f.total_score.toLocaleString() + ' pts' : 'No score yet'}</div>
+                                <button class="btn btn-warning btn-sm challenge-invite-btn bangers-font mt-1" data-uid="${f.uid}">
+                                    Challenge
+                                </button>
                             </div>
-                            <button class="btn btn-warning btn-sm challenge-invite-btn ms-auto" data-uid="${f.uid}" style="padding: 2px 8px; font-size: 0.8rem;">
-                                Challenge
-                            </button>
                         </div>
                     `);
                 });
@@ -111,14 +112,14 @@ $(function () {
                                     statusText = 'Challenged you!';
                                     actionHtml = `
                                         <div class="d-flex gap-2 mt-1">
-                                            <button class="btn btn-warning btn-sm challenge-accept-btn" data-id="${c.id}" style="padding: 2px 8px; font-size: 0.8rem;">Accept</button>
-                                            <button class="btn btn-outline-light btn-sm challenge-reject-btn" data-id="${c.id}" style="padding: 2px 8px; font-size: 0.8rem;">Decline</button>
+                                            <button class="btn btn-warning btn-sm challenge-accept-btn bangers-font" data-id="${c.id}">Accept</button>
+                                            <button class="btn btn-outline-light btn-sm challenge-reject-btn bangers-font" data-id="${c.id}">Decline</button>
                                         </div>
                                     `;
                                 }
                             } else if (c.status === 'ready_waiting' || c.status === 'in_progress') {
                                 statusText = 'Game in progress!';
-                                actionHtml = `<button class="btn btn-warning btn-sm challenge-play-btn" data-id="${c.id}" style="padding: 2px 8px; font-size: 0.8rem;">Enter Game</button>`;
+                                actionHtml = `<button class="btn btn-warning btn-sm challenge-play-btn bangers-font" data-id="${c.id}">Enter Game</button>`;
                             } else {
                                 // completed, expired, or unknown status — skip
                                 return;
@@ -126,7 +127,7 @@ $(function () {
 
                             challengeSection.append(`
                                 <div class="pending-card challenge-card" data-id="${c.id}">
-                                    <div class="pending-card__avatar" style="background: #ffc107; color: #000;">${initials}</div>
+                                    <div class="pending-card__avatar">${initials}</div>
                                     <div class="pending-card__meta">
                                         <div class="pending-card__title">${opponent}</div>
                                         <div class="small text-muted-light">${statusText}</div>
@@ -258,10 +259,9 @@ $(function () {
         });
     });
 
-    // ── Sidebar open: load data ───────────────────────────────────────
-    $('#friends-toggle').on('click', function () {
-        loadFriends();
-        loadPendingRequests();
+    // ── Add Friend button (focuses search) ────────────────────────────
+    $('#friends-add').on('click', function () {
+        $('#friends-search').focus();
     });
 
     // ── Challenge Logic ──────────────────────────────────────────────
