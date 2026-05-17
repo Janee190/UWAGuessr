@@ -233,10 +233,15 @@ $(function () {
     $btn.addClass("loading").prop("disabled", true);
     $btn.find(".btn-label").text("Creating account…");
 
+    const csrfToken = $('input[name="csrf_token"]').val();
+
     $.ajax({
       url: "/api/signup",
       method: "POST",
       contentType: "application/json",
+      headers: {
+        "X-CSRFToken": csrfToken,
+      },
       data: JSON.stringify({
         username: $("#username").val().trim(),
         email: $("#email").val().trim(),

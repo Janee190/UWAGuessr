@@ -36,6 +36,7 @@ def load_photos_command():
 @app.cli.command("admin-promote")
 @click.argument("username")
 def admin_promote(username):
+    """Promotes a user to admin from the command line"""
     from app.models import User
     from app import db
     user = User.query.filter_by(username=username).first()
@@ -49,6 +50,7 @@ def admin_promote(username):
 @app.cli.command("admin-demote")
 @click.argument("username")
 def admin_demote(username):
+    """Demotes a user from admin from the command line"""
     from app.models import User
     from app import db
     user = User.query.filter_by(username=username).first()

@@ -35,6 +35,7 @@ block body_class %}page-signup{% endblock %} {% block content %}
       </div>
 
       <form id="signupForm" novalidate>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
         <!-- Step 1: Account -->
         <div class="form-step" id="step-1">
           <div class="mb-3">

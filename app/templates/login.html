@@ -17,6 +17,7 @@ block body_class %}page-login{% endblock %} {% block content %}
       <div class="alert-area" id="alertArea"></div>
 
       <form id="loginForm" novalidate>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
         <div class="mb-3">
           <label class="form-label" for="email">Email</label>
           <input
