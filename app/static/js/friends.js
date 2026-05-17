@@ -1,5 +1,9 @@
 $(function () {
 
+    function getCSRFToken() {
+        return $('meta[name="csrf-token"]').attr('content');
+    }
+
     // ── Load friends list ─────────────────────────────────────────────
     function loadFriends() {
         $.ajax({
@@ -223,6 +227,7 @@ $(function () {
             url: '/api/friends/add',
             method: 'POST',
             contentType: 'application/json',
+            headers: { 'X-CSRFToken': getCSRFToken() },
             data: JSON.stringify({ uid: uid }),
             success: function () {
                 $btn.text('Requested').prop('disabled', true);
@@ -244,6 +249,7 @@ $(function () {
             url: '/api/friends/respond',
             method: 'POST',
             contentType: 'application/json',
+            headers: { 'X-CSRFToken': getCSRFToken() },
             data: JSON.stringify({ id: id, action: action }),
             success: function () {
                 $card.remove();
@@ -268,6 +274,7 @@ $(function () {
             url: '/api/challenges/create',
             method: 'POST',
             contentType: 'application/json',
+            headers: { 'X-CSRFToken': getCSRFToken() },
             data: JSON.stringify({ uid: uid }),
             success: function (data) {
                 if (data.redirect) {
@@ -293,6 +300,7 @@ $(function () {
             url: '/api/challenges/respond',
             method: 'POST',
             contentType: 'application/json',
+            headers: { 'X-CSRFToken': getCSRFToken() },
             data: JSON.stringify({ id: id, action: 'accept' }),
             success: function (data) {
                 window.location.href = `/game?challengeId=${id}`;
@@ -313,6 +321,7 @@ $(function () {
             url: '/api/challenges/respond',
             method: 'POST',
             contentType: 'application/json',
+            headers: { 'X-CSRFToken': getCSRFToken() },
             data: JSON.stringify({ id: id, action: 'reject' }),
             success: function () {
                 $card.remove();

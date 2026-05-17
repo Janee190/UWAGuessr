@@ -19,6 +19,10 @@ let timeRemaining = TIME_LIMIT;
 let isTimerExpired = false;
 let isSubmitting = false;
 
+function getCSRFToken() {
+    return document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+}
+
 // ── Timer Functions ────────────────────────────────────────────────────────
 
 let startTime = null;
@@ -124,7 +128,7 @@ async function autoSubmitMiss() {
     try {
         var response = await fetch('/api/guess', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCSRFToken() },
             body: JSON.stringify({ lat: 0, lng: 0, id: currentRoundData.id })
         });
 
@@ -300,7 +304,7 @@ async function handleStartClick() {
 
         await fetch('/api/challenges/ready', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCSRFToken() },
             body: JSON.stringify({ id: challengeId })
         });
     } else {
@@ -433,7 +437,8 @@ async function submitGuess() {
         const response = await fetch('/api/guess', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCSRFToken()
             },
             body: JSON.stringify({
                 lat: guessLat,
@@ -647,7 +652,8 @@ function sendGameComplete(finalScore) {
     fetch('/api/game-complete', {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCSRFToken()
         },
         body: JSON.stringify(body)
     })
@@ -706,7 +712,7 @@ async function updateProgress(roundNum, score) {
     try {
         await fetch('/api/challenges/update-progress', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCSRFToken() },
             body: JSON.stringify({ id: challengeId, round: roundNum, score: score })
         });
     } catch (e) {

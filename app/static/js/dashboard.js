@@ -1,5 +1,9 @@
 $(function () {
 
+    function getCSRFToken() {
+        return $('meta[name="csrf-token"]').attr('content');
+    }
+
     // ── Dashboard Stats ───────────────────────────────────────────────
     const statsUrl = IS_OWN_PROFILE
         ? '/api/dashboard-stats'
@@ -122,6 +126,7 @@ $(function () {
             url: '/api/friends/add',
             method: 'POST',
             contentType: 'application/json',
+            headers: { 'X-CSRFToken': getCSRFToken() },
             data: JSON.stringify({ uid: uid }),
             success: function () {
                 $btn.text('Request Sent!').removeClass('btn-warning').addClass('btn-outline-warning');
