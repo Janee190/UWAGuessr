@@ -21,6 +21,7 @@ let isSubmitting = false;
 
 function getCSRFToken() {
     return document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+}
 // ── Helpers ─────────────────────────────────────────────────────────────────
 
 function setActionState(btn, action, text) {
