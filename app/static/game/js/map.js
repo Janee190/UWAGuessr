@@ -5,6 +5,7 @@ let guessMarker = null;
 let actualMarker = null;
 let resultLine = null;
 let resizeListenersAttached = false;
+let mapExpanded = false;
 
 const UWA_CAMPUS_ID = 119;
 const UWA_CENTER = [115.818, -31.98]; // [lng, lat]
@@ -289,6 +290,54 @@ function focusResultOnMap(guessLat, guessLng, actualLat, actualLng) {
     }
 }
 
+// Mobile map toggle — show/hide the map panel and resize when revealed.
+function toggleMap() {
+    var mapWrapper = document.querySelector('.map-wrapper');
+    var toggleBtn = document.getElementById('btn-map-toggle');
+    if (!mapWrapper || !toggleBtn) return;
+
+    var isVisible = mapWrapper.classList.contains('map-visible');
+    if (isVisible) {
+        mapWrapper.classList.remove('map-visible');
+        toggleBtn.classList.remove('map-active');
+    } else {
+        mapWrapper.classList.add('map-visible');
+        toggleBtn.classList.add('map-active');
+        if (typeof map !== 'undefined' && map && typeof map.resize === 'function') {
+            setTimeout(function () { map.resize(); }, 100);
+        }
+    }
+}
+
+// Desktop map expand toggle — grows the map panel by ~30%.
+function toggleMapExpand() {
+    var container = document.querySelector('.bottom-right-container');
+    if (!container) return;
+
+    mapExpanded = !mapExpanded;
+
+    // Enable smooth transition only for this toggle (not fullscreen).
+    container.classList.add('map-expanding');
+
+    if (mapExpanded) {
+        container.classList.add('map-expanded');
+    } else {
+        container.classList.remove('map-expanded');
+    }
+
+    // Resize after transition completes, then drop the transition class.
+    if (typeof map !== 'undefined' && map && typeof map.resize === 'function') {
+        setTimeout(function () {
+            map.resize();
+            container.classList.remove('map-expanding');
+        }, 350);
+    } else {
+        setTimeout(function () {
+            container.classList.remove('map-expanding');
+        }, 350);
+    }
+}
+
 // Reset map for the next round
 function clearMapForNextRound() {
     if (guessMarker) {
@@ -305,4 +354,10 @@ function clearMapForNextRound() {
 
     recenterMapView();
     hideMapLabelsAndIcons();
+
+    // Reset mobile map toggle state
+    var mapWrapper = document.querySelector('.map-wrapper');
+    var toggleBtn = document.getElementById('btn-map-toggle');
+    if (mapWrapper) mapWrapper.classList.remove('map-visible');
+    if (toggleBtn) toggleBtn.classList.remove('map-active');
 }

@@ -19,6 +19,15 @@ let timeRemaining = TIME_LIMIT;
 let isTimerExpired = false;
 let isSubmitting = false;
 
+// ── Helpers ─────────────────────────────────────────────────────────────────
+
+function setActionState(btn, action, text) {
+    btn.setAttribute('data-action', action);
+    btn.disabled = true;
+    var span = btn.querySelector('.btn-action-text');
+    if (span) span.textContent = text;
+}
+
 // ── Timer Functions ────────────────────────────────────────────────────────
 
 let startTime = null;
@@ -160,8 +169,7 @@ async function autoSubmitMiss() {
             updateProgress(currentRoundIndex + 1, totalScore);
         }
 
-        actionBtn.innerText = "NEXT ROUND";
-        actionBtn.disabled = true; // keep hidden actionBtn disabled
+        setActionState(actionBtn, 'next', 'NEXT ROUND');
 
         currentRoundIndex++;
         if (currentRoundIndex < activeRounds.length) {
@@ -386,8 +394,7 @@ function loadNextRound(startTimerImmediately = true) {
     }
 
     const actionBtn = document.getElementById('action-btn');
-    actionBtn.innerText = "SUBMIT GUESS";
-    actionBtn.disabled = true; // Wait for guess
+    setActionState(actionBtn, 'submit', 'SUBMIT GUESS');
 
     document.getElementById('next-round-btn').disabled = true;
 
@@ -491,8 +498,7 @@ async function submitGuess() {
             updateProgress(currentRoundIndex + 1, totalScore);
         }
 
-        actionBtn.innerText = "NEXT ROUND";
-        actionBtn.disabled = true; // keep hidden actionBtn disabled
+        setActionState(actionBtn, 'next', 'NEXT ROUND');
 
         // Prepare for next round
         currentRoundIndex++;
@@ -508,7 +514,7 @@ async function submitGuess() {
 
 function handleAction() {
     const actionBtn = document.getElementById('action-btn');
-    if (actionBtn.innerText === "SUBMIT GUESS") {
+    if (actionBtn.getAttribute('data-action') === 'submit') {
         submitGuess();
     } else {
         loadNextRound();
