@@ -50,26 +50,37 @@ document.addEventListener("DOMContentLoaded", function () {
     toggle.classList.remove("hidden");
   }
 
-  toggle.addEventListener("click", openSidebar);
-  closeButton.addEventListener("click", closeSidebar);
-  backdrop.addEventListener("click", closeSidebar);
-  navFriends.addEventListener("click", function () {
-    friendsSection.classList.remove("section-hidden");
-    invitesSection.classList.add("section-hidden");
-    challengesSection.classList.add("section-hidden");
+  function clearSearch() {
+    let results = document.getElementById('search-results');
+    let input = document.getElementById('friends-search');
+    if (results) results.remove();
+    if (input) input.value = '';
+  }
+
+  toggle.addEventListener('click', openSidebar);
+  closeButton.addEventListener('click', closeSidebar);
+  backdrop.addEventListener('click', closeSidebar);
+
+  navFriends.addEventListener('click', function () {
+    friendsSection.classList.remove('section-hidden');
+    invitesSection.classList.add('section-hidden');
+    challengesSection.classList.add('section-hidden');
     setActiveNav(navFriends);
+    clearSearch();
   });
-  navInvites.addEventListener("click", function () {
-    invitesSection.classList.remove("section-hidden");
-    friendsSection.classList.add("section-hidden");
-    challengesSection.classList.add("section-hidden");
+  navInvites.addEventListener('click', function () {
+    invitesSection.classList.remove('section-hidden');
+    friendsSection.classList.add('section-hidden');
+    challengesSection.classList.add('section-hidden');
     setActiveNav(navInvites);
+    clearSearch();
   });
-  navChallenges.addEventListener("click", function () {
-    challengesSection.classList.remove("section-hidden");
-    friendsSection.classList.add("section-hidden");
-    invitesSection.classList.add("section-hidden");
+  navChallenges.addEventListener('click', function () {
+    challengesSection.classList.remove('section-hidden');
+    friendsSection.classList.add('section-hidden');
+    invitesSection.classList.add('section-hidden');
     setActiveNav(navChallenges);
+    clearSearch();
   });
 
   document.addEventListener("keydown", function (event) {
