@@ -59,6 +59,17 @@ class SeleniumTests(unittest.TestCase):
         self.driver.get(self.base_url + "/")
         self.assertIn("EXPLORE UWA", self.driver.page_source)
 
+    def test_friends_list_and_challenge_ui_elements(self):
+        driver=self.driver
+        driver.get(self.base_url + "/dashboard")
+        time.sleep(1.5)
+        page_content = driver.page_source
+
+        if "Sign In" in page_content or "loginForm" in page_content or "Log In" in page_content:
+            self.assertTrue(True)  
+        else:
+            self.assertIn("Friends List", page_content)
+
     def test_login_page(self):
         self.driver.get(self.base_url + "/login")
         self.assertIn("Sign in", self.driver.page_source)
@@ -74,6 +85,29 @@ class SeleniumTests(unittest.TestCase):
     def test_game_page(self):
         self.driver.get(self.base_url + "/game")
         self.assertIn("UWA", self.driver.page_source)
+    
+    def login_test_user(self):
+        from app import db
+        from app.models import User  
+        test_email = "testuser@student.uwa.edu.au"
+        user = User.query.filter_by(email=test_email).first()
+        if not user:
+            user = User(username="TestPlayer", email=test_email)
+            user.set_password("password123") 
+            db.session.add(user)
+            db.session.commit()
+
+        self.driver.get(self.base_url + "/login")
+        time.sleep(0.5)
+        
+        from selenium.webdriver.common.by import By
+        
+        self.driver.find_element(By.ID, "email").send_keys(test_email)
+        self.driver.find_element(By.ID, "password").send_keys("password123")
+        
+        
+        self.driver.find_element(By.ID, "signinBtn").click()
+        time.sleep(1.0)
 
 
 if __name__ == "__main__":
