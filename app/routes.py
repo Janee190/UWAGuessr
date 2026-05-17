@@ -223,6 +223,8 @@ def logout():
 @app.route("/image-upload")
 @login_required
 def image_upload():
+    if not current_user.is_admin:
+        return jsonify({'error': 'Forbidden'}), 403
     return render_template("imageupload.html")
 
 
@@ -241,6 +243,7 @@ def serve_temp_upload(filename):
 
 
 @app.route("/api/upload-image", methods=["POST"])
+@login_required
 def api_upload_image():
     """Upload a panorama, extract GPS coords, return temp path + coords."""
     if 'image' not in request.files:
@@ -302,6 +305,7 @@ def _process_single_upload(file_obj):
 
 
 @app.route("/api/upload-images", methods=["POST"])
+@login_required
 def api_upload_images():
     """Upload multiple panoramas at once, extract GPS for each.
     Accepts multiple files under the 'images[]' field.
@@ -328,6 +332,7 @@ def api_upload_images():
 
 
 @app.route("/api/confirm-image", methods=["POST"])
+@login_required
 def api_confirm_image():
     """Confirm final location, convert to WebP, and save to the database."""
     data = request.json

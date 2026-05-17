@@ -15,6 +15,10 @@ let savingIds = new Set();   // Prevent double-save per item
 
 const UWA_CAMPUS_ID = 119;
 
+function getCSRFToken() {
+    return document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+}
+
 // ── MazeMap helpers ──────────────────────────────────────────────────────
 
 function hideLabels(map) {
@@ -331,7 +335,7 @@ async function startUploading() {
         formData.append('image', item.file);
 
         try {
-            var resp = await fetch('/api/upload-image', { method: 'POST', body: formData });
+            var resp = await fetch('/api/upload-image', { method: 'POST', headers: { 'X-CSRFToken': getCSRFToken() }, body: formData });
             var data = await resp.json();
 
             if (data.error) {
@@ -396,7 +400,7 @@ function saveInBackground(item) {
 
     fetch('/api/confirm-image', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCSRFToken() },
         body: JSON.stringify({
             tempPath: item.tempPath,
             lat: item.lat,
